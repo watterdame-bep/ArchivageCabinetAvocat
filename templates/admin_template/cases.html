@@ -1,0 +1,488 @@
+﻿{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h4 class="page-title">Client</h4>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="#"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Client</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="content">
+            <div class="row mb-3 align-items-center">
+                <div class="col-md-6">
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutClientModal">
+                        <i class="fa fa-plus"></i> Ajouter un client
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Rechercher un client...">
+                </div>
+            </div>
+
+            <div class="container mt-4">
+                {% if messages %}
+                {% for message in messages %}
+                {% if message.tags == 'success' %}
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fa fa-check-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endif %}
+                {% endfor %}
+                {% endif %}
+            </div>
+
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="table-responsive rounded card-table">
+                                <table class="table border-no" id="example1">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Date enregistrer</th>
+                                            <th>Nom complet</th>
+                                            <th>Téléphone</th>
+                                            <th>Sexe</th>
+                                            <th>Type client</th>
+                                            <th>Profession</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for c in clients %}
+                                        <tr class="hover-primary">
+                                            <td>{{ c.id }}</td>
+                                            <td>{{ c.date_enregistrement|date:"d F Y" }}</td>
+                                            <td>{{ c.nom.upper }} {{c.prenom.upper}}</td>
+                                            <td>{{ c.telephone }}</td>
+                                            <td>{{ c.sexe }}</td>
+                                            <td>{{ c.type_client }}</td>
+                                            <td>{{ c.profession }}</td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a class="hover-primary dropdown-toggle no-caret" data-bs-toggle="dropdown">
+                                                        <i class="fa fa-ellipsis-h"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu">
+                                                        <a class="dropdown-item" href="{% url 'client_details' client_id=c.pk %}">Voir les
+                                                            details</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                                <div id="pagination" class="mt-3"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="ajoutClientModal" tabindex="-1" aria-labelledby="ajoutClientLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <form method="POST" action="{% url 'enregistrer_nouveau_client' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="ajoutClientLabel">
+                        <i class="fa fa-user-plus me-2"></i> Ajouter un client
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+
+                <div class="modal-body">
+                    {% if messages %}
+                    {% for message in messages %}
+                    {% if message.tags == 'error' or message.tags == 'warning' %}
+                    <div class="alert alert-danger mb-4">
+                        <i class="fa fa-exclamation-triangle me-2"></i> {{ message }}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+
+                    {% if client_form.errors %}
+                    <div class="alert alert-danger mb-4">
+                        Veuillez corriger les erreurs suivantes:
+                        <ul>
+                            {% for field, errors in client_form.errors.items %}
+                            {% for error in errors %}
+                            <li><strong>{{ field|title }}</strong> : {{ error }}</li>
+                            {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <div class="box p-3 shadow-sm">
+                        <h4 class="text-info mb-3"><i class="ti-user me-2"></i> Informations du client</h4>
+                        <hr>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Type de client <span class="text-danger">*</span></label>
+                                <select name="type_client" class="form-select" required id="typeClientSelect">
+                                    <option value="">Choisir...</option>
+                                    <option value="Physique" {% if client_form.type_client.value == 'Physique' %}selected{% endif %}>
+                                        Physique</option>
+                                    <option value="Morale" {% if client_form.type_client.value == 'Morale' %}selected{% endif %}>Morale
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Représentant légal <span class="text-danger required-moral-star"
+                                        style="display: none;">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-user-tie"></i></span>
+                                    <input type="text" name="representant_legal" class="form-control"
+                                        placeholder="Nom du représentant (si client Moral)" id="representantLegalInput"
+                                        value="{{ client_form.representant_legal.value|default_if_none:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Prénom <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-id-badge"></i></span>
+                                    <input type="text" name="prenom" class="form-control" placeholder="Prénom" required
+                                        value="{{ client_form.prenom.value|default_if_none:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nom <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fa fa-id-badge"></i></span>
+                                    <input type="text" name="nom" class="form-control" placeholder="Nom" required
+                                        value="{{ client_form.nom.value|default_if_none:'' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-4">
+                                <label class="form-label">Sexe <span class="text-danger">*</span></label>
+
+                                <select name="sexe" class="form-select" required>
+                                    <option value="">Choisir...</option>
+                                    <option value="Homme" {% if client_form.sexe.value|stringformat:"s" == 'Homme' %}selected{% endif %}>
+                                        Masculin</option>
+                                    <option value="Femme" {% if client_form.sexe.value|stringformat:"s" == 'Femme' %}selected{% endif %}>
+                                        Féminin</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Date de naissance</label>
+                                <input type="date" name="date_naissance" class="form-control"
+                                    value="{{ client_form.date_naissance.value|default_if_none:'' }}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+                                <input type="text" name="telephone" class="form-control" placeholder="Numéro de téléphone" required
+                                    value="{{ client_form.telephone.value|default_if_none:'' }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">E-mail <span class="text-danger">*</span></label>
+                                <input type="email" name="email" class="form-control" placeholder="exemple@mail.com" required
+                                    value="{{ client_form.email.value|default_if_none:'' }}">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Nationalité</label>
+                                <input type="text" name="nationalite" class="form-control" placeholder="Nationalité"
+                                    value="{{ client_form.nationalite.value|default_if_none:'' }}">
+                            </div>
+                        </div>
+
+
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Photo de profil</label>
+                                <input type="file" name="photo" class="form-control" accept="image/*" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Profession</label>
+                                <input type="text" name="profession" class="form-control" placeholder="Profession"
+                                    value="{{ client_form.profession.value|default_if_none:'' }}">
+                            </div>
+                        </div>
+
+
+                        <h5 class="text-info mt-4"><i class="ti-location-pin me-2"></i> Adresse complète</h5>
+                        <hr>
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <input type="text" name="numero" class="form-control" placeholder="N°">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="avenue" class="form-control" placeholder="Avenue / Rue">
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="quartier" class="form-control" placeholder="Quartier">
+                            </div>
+                            <div class="col-md-2">
+                                <select name="commune" class="form-select">
+                                    <option value="">Commune...</option>
+                                    {% for c in communes %}
+                                    <option value="{{ c.id }}">{{ c.nom }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select name="ville" class="form-select">
+                                    <option value="">Ville...</option>
+                                    {% for v in villes %}
+                                    <option value="{{ v.id }}">{{ v.nom_ville }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <h4 class="text-info mt-4"><i class="ti-clip me-2"></i> Pièces justificatives</h4>
+                        <hr>
+
+                        <template id="typePieceOptions">
+                            {% for type in type_pieces %}
+                                <option value="{{ type.id }}">{{ type.nom_type }}</option>
+                            {% endfor %}
+                        </template>
+
+                        <div id="piecesContainer">
+                            {% if pieces_post %}
+                                {% for piece in pieces_post %}
+                                <div class="row piece-item mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Type de pièce</label>
+                                        <select name="type_piece[]" class="form-select" required>
+                                            <option value="">Choisir...</option>
+                                            {% for type in type_pieces %}
+                                                <option value="{{ type.id }}" {% if piece.type_id|stringformat:"s" == type.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ type.nom_type }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Numéro de la pièce</label>
+                                        <input type="text" name="numero_piece[]" class="form-control" value="{{ piece.numero }}" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Fichier</label>
+                                        <input type="file" name="fichier_piece[]" class="form-control" accept="application/pdf,image/*" required>
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-piece"><i class="fa fa-trash"></i></button>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="row piece-item mb-3">
+                                    <div class="col-md-3">
+                                        <label class="form-label">Type de pièce</label>
+                                        <select name="type_piece[]" class="form-select" required>
+                                            <option value="">Choisir...</option>
+                                            {% for type in type_pieces %}
+                                                <option value="{{ type.id }}">{{ type.nom_type }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label">Numéro de la pièce</label>
+                                        <input type="text" name="numero_piece[]" class="form-control" placeholder="Numéro du document" required>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <label class="form-label">Fichier</label>
+                                        <input type="file" name="fichier_piece[]" class="form-control" accept="application/pdf,image/*" required>
+                                    </div>
+                                    <div class="col-md-1 d-flex align-items-end">
+                                        <button type="button" class="btn btn-danger btn-sm remove-piece"><i class="fa fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <button type="button" id="addPiece" class="btn btn-outline-primary btn-sm mt-2">
+                            <i class="fa fa-plus"></i> Ajouter une pièce
+                        </button>
+                    </div>
+
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="ti-close"></i>
+                        Annuler</button>
+                    <button type="submit" class="btn btn-primary"><i class="ti-save"></i> Enregistrer le Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modalElement = document.getElementById('ajoutClientModal');
+
+        // ----------------------------------------------------------------------------------
+        // 1. LOGIQUE des Pièces Justificatives (Ajout et Suppression dynamique)
+        // ----------------------------------------------------------------------------------
+        const piecesContainer = document.getElementById('piecesContainer');
+        const addPieceButton = document.getElementById('addPiece');
+        // Récupérer les options du template (ID: typePieceOptions)
+        const typeOptionsTemplate = document.getElementById('typePieceOptions').innerHTML;
+
+        if (addPieceButton) {
+            addPieceButton.addEventListener('click', function () {
+                const newRow = document.createElement('div');
+                // Structure HTML de la nouvelle ligne (utilise typeOptionsTemplate pour le select)
+                newRow.className = 'row piece-item mb-3';
+                newRow.innerHTML = `
+                    <div class="col-md-3">
+                        <label class="form-label">Type de pièce</label>
+                        <select name="type_piece[]" class="form-select" required>
+                            <option value="">Choisir...</option>
+                            ${typeOptionsTemplate}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Numéro de la pièce</label>
+                        <input type="text" name="numero_piece[]" class="form-control" placeholder="Numéro du document" required>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Fichier</label>
+                        <input type="file" name="fichier_piece[]" class="form-control" accept="application/pdf,image/*" required>
+                    </div>
+                    <div class="col-md-1 d-flex align-items-end">
+                        <button type="button" class="btn btn-danger btn-sm remove-piece"><i class="fa fa-trash"></i></button>
+                    </div>
+                `;
+                piecesContainer.appendChild(newRow);
+            });
+        }
+
+        // Supprimer une ligne (délégation d'événement)
+        if (piecesContainer) {
+            piecesContainer.addEventListener('click', function (e) {
+                const removeBtn = e.target.closest('.remove-piece');
+                if (removeBtn) {
+                    removeBtn.closest('.piece-item').remove();
+                }
+            });
+        }
+        
+        // ----------------------------------------------------------------------------------
+        // 2. LOGIQUE CONDITIONNELLE (Personne Physique vs Morale)
+        // ----------------------------------------------------------------------------------
+        const typeClientSelect = document.getElementById('typeClientSelect');
+        const representantLegalInput = document.getElementById('representantLegalInput');
+        const requiredMoralStars = document.querySelectorAll('.required-moral-star');
+
+        function toggleChampsMoralObligation() {
+            const isMoral = typeClientSelect.value === 'Morale';
+
+            // Gère l'attribut 'required'
+            representantLegalInput.required = isMoral;
+
+            // Gère l'affichage des étoiles rouges d'obligation
+            requiredMoralStars.forEach(star => {
+                star.style.display = isMoral ? 'inline' : 'none';
+            });
+
+            // Si l'on passe de Morale à Physique, on vide les champs conditionnels
+            if (!isMoral) {
+                representantLegalInput.value = '';
+            }
+        }
+
+        // Écouter l'événement 'change' et définir l'état initial
+        if (typeClientSelect) {
+            typeClientSelect.addEventListener('change', toggleChampsMoralObligation);
+            toggleChampsMoralObligation();
+        }
+
+
+        // ----------------------------------------------------------------------------------
+        // 3. LOGIQUE d'Ouverture du Modal après Erreur
+        // ----------------------------------------------------------------------------------
+        {% if is_modal_active %}
+        if (modalElement) {
+            // Utiliser la classe 'Modal' de Bootstrap
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+        {% endif %}
+
+        // ----------------------------------------------------------------------------------
+        // 4. LOGIQUE de Recherche et Pagination
+        // ----------------------------------------------------------------------------------
+        const table = document.getElementById("example1");
+        const searchInput = document.getElementById("searchInput");
+        const paginationDiv = document.getElementById("pagination");
+
+        if (table && searchInput && paginationDiv) {
+            const tbody = table.querySelector("tbody");
+            const allRows = Array.from(tbody.querySelectorAll("tr"));
+            const rowsPerPage = 7;
+            let currentPage = 1;
+            let filteredRows = allRows;
+
+            function showPage(page) {
+                currentPage = page;
+                tbody.innerHTML = "";
+                const start = (page - 1) * rowsPerPage;
+                const end = start + rowsPerPage;
+                filteredRows.slice(start, end).forEach(row => tbody.appendChild(row));
+                renderPagination();
+            }
+
+            function renderPagination() {
+                paginationDiv.innerHTML = "";
+                const totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+                if (totalPages <= 1) return;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const btn = document.createElement("button");
+                    btn.textContent = i;
+                    btn.className = "btn btn-sm me-1 " + (i === currentPage ? "btn-primary" : "btn-outline-primary");
+                    btn.addEventListener("click", () => showPage(i));
+                    paginationDiv.appendChild(btn);
+                }
+            }
+
+            searchInput.addEventListener("input", () => {
+                const query = searchInput.value.toLowerCase();
+                filteredRows = allRows.filter(row => {
+                    return Array.from(row.cells).some(cell => cell.textContent.toLowerCase().includes(query));
+                });
+                showPage(1);
+            });
+
+            showPage(1);
+        }
+
+    });
+</script>
+
+{%endblock%}

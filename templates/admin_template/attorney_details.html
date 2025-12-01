@@ -1,0 +1,114 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+	  <div class="container-full">
+		<!-- Content Header (Page header) -->	  
+		<div class="content-header">
+			<div class="d-flex align-items-center">
+				<div class="me-auto">
+					<h4 class="page-title">Informations sur l'agent</h4>
+					<div class="d-inline-block align-items-center">
+						<nav>
+							<ol class="breadcrumb">
+								<li class="breadcrumb-item"><a href="#"><i class="mdi mdi-home-outline"></i></a></li>
+								<li class="breadcrumb-item active" aria-current="page">Informations sur l'agent </li>
+							</ol>
+						</nav>
+					</div>
+				</div>
+				
+			</div>
+		</div>  
+
+		<!-- Main content -->
+		<section class="content">
+			<div class="row">
+				<div class="col-xl-8 col-12">
+					<div class="box">
+						<div class="box-body text-end min-h-150" style="background-image:url({% static 'images/gallery/landscape14.jpg'%}); background-repeat: no-repeat; background-position: center;background-size: cover;">
+							<div class="bg-success rounded10 p-15 fs-18 d-inline"><i class="fa fa-legal"></i>{{agent.specialite}}</div>	
+						</div>						
+						<div class="box-body wed-up position-relative">
+							<div class="d-md-flex align-items-end">
+								<img src="{{ agent.photo.url }}" class="bg-success-light rounded10 me-20 w-150 h-150"
+								 alt="{{ agent.nom }} {{ agent.prenom }}" />
+								<div>
+									<h4>{{agent.nom.capitalize}} {{agent.prenom.capitalize}}</h4>
+									<p><i class="fa fa-clock-o"></i> Embaucher le {{ agent.date_creation|date:"d F Y à h:m"|default:"Date non disponible" }}</p>
+								</div>
+							</div>
+						</div>						
+						<div class="box-body">
+							<h4>Biographie</h4>
+							<p>{{agent.a_propos}}</p>
+						</div>
+					</div>
+					<div class="box">
+						<div class="box-header">
+							<h4 class="box-title">Affaire traitées</h4>
+						</div>
+						<div class="box-body">
+							<div class="media d-lg-flex d-block text-lg-start text-center">
+								<img class="me-3 img-fluid rounded bg-primary-light w-100" src="../images/avatar/1.jpg" alt="">
+								<div class="media-body my-10 my-lg-0">
+									<h4 class="mt-0 mb-2">Loky Doe</h4>
+									<h6 class="mb-4 text-primary">Domestic Violence</h6>
+									<div class="d-flex justify-content-center justify-content-lg-start">
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary-light me-4">Unassign</a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-danger-light ">Imporvement</a>
+									</div>
+								</div>
+								<!--<div id="chart" class="me-3"></div>-->
+								<div class="media-footer align-self-center">
+									<div class="up-sign text-success">
+										<!--<i class="fa fa-caret-up fs-38"></i>-->
+										Evaluation: <h3 class="text-success">10%</h3>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+
+
+					<div class="box">
+						<div class="box-header">
+							<h4 class="box-title">Affaire en cours</h4>
+						</div>
+						<div class="box-body">
+							<div class="media d-lg-flex d-block text-lg-start text-center">
+								<img class="me-3 img-fluid rounded bg-primary-light w-100" src="../images/avatar/1.jpg" alt="">
+								<div class="media-body my-10 my-lg-0">
+									<h4 class="mt-0 mb-2">Loky Doe</h4>
+									<h6 class="mb-4 text-primary">Domestic Violence</h6>
+									<div class="d-flex justify-content-center justify-content-lg-start">
+										<a href="javascript:void(0);" class="btn btn-sm btn-primary-light me-4">Unassign</a>
+										<a href="javascript:void(0);" class="btn btn-sm btn-danger-light ">Imporvement</a>
+									</div>
+								</div>
+								<!--<div id="chart" class="me-3"></div>-->
+								<div class="media-footer align-self-center">
+									<div class="up-sign text-success">
+										<!--<i class="fa fa-caret-up fs-38"></i>-->
+										Evaluation: <h3 class="text-success">10%</h3>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+									
+						</div>
+					</div>
+				</div>
+				
+					
+					
+				</div>								
+			</div>
+		</section>
+		<!-- /.content -->
+	  </div>
+  </div>
+ {%endblock%}

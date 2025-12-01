@@ -1,0 +1,271 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- jQuery (obligatoire pour Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+<div class="content-wrapper">
+  <div class="container-full">
+
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <div class="me-auto">
+          <h4 class="page-title">Dossiers</h4>
+          <div class="d-inline-block align-items-center">
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                  <a href="#"><i class="mdi mdi-home-outline"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                  Gestion des Dossiers
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="content">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutDossierModal">
+            <i class="fa fa-plus"></i> Nouveau dossier
+          </button>
+        </div>
+        <div class="col-md-6">
+          <form method="get" action="" class="d-flex">
+            <input type="text" name="q" class="form-control me-2" placeholder="Rechercher un dossier...">
+            <button type="submit" class="btn btn-outline-secondary">
+              <i class="fa fa-search"></i>
+            </button>
+          </form>
+        </div>
+      </div>
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for field in form %}
+          {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <div class="row">
+        <div class="col-12">
+          <div class="box">
+            <div class="box-body">
+              <div class="table-responsive rounded card-table">
+                <table class="table border-no" id="example1">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Date Ouverture</th>
+                      <th>Client</th>
+                      <th>Référence</th>
+                      <th>Type d’affaire</th>
+                      <th>Secteur Foncier</th>
+                      <th>Statut</th>
+                      
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for d in dossiers %}
+                    <tr class="hover-primary">
+                      <td>{{ d.id }}</td>
+                      <td>{{ d.date_ouverture|date:"d/m/Y" }}</td>
+                      <td>{{ d.client.nom }} {{ d.client.prenom }}</td>
+                      <td>{{ d.numero_reference_dossier }}</td>                      
+                      <td>{{ d.type_affaire.nom_type }}</td>
+                      <td>{{ d.secteur_foncier.nom }}</td>
+                      <td><span class="badge bg-info">{{ d.statut_dossier }}</span></td>
+                      
+                      <td>
+                        <div class="btn-group">
+                          <a class="hover-primary dropdown-toggle no-caret" data-bs-toggle="dropdown">
+                            <i class="fa fa-ellipsis-h"></i>
+                          </a>
+                          <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'dossier_details' dossier_id=d.id %}">Voir les détails</a>
+                            
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="8" class="text-center text-muted">Aucun dossier trouvé.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- MODALE AJOUT DOSSIER -->
+<div class="modal fade" id="ajoutDossierModal" tabindex="-1" aria-labelledby="ajoutDossierLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <form method="POST" action=" {%url 'Dossier_interfaces'%}" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="ajoutDossierLabel">
+            <i class="fa fa-folder-plus"></i> Ajouter un dossier
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+
+        <div class="mb-3">
+          <h5>N° de dossier: <strong>{{ numero_temp }}</strong></h5>
+        </div>
+
+        <div class="modal-body">
+          <div class="box p-1 shadow-sm">
+            <div class="box-body">
+              <h4 class="box-title text-info mb-1 mt-2">
+                <i class="fa fa-info-circle me-2"></i> Informations du dossier
+              </h4>
+              <hr class="my-15">
+
+              <!-- LIGNE 1 -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Client <span class="text-danger">*</span></label>
+                  <select name="client" class="form-select select2">
+                    <option value="">Choisir un client...</option>
+                    {% for c in clients %}
+                    <option value="{{ c.id }}">{{ c.nom }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Intitulé du dossier <span class="text-danger">*</span></label>
+                  <input type="text" name="titre" class="form-control" placeholder="Nom du dossier" required>
+                </div>
+              </div>
+
+              <!-- LIGNE 2 -->
+              <div class="row">
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Type du dossier <span class="text-danger">*</span></label>
+                  <select name="type_affaire" class="form-select select2">
+                    <option value="">Choisir un type du dossier ...</option>
+                    {% for t in types_affaire %}
+                    <option value="{{ t.id }}">{{ t.nom_type }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Secteur foncier <span class="text-danger">*</span></label>
+                  <select name="secteur_foncier" id="" class="form-select" required>
+                    <option value="">Choisir le secteur foncier...</option>
+                    {% for t in secteurs %}
+                    <option value="{{ t.id }}">{{ t.nom}}</option>
+                    {% endfor %}
+                  </select>
+                </div>         
+
+              </div>
+
+              <!-- LIGNE 3 -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Nom de la partie adverse <span class="text-danger">*</span></label>
+                  <input type="text" name="partie_adverse_nom" class="form-control"
+                    placeholder="Nom de la partie adverse" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+  <label class="form-label">Juridiction <span class="text-danger">*</span></label>
+  <div class="input-group">
+    <select name="juridiction" id="juridictionSelect" class="form-select select2" required>
+      <option value="">Sélectionnez une juridiction...</option>
+      {% for j in juridictions %}
+        <option value="{{ j.id }}">{{ j.nom }} {% if j.lieu %}- {{ j.lieu.nom }}{% endif %}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal" data-bs-target="#modalJuridiction">
+      + Ajouter
+    </button>
+  </div>
+</div>
+
+
+
+              </div>
+
+              <!-- DESCRIPTION
+              <div class="row">
+                <div class="col-md-12 mb-2">
+                  <label class="form-label">Description</label>
+                  <textarea name="description" class="form-control" rows="3"></textarea>
+                </div>
+              </div>-->
+
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="ti-close"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti-save"></i> Enregistrer le dossier
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  $(document).ready(function () {
+    // Active la recherche sur tous les select2
+    $('.select2').select2({
+      width: '100%',
+      placeholder: "Choisissez ou recherchez...",
+      allowClear: true,
+      language: {
+        noResults: function () {
+          return "Aucun résultat trouvé";
+        }
+      }
+    });
+
+    // Facultatif : réinitialiser select2 à l’ouverture du modal
+    $('#ajoutDossierModal').on('shown.bs.modal', function () {
+      $('.select2').select2({
+        dropdownParent: $('#ajoutDossierModal')
+      });
+    });
+  });
+</script>
+
+
+{%endblock%}
