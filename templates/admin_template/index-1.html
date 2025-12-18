@@ -11,7 +11,12 @@
 				<div class="col-xl-4 col-12">
 					<div class="box">
 						<div class="box-header no-border">
-							<h3 class="box-title">Total dossiers ({{dossiers.count}})</h3>
+							<h3 class="box-title">Total dossiers
+								{% if user.is_authenticated and  not user.agent.poste == 'Avocat' %}
+								   ({{dossiers.count}})
+								{%else%}
+								({{nb_total_dossiers_agent}})
+								{% endif %}</h3>
 						</div>
 						<div class="box-body py-0 px-0">
 							<div class="chart" id="totalcases"></div>
@@ -21,7 +26,13 @@
 				<div class="col-xl-4 col-12">
 					<div class="box">
 						<div class="box-header no-border">
-							<h3 class="box-title">Dossiers cloturés ({{dossiers_regler}})</h3>
+							<h3 class="box-title">Dossiers cloturés
+								{% if user.is_authenticated and  not user.agent.poste == 'Avocat' %}
+								   ({{dossiers_regler}})
+								{%else%}
+								({{nb_dossiers_clos_agent}})
+								{% endif %}</h3>
+								</h3>
 						</div>
 						<div class="box-body py-0 px-0">
 							<div class="chart" id="settledcases"></div>
@@ -39,10 +50,22 @@
 									<span class="text-white fs-60 icon-Like"><span class="path1"></span><span
 											class="path2"></span></span>
 									<div class="text-white fw-600 mb-2 mt-5">
-										<h2>{{ dossiers_gagner }}</h2>
+										<h2>
+											{% if user.is_authenticated and  not user.agent.poste == 'Avocat' %}
+								                ({{ dossiers_gagner }})
+								            {%else%}
+								                ({{nb_dossiers_agent_gagner}})
+								             {% endif %}
+											</h2>
 									</div>
 									<div class="text-white-50">
-										<h4 class="mb-0">{{pourcentage_gagner}}%</h4>
+										<h4 class="mb-0">
+											{% if user.is_authenticated and  not user.agent.poste == 'Avocat' %}
+								                {{pourcentage_gagner}}%
+								            {%else%}
+								               {{pourcentage_agent_gagner}}%
+								             {% endif %}
+											</h4>
 									</div>
 								</div>
 								<div class="bg-danger p-20 w-p100">
@@ -52,11 +75,22 @@
 									<span class="text-white fs-60 icon-Dislike rotate-180"><span
 											class="path1"></span><span class="path2"></span></span>
 									<div class="text-white fw-600 mb-2 mt-5">
-										<h2>{{ dossiers_perdu }}%</h2>
+										<h2>
+											{% if user.is_authenticated and  not user.agent.poste == 'Avocat' %}
+								                ({{ dossiers_perdu }})
+								            {%else%}
+								                ({{nb_dossiers_agent_perdu}})
+								             {% endif %}
 										</h2>
 									</div>
 									<div class="text-white-50">
-										<h4 class="mb-0">{{pourcentage_perdu}}</h4>
+										<h4 class="mb-0">
+											{% if user.is_authenticated and  not user.agent.poste == 'Avocat' %}
+								                {{pourcentage_perdu}}%
+								            {%else%}
+								               {{pourcentage_agent_perdu}}%
+								             {% endif %}
+										</h4>
 									</div>
 								</div>
 							</div>
@@ -80,8 +114,8 @@
 							<h3 class="box-title">Recettes du mois en cours</h3>
 						</div>
 						<div class="box-body pb-0 ">
-							<h4 class="text-dark">${{gain_de_ce_mois}}
-								<br>fc {{gain_de_ce_mois_fc}}
+							<h4 class="text-dark">${{solde_actuel}}
+								<br>fc {{solde_actuel_fc}}
 								<small class="text-success">25%
 									<span class="badge badge-pill badge-success-light"><i
 											class="fa fa-angle-up text-success"></i></span></small>
@@ -136,7 +170,7 @@
 								<tbody>
 									{% if dossiers %}
 									{% if user.agent.poste == 'Avocat'%}
-									{% for d in dossiers_agent%}
+									{% for d in dossiers_agent %}
 									<tr>
 										<td class="ps-0 py-1">
 											<div class="d-flex align-items-center">
@@ -189,7 +223,7 @@
 									{%endfor%}
 									{%else%}
 
-									{% for d in dossiers%}
+									{% for d in dossiers|slice:4%}
 									<tr>
 										<td class="ps-0 py-1">
 											<div class="d-flex align-items-center">
@@ -289,11 +323,11 @@
 						<p>Aucun agent n'a eté enregistrer </p>
 						{% endfor %}
 					</div>
-					
+
 
 				</div>{%endif%}
 			</div>
-			
+
 	</div>
 
 	</section>
@@ -301,19 +335,10 @@
 </div>
 </div>
 <!-- /.content-wrapper -->
-<footer class="main-footer">
-	<!--<div class="pull-right d-none d-sm-inline-block">
-        <ul class="nav nav-primary nav-dotted nav-dot-separated justify-content-center justify-content-md-end">
-		  <li class="nav-item">
-			<a class="nav-link" href="javascript:void(0)">FAQ</a>
-		  </li>
-		  <li class="nav-item">
-			<a class="nav-link" href="https://themeforest.net/item/lawfirm-responsive-bootstrap-admin-template/32736939">Purchase Now</a>
-		  </li>
-		</ul>
-    </div>-->
-	&copy;
-	<script>document.write(new Date().getFullYear())</script> <a href="https://www.multipurposethemes.com/">Yeta Jean
-		Programming. </a>Tout droit reservés.
-</footer>
+
+
+
+
+
+
 {%endblock%}

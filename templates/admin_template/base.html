@@ -20,8 +20,9 @@
 	<!-- Style-->
 	<link rel="stylesheet" href="{% static 'css/style.css' %}">
 	<link rel="stylesheet" href="{% static 'css/skin_color.css' %}">
+	-<!-- Chosen CSS -->
 
-</head>
+
 
 <body class="hold-transition light-skin sidebar-mini theme-primary fixed">
 
@@ -191,7 +192,7 @@
 						<li><a href="contact_app_chat.html" data-bs-toggle="tooltip" title="Chat"><i
 									class="icon-Group-chat fs-24"><span class="path1"></span><span
 										class="path2"></span></i></a></li>
-						<li><a href="auth_login.html" data-bs-toggle="tooltip" title="Logout"><i
+						<li><a href="{% url 'Deconnecter' %}" data-bs-toggle="tooltip" title="Déconnexion"><i
 									class="icon-Lock-overturning fs-24"><span class="path1"></span><span
 										class="path2"></span></i></a></li>
 					</ul>
@@ -257,6 +258,26 @@
 								<a href="#">
 									<i class="icon-Hummer"><span class="path1"></span><span class="path2"></span><span
 											class="path3"></span></i>
+									<span>Caisse </span>
+									<span class="pull-right-container">
+										<i class="fa fa-angle-right pull-right"></i>
+									</span>
+								</a>
+								<ul class="treeview-menu">
+									<li><a href="{%url 'Gerer_caisse'%}"><i class="icon-Commit"><span class="path1"></span><span
+													class="path2"></span></i>Gérer la caisse</a>
+									</li>
+									<li><a href="#"><i class="icon-Commit"><span class="path1"></span><span
+													class="path2"></span></i> Rapport caisse</a>
+									</li>
+									<!--<li><a href="case_details.html"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Case Details</a></li>-->
+								</ul>
+							</li>
+
+							<li class="treeview">
+								<a href="#">
+									<i class="icon-Hummer"><span class="path1"></span><span class="path2"></span><span
+											class="path3"></span></i>
 									<span>Rapport </span>
 									<span class="pull-right-container">
 										<i class="fa fa-angle-right pull-right"></i>
@@ -266,7 +287,7 @@
 									<li><a href="#"><i class="icon-Commit"><span class="path1"></span><span
 													class="path2"></span></i> Rapport agent</a>
 									</li>
-									<li><a href="#"><i class="icon-Commit"><span class="path1"></span><span
+									<li><a href="{% url 'rapport_client' %}"><i class="icon-Commit"><span class="path1"></span><span
 													class="path2"></span></i> Rapport client</a>
 									</li>
 									<!--<li><a href="case_details.html"><i class="icon-Commit"><span class="path1"></span><span class="path2"></span></i>Case Details</a></li>-->
@@ -279,7 +300,23 @@
 		</aside>
 		{%block content%}
 		{%endblock%}
+        <footer class="main-footer">
+	<!--<div class="pull-right d-none d-sm-inline-block">
+        <ul class="nav nav-primary nav-dotted nav-dot-separated justify-content-center justify-content-md-end">
+		  <li class="nav-item">
+			<a class="nav-link" href="javascript:void(0)">FAQ</a>
+		  </li>
+		  <li class="nav-item">
+			<a class="nav-link" href="https://themeforest.net/item/lawfirm-responsive-bootstrap-admin-template/32736939">Purchase Now</a>
+		  </li>
+		</ul>
+    </div>-->
+	&copy;
+	<script>document.write(new Date().getFullYear())</script> <a href="https://www.multipurposethemes.com/">Yeta Jean
+		Programming. </a>Tout droit reservés.
+       </footer>
 
+	   
 		<!-- Control Sidebar -->
 		<aside class="control-sidebar">
 
@@ -434,11 +471,11 @@
 								<li class="list-group-item d-flex justify-content-between align-items-center">
 									<div>
 										<i class="mdi mdi-bank-transfer text-success me-2"></i>
-										<strong>Taux du jour</strong>
+										<strong>Motif depense</strong>
 										<p class="mb-0 fs-12">Ajouter ou mettre à jour le taux du marché.</p>
 									</div>
 									<button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-										data-bs-target="#modalTaux">
+										data-bs-target="#modalServiceCabinet">
 										<i class="mdi mdi-pencil"></i>
 									</button>
 								</li>
@@ -570,7 +607,7 @@
 											facturation et taxes.</p>
 									</div>
 									<button class="btn btn-sm btn-primary" data-bs-toggle="modal"
-										data-bs-target="#modalParamFinancier">
+										data-bs-target="#modalTaux">
 										<i class="mdi mdi-pencil"></i>
 									</button>
 								</li>
@@ -1382,121 +1419,222 @@
 	</div>
 
 	<!-- Modal Gestion des Taux -->
-	<div class="modal fade" id="modalTaux" tabindex="-1" aria-labelledby="modalTauxLabel" aria-hidden="true">
-		<div class="modal-dialog modal-lg modal-dialog-centered">
-			<div class="modal-content border-0 shadow-lg">
+	<div class="modal fade" id="modalTaux" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
 
-				<!-- Header -->
-				<div class="modal-header bg-primary text-white">
-					<h5 class="modal-title" id="modalTauxLabel">
-						<i class="mdi mdi-cash"></i> Gestion des Taux (CDF)
-					</h5>
+            <!-- HEADER -->
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="mdi mdi-cash-multiple"></i> Gestion Financière du Cabinet
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
 
-					<div class="d-flex align-items-center">
-						<!-- Bouton d’ouverture du sidebar -->
-						<button type="button" class="btn-open-sidebar btn btn-outline-light btn-sm me-2"
-							title="Ouvrir le panneau latéral">
-							<i class="mdi mdi-view-sidebar"></i>
-						</button>
+            <!-- NAVIGATION INTERNE -->
+            <div class="modal-body pb-0">
 
-						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-					</div>
-				</div>
+                <ul class="nav nav-tabs nav-fill" id="financeTabs" role="tablist">
 
-				<!-- BODY -->
-				<div class="modal-body">
-					<div class="row">
+                    <!-- Onglet Taux -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="tab-taux" data-bs-toggle="tab"
+                            data-bs-target="#content-taux" type="button" role="tab">
+                            <i class="mdi mdi-currency-usd"></i> Taux (CDF)
+                        </button>
+                    </li>
 
-						<!-- FORMULAIRE AJOUTER TAUX -->
-						<div class="col-md-4">
-							<div class="card border-light shadow-sm">
-								<div class="card-header bg-primary text-white">
-									<h6 class="mb-0">
-										<i class="mdi mdi-plus-circle-outline"></i> Ajouter un nouveau taux
-									</h6>
-								</div>
+                    <!-- Onglet Banques -->
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tab-banques" data-bs-toggle="tab"
+                            data-bs-target="#content-banques" type="button" role="tab">
+                            <i class="mdi mdi-bank"></i> Banques
+                        </button>
+                    </li>
 
-								<div class="card-body">
+                </ul>
+            </div>
 
-									<form id="formAjouterTaux" class="form-ajax" method="post"
-										action="{% url 'ajouter_taux_ajax' %}" data-msg="msgTaux"
-										data-table="#tableTaux">
+            <!-- CONTENU DES TABS -->
+            <div class="tab-content p-3">
 
-										{% csrf_token %}
+                <!-- ---------------------- SECTION TAUX ---------------------- -->
+                <div class="tab-pane fade show active" id="content-taux" role="tabpanel">
 
-										<div class="mb-3">
-											<label class="form-label">Nouveau Taux (CDF)</label>
-											<input type="number" name="cout" class="form-control"
-												placeholder="Taux actuel : {{ dernier_taux.cout }}" required>
-										</div>
+                    <div class="row">
 
-										<div class="alert alert-info mt-2">
-											<i class="mdi mdi-information-outline"></i>
-											Le taux sera automatiquement appliqué aux tarifs existants.
-										</div>
+                        <!-- Formulaire Ajouter Taux -->
+                        <div class="col-md-4">
+                            <div class="card border-light shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="mdi mdi-plus-circle"></i> Ajouter un taux</h6>
+                                </div>
 
-										<div class="text-end mt-3">
-											<button type="submit" class="btn btn-success">
-												<i class="mdi mdi-content-save"></i> Enregistrer
-											</button>
-										</div>
-									</form>
+                                <div class="card-body">
+                                    <form id="formAjouterTaux" class="form-ajax" method="post"
+                                        action="{% url 'ajouter_taux_ajax' %}" data-msg="msgTaux"
+                                        data-table="#tableTaux">
 
-									<div id="msgTaux"></div>
-								</div>
-							</div>
-						</div>
+                                        {% csrf_token %}
 
-						<!-- LISTE DES TAUX -->
-						<div class="col-md-8">
-							<div class="card border-light shadow-sm">
+                                        <div class="mb-3">
+                                            <label class="form-label">Nouveau Taux (CDF)</label>
+                                            <input type="number" name="cout" class="form-control"
+                                                placeholder="Taux actuel : {{ dernier_taux.cout }}" required>
+                                        </div>
 
-								<div class="card-header bg-light">
-									<h6 class="mb-0 text-primary">
-										<i class="mdi mdi-view-list"></i> Historique des taux
-									</h6>
-								</div>
+                                        <div class="text-end">
+                                            <button class="btn btn-success">
+                                                <i class="mdi mdi-content-save"></i> Enregistrer
+                                            </button>
+                                        </div>
+                                    </form>
 
-								<div class="card-body p-0 table-scrollable">
-									<table class="table table-hover mb-0" id="tableTaux">
-										<thead class="table-light">
-											<tr>
-												<th>#</th>
-												<th>Taux (CDF)</th>
-												<th>Date</th>
-												<th class="text-center">Supprimer</th>
-											</tr>
-										</thead>
+                                    <div id="msgTaux"></div>
+                                </div>
+                            </div>
+                        </div>
 
-										<tbody>
-											{% for t in liste_taux %}
-											<tr id="taux{{ t.id }}">
-												<td>{{ forloop.counter }}</td>
-												<td>{{ t.cout }}</td>
-												<td>{{ t.date_ajouter|date:"d/m/Y H:i" }}</td>
-												<td class="text-center">
-													<button class="btn btn-sm btn-danger btn-delete-ajax"
-														data-row="taux{{ t.id }}"
-														data-url="{% url 'supprimer_taux_ajax' t.id %}">
-														<i class="mdi mdi-delete"></i>
-													</button>
-												</td>
-											</tr>
-											{% endfor %}
-										</tbody>
+                        <!-- Liste des taux -->
+                        <div class="col-md-8">
+                            <div class="card border-light shadow-sm">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0 text-primary">
+                                        <i class="mdi mdi-history"></i> Historique des taux
+                                    </h6>
+                                </div>
 
-									</table>
-								</div>
+                                <div class="card-body p-0 table-scrollable">
+                                    <table class="table table-hover mb-0" id="tableTaux">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Taux</th>
+                                                <th>Date</th>
+                                                <th class="text-center">Supprimer</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for t in liste_taux %}
+                                            <tr id="taux{{ t.id }}">
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ t.cout }}</td>
+                                                <td>{{ t.date_ajouter|date:"d/m/Y H:i" }}</td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm btn-danger btn-delete-ajax"
+                                                        data-row="taux{{ t.id }}"
+                                                        data-url="{% url 'supprimer_taux_ajax' t.id %}">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
 
-							</div>
-						</div>
+                    </div>
+                </div>
 
-					</div>
-				</div>
+                <!-- ---------------------- SECTION BANQUES ---------------------- -->
+                <div class="tab-pane fade" id="content-banques" role="tabpanel">
 
-			</div>
-		</div>
-	</div>
+                    <div class="row">
+
+                        <!-- Formulaire Ajouter Banque -->
+                        <div class="col-md-4">
+                            <div class="card border-light shadow-sm">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="mdi mdi-bank"></i> Ajouter une banque</h6>
+                                </div>
+
+                                <div class="card-body">
+
+                                    <form id="formAjouterBanque" class="form-ajax" method="post"
+                                        action="{% url 'ajouter_banque_ajax' %}" data-msg="msgBanque"
+                                        data-table="#tableBanques">
+
+                                        {% csrf_token %}
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Nom de la Banque</label>
+                                            <input type="text" name="nom_banque" class="form-control"
+                                                placeholder="Ex : RAWBANK" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="form-label">Numéro de Compte</label>
+                                            <input type="text" name="numero_compte" class="form-control"
+                                                placeholder="000-123456789-00" required>
+                                        </div>
+
+                                        <div class="text-end">
+                                            <button class="btn btn-success">
+                                                <i class="mdi mdi-content-save"></i> Enregistrer
+                                            </button>
+                                        </div>
+
+                                    </form>
+
+                                    <div id="msgBanque"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Liste des banques -->
+                        <div class="col-md-8">
+                            <div class="card border-light shadow-sm">
+
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0 text-primary">
+                                        <i class="mdi mdi-view-list"></i> Banques enregistrées
+                                    </h6>
+                                </div>
+
+                                <div class="card-body p-0 table-scrollable">
+                                    <table class="table table-hover mb-0" id="tableBanques">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Banque</th>
+                                                <th>N° Compte</th>
+                                                <th class="text-center">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for b in banques %}
+                                            <tr id="banque{{ b.id }}">
+                                                <td>{{ forloop.counter }}</td>
+                                                <td>{{ b.nom_banque }}</td>
+                                                <td>{{ b.numero_compte }}</td>
+                                                <td class="text-center">
+                                                    <button class="btn btn-sm btn-danger btn-delete-ajax"
+                                                        data-row="banque{{ b.id }}"
+                                                        data-url="{% url 'supprimer_banque_ajax' b.id %}">
+                                                        <i class="mdi mdi-delete"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
 
 
 
@@ -2266,6 +2404,126 @@
 		</div>
 	</div>
 
+	<div class="modal fade" id="modalServiceCabinet" tabindex="-1" aria-labelledby="modalServiceCabinetLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-xl modal-dialog-centered">
+			<div class="modal-content border-0 shadow-lg">
+				<div class="modal-header bg-info text-white">
+					<h5 class="modal-title" id="modalServiceCabinetLabel"><i class="mdi mdi-account-tie-outline"></i>
+						Services et depenses</h5>
+					<div class="d-flex align-items-center">
+						<button type="button" class="btn-open-sidebar btn btn-outline-light btn-sm me-2"
+							title="Ouvrir le panneau latéral">
+							<i class="mdi mdi-view-sidebar"></i>
+						</button>
+						<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+					</div>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<!-- Formulaire Ajouter service -->
+						<div class="col-md-4">
+							<div class="card border-light shadow-sm">
+								<div class="card-header bg-info text-white">
+									<h6 class="mb-0"><i class="mdi mdi-plus-circle-outline"></i> Ajouter un service</h6>
+								</div>
+								<div class="card-body">
+									<form class="form-ajax" method="post" action="{% url 'ajouter_service_cabinet_ajax' %}"
+										data-msg="msgServiceCabinet" data-table="#tableServiceCabinet">
+										{% csrf_token %}
+										<div class="form-group mb-3">
+											<label for="nom_service">Nom du service</label>
+											<input type="text" name="nom_service" id="nom_service" class="form-control"
+												required>
+										</div>
+										<div class="text-end">
+											<button type="submit" class="btn btn-success">
+												<i class="mdi mdi-content-save-outline"></i> Enregistrer
+											</button>
+										</div>
+									</form>
+									<div id="msgServiceCabinet"></div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Liste des services -->
+						<div class="col-md-8">
+							<div class="card border-light shadow-sm">
+								<div class="card-header bg-light">
+									<h6 class="mb-0 text-primary"><i class="mdi mdi-format-list-bulleted"></i> Liste des
+										services</h6>
+								</div>
+								<div class="card-body p-0 table-scrollable">
+									<table class="table table-hover mb-0" id="tableServiceCabinet">
+										<thead class="table-light">
+											<tr>
+												<th>#</th>
+												<th>Service</th>
+												<th>Date ajouter</th>
+												<th class="text-center">Actions</th>
+											</tr>
+										</thead>
+										<tbody>
+											{% for service in services %}
+											<tr id="service{{ service.id }}">
+												<td>{{ forloop.counter }}</td>
+												<td>{{ service.nom_service }}</td>
+												<td>{{ service.date_ajouter|date:"d/m/Y H:i" }}</td>
+												<td class="text-center">
+													<button class="btn btn-sm btn-warning btn-edit-ajax"
+														data-row="service{{ service.id }}" data-msg="msgServiceCabinet"
+														data-url="{% url 'modifier_service_cabinet_ajax' service.id %}">
+														<i class="mdi mdi-pencil"></i>
+													</button>
+													<button class="btn btn-sm btn-danger btn-delete-ajax"
+														data-row="service{{ service.id }}"
+														data-url="{% url 'supprimer_service_cabinet_ajax' service.id %}">
+														<i class="mdi mdi-delete"></i>
+													</button>
+												</td>
+											</tr>
+											{% endfor %}
+										</tbody>
+									</table>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal Modifier service -->
+	<div class="modal fade" id="modalModifierService" tabindex="-1" aria-labelledby="modalModifierServiceLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-dialog-centered">
+			<div class="modal-content border-0 shadow-lg">
+				<div class="modal-header bg-warning text-white">
+					<h5 class="modal-title" id="modalModifierserviceLabel"><i class="mdi mdi-pencil"></i> Modifier service
+					</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form class="form-edit-ajax" method="post" data-msg="msgServiceCabinet">
+						{% csrf_token %}
+						<div class="form-group mb-3">
+							<label for="nom_service_edit">Nom du service</label>
+							<input type="text" name="nom_service" id="nom_service_edit" class="form-control" required>
+						</div>
+
+						<div class="text-end">
+							<button type="submit" class="btn btn-success">
+								<i class="mdi mdi-content-save-outline"></i> Enregistrer
+							</button>
+						</div>
+					</form>
+					<div class="msg-container"></div>
+				</div>
+			</div>
+		</div>
+	</div>
 
 	<!-- Modal Paramétrage Cabinet -->
 <div class="modal fade" id="modalCabinet" tabindex="-1" aria-hidden="true">
@@ -2538,48 +2796,7 @@
 
 
 
-
-	<!-- Vendor JS -->
-	<script src="{% static 'js/vendors.min.js' %}"></script>
-	<script src="{% static 'js/pages/chat-popup.js' %}"></script>
-	<script src="{% static 'assets/icons/feather-icons/feather.min.js' %}"></script>
-
-	<script src="{% static 'assets/vendor_components/apexcharts-bundle/dist/apexcharts.js' %}"></script>
-
-	<!-- Law Firm App -->
-	<script src="{% static 'js/template.js' %}"></script>
-	<script src="{% static 'js/pages/dashboard.js' %}"></script>
-
-	<script>
-		document.addEventListener('DOMContentLoaded', function () {
-			// 1. Sélectionner tous les boutons dans la sidebar qui ouvrent un modal
-			const sidebarModalButtons = document.querySelectorAll('.control-sidebar [data-bs-toggle="modal"]');
-
-			// 2. Sélectionner le bouton de bascule de la sidebar (celui avec l'icône 'Settings')
-			const sidebarToggleBtn = document.querySelector('[data-toggle="control-sidebar"]');
-
-			// Pour chaque bouton de modal dans la sidebar :
-			sidebarModalButtons.forEach(button => {
-				button.addEventListener('click', function (event) {
-
-					// Étape A: Empêcher le clic de remonter et d'ouvrir involontairement la sidebar 
-					// ou d'interférer avec d'autres scripts.
-					event.stopPropagation();
-
-					// Étape B: **Forcer la fermeture de la sidebar** avant d'ouvrir le modal.
-					// C'est la façon la plus directe et fiable de fermer la sidebar.
-					if (sidebarToggleBtn) {
-						// Utiliser un simple clic sur le bouton de bascule pour déclencher la fermeture.
-						sidebarToggleBtn.click();
-					}
-				});
-			});
-		});
-	</script>
-
-
-
-	<style>
+<style>
 		/* Rend la zone du tableau scrollable dans les modales */
 		.table-scrollable {
 			max-height: 400px;
@@ -2619,6 +2836,43 @@
 			line-height: 1;
 		}
 	</style>
+	<!-- Vendor JS -->
+	<script src="{% static 'js/vendors.min.js' %}"></script>
+	<script src="{% static 'js/pages/chat-popup.js' %}"></script>
+	<script src="{% static 'assets/icons/feather-icons/feather.min.js' %}"></script>
+
+	<script src="{% static 'assets/vendor_components/apexcharts-bundle/dist/apexcharts.js' %}"></script>
+
+	<!-- Law Firm App -->
+	<script src="{% static 'js/template.js' %}"></script>
+	<script src="{% static 'js/pages/dashboard.js' %}"></script>
+
+	<script>
+		document.addEventListener('DOMContentLoaded', function () {
+			// 1. Sélectionner tous les boutons dans la sidebar qui ouvrent un modal
+			const sidebarModalButtons = document.querySelectorAll('.control-sidebar [data-bs-toggle="modal"]');
+
+			// 2. Sélectionner le bouton de bascule de la sidebar (celui avec l'icône 'Settings')
+			const sidebarToggleBtn = document.querySelector('[data-toggle="control-sidebar"]');
+
+			// Pour chaque bouton de modal dans la sidebar :
+			sidebarModalButtons.forEach(button => {
+				button.addEventListener('click', function (event) {
+
+					// Étape A: Empêcher le clic de remonter et d'ouvrir involontairement la sidebar 
+					// ou d'interférer avec d'autres scripts.
+					event.stopPropagation();
+
+					// Étape B: **Forcer la fermeture de la sidebar** avant d'ouvrir le modal.
+					// C'est la façon la plus directe et fiable de fermer la sidebar.
+					if (sidebarToggleBtn) {
+						// Utiliser un simple clic sur le bouton de bascule pour déclencher la fermeture.
+						sidebarToggleBtn.click();
+					}
+				});
+			});
+		});
+	</script>	
 
 	<script>
 		document.addEventListener('DOMContentLoaded', function () {
@@ -2713,7 +2967,7 @@
 				});
 			});
 
-			// ------------------- SUPPRESSION -------------------
+			
 			// ------------------- SUPPRESSION (Correction) -------------------
 			// Utilisation de la délégation d'événement sur document.body
 			document.body.addEventListener("click", function (e) {
@@ -2817,6 +3071,9 @@
 				else if (rowId.startsWith("ville")) modalId = "modalModifierVille";
 				else if (rowId.startsWith("juridiction")) modalId = "modalModifierJuridiction";
 				else if (rowId.startsWith("typePiece")) modalId = "modalModifierTypePiece";
+				else if (rowId.startsWith("service")) modalId = "modalModifierService";
+
+
 
 				const modalEl = document.getElementById(modalId);
 				const modal = new bootstrap.Modal(modalEl);
@@ -2864,6 +3121,10 @@
 				else if (rowId.startsWith("typePiece")) { // Note: 'typePiece' dans le HTML/JS pour typeDossier existant
 					form.querySelector("input[name='nom_type']").value = row.children[1].textContent.trim();
 				}
+				if (rowId.startsWith("service")) {
+                 form.querySelector("input[name='nom_service']").value = row.children[1].textContent.trim();
+                }
+
 			});
 
 		});

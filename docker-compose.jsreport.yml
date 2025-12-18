@@ -1,0 +1,59 @@
+# Docker Compose pour JSReport - Déploiement séparé
+version: '3.8'
+
+services:
+  jsreport:
+    image: jsreport/jsreport:4.7.0
+    container_name: jsreport-production
+    ports:
+      - "5488:5488"
+    environment:
+      # Configuration de base
+      - NODE_ENV=production
+      - httpPort=5488
+      
+      # Authentification (recommandée pour la production)
+      - authentication_admin_username=${JSREPORT_USERNAME:-admin}
+      - authentication_admin_password=${JSREPORT_PASSWORD:-admin123}
+      - authentication_enabled=true
+      
+      # Configuration de sécurité
+      - trustUserCode=false
+      - allowLocalFilesAccess=false
+      
+      # Configuration des extensions
+      - extensions_authentication_cookieSession_secret=${JSREPORT_COOKIE_SECRET:-your-secret-key}
+      - extensions_authentication_admin_username=${JSREPORT_USERNAME:-admin}
+      - extensions_authentication_admin_password=${JSREPORT_PASSWORD:-admin123}
+      
+      # Configuration de performance
+      - workers_numberOfWorkers=2
+      - workers_timeout=60000
+      
+      # Configuration de stockage
+      - store=fs
+      - blobStorage=fs
+      
+    volumes:
+      # Persistance des templates et données
+      - jsreport_data:/app/data
+      - jsreport_logs:/app/logs
+      
+    restart: unless-stopped
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5488/api/ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  jsreport_data:
+    driver: local
+  jsreport_logs:
+    driver: local
+
+networks:
+  default:
+    name: jsreport-network

@@ -2,7 +2,7 @@
 
 from Dossier.models import SecteurFoncier, commune, Activite, type_dossier, TarifHoraire,TypePiece
 from Adresse.models import  Ville,adresse
-from Structure.models import Specialite, PosteAvocat,Juridiction,Cabinet, Forme_juridiques
+from Structure.models import Specialite, PosteAvocat,Juridiction,Cabinet, Forme_juridiques,ServiceCabinet,Banque
 from parametre.models import taux
 
 def modales_data(request):
@@ -34,7 +34,9 @@ def modales_data(request):
         liste_taux = taux.objects.filter(cabinet=request.user.cabinet).order_by('-id')
         cabinet = user_cabinet  # objet unique
         adr = cabinet.adresse    # objet adresse
+        services=ServiceCabinet.objects.filter(cabinet=user_cabinet)
         forme_juridiques =Forme_juridiques.objects.all().order_by('id')
+        banques=Banque.objects.filter(cabinet=request.user.cabinet).order_by('date_ajouter')
        
         
 
@@ -56,6 +58,8 @@ def modales_data(request):
         juridictions=Juridiction.objects.none()
         dernier_taux=taux.objects.none()
         liste_taux=taux.objects.none()
+        services=ServiceCabinet.objects.none()
+        banques=Banque.objects.none()
         
 
     return {
@@ -76,6 +80,9 @@ def modales_data(request):
         'forme_juridiques': forme_juridiques,
         'cabinet': cabinet,
         'adr': adr,
+        'services':services,
+        'banques':banques,
+       
     }
 
 

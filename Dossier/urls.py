@@ -20,6 +20,11 @@ urlpatterns = [
     path('dossier/<int:dossier_id>/declaration/ajouter/', views.ajouter_declaration, name="ajouter_declaration"),
     path("declaration/<int:decl_id>/modifier/", views.modifier_declaration, name="modifier_declaration"),
     path("declaration/<int:decl_id>/supprimer/", views.supprimer_declaration, name="supprimer_declaration"),
+    path('dossier/<int:dossier_id>/extrait-compte-date_form/', views.extrait_compte_date_form, name='extrait_compte_date_form'),
+    path('dossier/<int:dossier_id>/extrait-compte-preview/', views.extrait_compte_preview, name='extrait_compte_preview'),
+    path('dossier/<int:dossier_id>/extrait-paiements/pdf/', views.imprimer_paiements, name='extrait_compte_pdf'),
+    path('dossiers/<int:dossier_id>/print/', views.print_facture, name='print_facture'),
+    path('dossier/<int:dossier_id>/cloturer/', views.cloturer_dossier, name='cloturer_dossier'),
 
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
+    ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) 
    # Le media

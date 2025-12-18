@@ -62,6 +62,19 @@ class PosteAvocat(models.Model):
         return self.nom_poste
     
 
+class ServiceCabinet(models.Model):
+    nom_service = models.CharField(max_length=100)
+    date_ajouter = models.DateTimeField(auto_now_add=True, null=True)
+    cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE,related_name="services_cabinet")
+
+    class Meta:
+        unique_together = ('nom_service', 'cabinet')
+        verbose_name = "Service cabinet"
+        verbose_name_plural = "Services cabinet"
+
+    def __str__(self):
+        return self.nom_service
+
 
 class Juridiction(models.Model):
     nom = models.CharField(max_length=150, null=False)
@@ -71,5 +84,20 @@ class Juridiction(models.Model):
 
     def __str__(self):
         return self.nom
+
+
+class Banque(models.Model):
+    nom_banque = models.CharField(max_length=255)
+    numero_compte = models.CharField(max_length=255)
+    date_ajouter = models.DateTimeField(auto_now_add=True)
+    cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE, default=1, related_name="Banque_cabinet")
     
+    class Meta:
+        unique_together = ('nom_banque', 'cabinet')
+        verbose_name = "Banque cabinet"
+        verbose_name_plural = "Banques cabinet"
+
+    def __str__(self):
+        return self.nom_banque
+
 

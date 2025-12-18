@@ -42,6 +42,11 @@ urlpatterns = [
     path('poste/<int:id>/modifier/', views.modifier_poste_avocat_ajax, name='modifier_poste_avocat_ajax'),
     path('poste/<int:id>/supprimer/', views.supprimer_poste_avocat_ajax, name='supprimer_poste_avocat_ajax'),
 
+    path('service/ajouter/', views.ajouter_service_cabinet_ajax, name='ajouter_service_cabinet_ajax'),
+    path('service/<int:id>/modifier/', views.modifier_service_cabinet_ajax, name='modifier_service_cabinet_ajax'),
+    path('service/<int:id>/supprimer/', views.supprimer_service_cabinet_ajax, name='supprimer_service_cabinet_ajax'),
+
+
     path('ville/ajouter/', views.ajouter_ville_ajax, name='ajouter_ville_ajax'),
     path('ville/<int:id>/modifier/', views.modifier_ville_ajax, name='modifier_ville_ajax'),
     path('ville/<int:id>/supprimer/', views.supprimer_ville_ajax, name='supprimer_ville_ajax'),
@@ -58,7 +63,9 @@ urlpatterns = [
     
     path('ajouter-taux/', views.ajouter_taux_ajax, name='ajouter_taux_ajax'),
     path("supprimer-taux/<int:id>/", views.supprimer_taux_ajax, name="supprimer_taux_ajax"),
-  
+    
+    path('ajouter-banque/', views.ajouter_banque_ajax, name='ajouter_banque_ajax'),
+    path("supprimer-banque/<int:id>/", views.supprimer_banque_ajax, name="supprimer_banque_ajax")
 
 
    ]

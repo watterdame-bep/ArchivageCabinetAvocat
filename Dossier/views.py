@@ -19,6 +19,18 @@ from django.db.models import Prefetch
 from paiement.models import Paiement
 from django.db.models import Sum
 from django.urls import reverse
+from parametre.models import taux
+import requests
+from decimal import Decimal
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
+from django.db.models import Sum
+import base64
+import os
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.utils import timezone
 
 
 @login_required(login_url='Connexion')# Il est bon de s'assurer que l'utilisateur est connecté
@@ -211,6 +223,9 @@ def affaires_interface(request):
                 client_id=form.cleaned_data['client'].id
             )
 
+            dossier_instance.save()
+            now = datetime.now()
+            reference = f"FACT-{dossier_instance.id}-{now.strftime('%Y%m%d%H%M%S')}"
             # Récupérer le tarif
             try:
                 tarif = TarifHoraire.objects.get(
@@ -224,6 +239,7 @@ def affaires_interface(request):
                 dossier_instance.montant_dollars_enreg = tarif.montant_dollars
                 dossier_instance.montant_fc_enreg = tarif.montant_fc
                 dossier_instance.taux_enreg = tarif.taux_jour
+                dossier_instance.reference=reference
 
             except TarifHoraire.DoesNotExist:
                 # Aucun tarif trouvé pour cette combinaison
@@ -344,8 +360,10 @@ def details_affaire(request, dossier_id):
     # -------------------------------------------------------------------------
     # 3. Contexte Final
     # -------------------------------------------------------------------------
-    montant_deja_paye = paiements_dossier.filter(devise="USD").aggregate(Sum("montant"))["montant__sum"] or 0
-    montant_deja_paye_fc = paiements_dossier.filter(devise="FC").aggregate(Sum("montant"))["montant__sum"] or 0
+    montant_deja_paye =paiements.aggregate(Sum("montant_payer_dollars"))["montant_payer_dollars__sum"] or 0
+
+    montant_deja_paye_fc = paiements.aggregate(Sum("montant_payer_fc"))["montant_payer_fc__sum"] or 0
+      
     reste_a_payer = total_dollars - montant_deja_paye
     reste_a_payer_fc = total_fc- montant_deja_paye_fc
     taux_du_jour=tarif_horaire.taux_jour
@@ -385,12 +403,17 @@ def ajouter_declaration(request, dossier_id):
 
     if request.method == "POST":
         contenu = request.POST.get("contenu")
+        auteur=request.POST.get("auteur")
+
+        if auteur == '':
+            auteur= f'{dossier_instance.client.nom} (client)'
 
         if contenu and contenu.strip() != "":
             DeclarationDossier.objects.create(
                 dossier=dossier_instance,
                 contenu=contenu,
-                auteur=request.user.agent
+                auteur=auteur,
+                ecrit_par=request.user.agent
             )
 
         return redirect("dossier_details", dossier_id=dossier_id)
@@ -532,15 +555,19 @@ def definir_mode_honoraire(request, dossier_id):
             mode = form.cleaned_data['mode_honoraire']
             dossier_instance.mode_honoraire = mode
 
-            # Si mode = Forfait → les prix doivent être définis
-            dossier_instance.forfait_defini = False if mode == "Forfait"  else True
-            dossier_instance.mode_defini =True
+            # 👉 Si l'utilisateur choisit "Forfait", remettre les montants à 0
+            if mode == "Forfait":
+                dossier_instance.montant_dollars_enreg = 0.0
+                dossier_instance.montant_fc_enreg = 0.0
+                dossier_instance.forfait_defini = False
+            else:
+                dossier_instance.forfait_defini = True
 
+            dossier_instance.mode_defini = True
             dossier_instance.save()
+
             messages.success(request, "Le mode d'honoraire a été mis à jour avec succès.")
 
-            # Redirection vers détails pour recharger l'état
-             # Redirection vers la page détails + paramètre pour ouvrir le modal
             url = reverse('dossier_details', args=[dossier_instance.id])
             return redirect(f"{url}?open_modal=activites")
 
@@ -554,23 +581,26 @@ def definir_mode_honoraire(request, dossier_id):
 
 
 
-@login_required(login_url='Connexion')
+@login_required(login_url='Connexion') 
 def enregistrer_prix_forfaitaire(request, dossier_id):
     dossier_instance = get_object_or_404(dossier, id=dossier_id)
 
     if request.method != "POST":
         return redirect("dossier_details", dossier_id=dossier_id)
+    
+    t = taux.objects.filter(cabinet=request.user.cabinet).order_by('-date_ajouter').first()
+    if not t:
+        messages.error(request, "Aucun taux de change n'est défini pour ce cabinet.")
+        return redirect('dossier_details', dossier_id=dossier_id)
 
-    # Récupération du taux basé sur le type + secteur
-    tarif = TarifHoraire.objects.filter(
-        type_dossier=dossier_instance.type_affaire,
-        secteur=dossier_instance.secteur_foncier
-    ).first()
-
-    taux_fc = dossier_instance.taux_enreg if tarif else 0  
+    taux_fc = float(t.cout)
+    
 
     # Toutes les activités du dossier
     activites = TarifActivite.objects.filter(tarif=dossier_instance.tarif_reference)
+
+    total_dollars = 0.0
+    total_fc = 0.0
 
     for act in activites:
         key = f"prix_dollars_{act.id}"
@@ -581,6 +611,10 @@ def enregistrer_prix_forfaitaire(request, dossier_id):
                 prix_dollar = 0
 
             prix_fc = prix_dollar * float(taux_fc)
+
+            # Ajouter au total
+            total_dollars += prix_dollar
+            total_fc += prix_fc
 
             # Enregistrement dans ReductionTarifForfaitaire
             reduction, created = ReductionTarifForfaitaire.objects.get_or_create(
@@ -594,9 +628,11 @@ def enregistrer_prix_forfaitaire(request, dossier_id):
                 reduction.prix_reduit_fc = prix_fc
                 reduction.save()
 
-    # Marquer que tous les prix ont été définis
+    # Mettre à jour les montants totaux du dossier
+    dossier_instance.montant_dollars_enreg = total_dollars
+    dossier_instance.montant_fc_enreg = total_fc
+    dossier_instance.taux_enreg = taux_fc
     dossier_instance.forfait_defini = True
-    
     dossier_instance.save()
 
     messages.success(request, "Les prix forfaitaires ont été enregistrés avec succès.")
@@ -604,5 +640,399 @@ def enregistrer_prix_forfaitaire(request, dossier_id):
 
 
 
+@login_required(login_url='Connexion')
+def extrait_compte_preview(request, dossier_id):
+    doss = get_object_or_404(dossier, pk=dossier_id, cabinet=request.user.cabinet)
+
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    devise = request.GET.get("devise", "USD")
+
+    paiements = doss.paiements.all()
+
+    # Filtrage correct des dates : inclure toute la journée de date_fin
+    if date_debut and date_fin:
+        date_debut_obj = datetime.strptime(date_debut, "%Y-%m-%d")
+        date_fin_obj = datetime.strptime(date_fin, "%Y-%m-%d")
+
+        # Ajouter 1 jour à la date de fin pour inclure TOUTE la journée
+        date_fin_plus_un = date_fin_obj + timedelta(days=1)
+
+        paiements = paiements.filter(
+            date_paiement__gte=date_debut_obj,
+            date_paiement__lt=date_fin_plus_un
+        )
+
+    # Calcul des totaux selon la devise
+    if devise == "USD":
+        total_paye = paiements.aggregate(Sum("montant_payer_dollars"))["montant_payer_dollars__sum"] or 0
+        reste_a_payer = doss.montant_dollars_enreg - total_paye
+    else:
+        total_paye = paiements.aggregate(Sum("montant_payer_fc"))["montant_payer_fc__sum"] or 0
+        reste_a_payer = doss.montant_fc_enreg - total_paye
+
+    context = {
+        "dossier": doss,
+        "paiements": paiements.order_by('date_paiement'),
+        "date_debut": date_debut,
+        "date_fin": date_fin,
+        "devise": devise,
+        "total_paye": total_paye,
+        "reste_a_payer": reste_a_payer,
+    }
+
+    return render(request, "admin_template/extrait_preview.html", context)
 
 
+@login_required(login_url='Connexion')
+def extrait_compte_date_form(request, dossier_id):
+    return render(request, "admin_template/extrait_compte_date_form.html", {"dossier_id": dossier_id})
+
+
+
+@login_required(login_url='Connexion')
+def imprimer_paiements(request, dossier_id):
+    today = datetime.now().strftime("%d/%m/%Y")
+    
+    # Récupérer le dossier avec relations
+    doss = get_object_or_404(
+        dossier.objects.select_related(
+            'client', 'type_affaire', 'secteur_foncier', 'tarif_reference', 'cabinet'
+        ).prefetch_related('paiements', 'pieces_dossier', 'avocatdossier_set__avocat'),
+        pk=dossier_id,
+        cabinet=request.user.cabinet
+    )
+
+    # Paramètres GET
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    devise = request.GET.get("devise", "USD").upper()  # Devise par défaut USD
+
+    # Paiements filtrés
+    paiements = doss.paiements.all().order_by("date_paiement")
+    if date_debut and date_fin:
+        date_fin_obj = datetime.strptime(date_fin, '%Y-%m-%d').date() + timedelta(days=1)
+        paiements = paiements.filter(date_paiement__gte=date_debut, date_paiement__lt=date_fin_obj)
+
+    # Logo du cabinet
+    logo_url = ""
+    if doss.cabinet.logo:
+        with doss.cabinet.logo.open("rb") as f:
+            logo_base64 = base64.b64encode(f.read()).decode()
+        logo_url = f"data:image/png;base64,{logo_base64}"
+
+    # Activités et réductions
+    reductions_dict = {r.activite_id: r for r in ReductionTarifForfaitaire.objects.filter(dossier=doss)}
+    activites = TarifActivite.objects.filter(tarif=doss.tarif_reference).select_related('activite') if doss.tarif_reference else []
+    tarif_horaire = TarifHoraire.objects.filter(type_dossier=doss.type_affaire, secteur=doss.secteur_foncier).first()
+    taux_fc = float(doss.taux_enreg or 2800.0)
+
+    total_dollars = 0.0
+    total_fc = 0.0
+    activites_list = []
+    forfait_defini = doss.mode_honoraire == "Forfait" and doss.forfait_defini
+
+    for act in activites:
+        prix_dollars_base = float(act.prix_dollars or 0)
+        prix_fc_calcule = prix_dollars_base * taux_fc
+
+        prix_affiche_dollars = prix_dollars_base
+        prix_affiche_fc = prix_fc_calcule
+
+        if forfait_defini:
+            reduction = reductions_dict.get(act.id)
+            if reduction:
+                prix_affiche_dollars = float(reduction.prix_reduit_dollars or prix_dollars_base)
+                prix_affiche_fc = float(reduction.prix_reduit_fc or prix_fc_calcule)
+
+        total_dollars += prix_affiche_dollars
+        total_fc += prix_affiche_fc
+
+        activites_list.append({
+            "nom": act.activite.nom_activite if act.activite else "",
+            "prix_affiche": prix_affiche_dollars if devise == "USD" else prix_affiche_fc
+        })
+
+    # Calcul total payé et reste
+    if devise == "USD":
+        total_paye = float(paiements.aggregate(Sum("montant_payer_dollars"))["montant_payer_dollars__sum"] or 0)
+        dernier_paiement = paiements.last()
+        reste = float(dernier_paiement.montant_reste_dollars) if dernier_paiement else 0
+    else:
+        total_paye = float(paiements.aggregate(Sum("montant_payer_fc"))["montant_payer_fc__sum"] or 0)
+        dernier_paiement = paiements.last()
+        reste = float(dernier_paiement.montant_reste_fc) if dernier_paiement else 0
+
+    taux_du_jour = float(tarif_horaire.taux_jour) if tarif_horaire else 0.0
+
+   
+
+    # Préparer données pour jsreport
+    dossier_data = {
+        "numero_reference_dossier": doss.numero_reference_dossier,
+        "type_affaire": doss.type_affaire.nom_type if doss.type_affaire else "",
+        "secteur_foncier": doss.secteur_foncier.nom if doss.secteur_foncier else "",
+        "juridiction": doss.juridiction.nom if doss.juridiction else "",
+        "date_ouverture": doss.date_ouverture.strftime("%d/%m/%Y") if doss.date_ouverture else "",
+        "total_a_payer": float(doss.montant_dollars_enreg if devise == "USD" else doss.montant_fc_enreg),
+        "reste_total_a_payer": reste,
+        "total_deja_paye": total_paye,
+        "reference": doss.reference or "-",
+        "num_facture":doss.reference,
+
+        "client": {
+            "nom": doss.client.nom,
+            "prenom": doss.client.prenom,
+            "telephone": doss.client.telephone,
+            "email": doss.client.email,
+            "adresse": f"{doss.client.adresse.numero}, {doss.client.adresse.avenue}, {doss.client.adresse.quartier}, {doss.client.adresse.ville}" if doss.client.adresse else "",
+            "representant_legal": doss.client.representant_legal if doss.client.representant_legal != "Aucune" else ""
+        },
+        "cabinet": {
+            "nom": doss.cabinet.nom,
+            "logo": logo_url,
+            "telephone": doss.cabinet.telephone,
+            "telephone_secondaire": doss.cabinet.telephone_secondaire,
+            "email": doss.cabinet.email,
+            "site_web": doss.cabinet.site_web,
+            "adresse": f"{doss.cabinet.adresse.numero}, {doss.cabinet.adresse.avenue}, {doss.cabinet.adresse.quartier}, {doss.cabinet.adresse.ville}" if doss.cabinet.adresse else ""
+        }
+    }
+    
+
+     # Préparer paiements avec montant et reste selon devise
+    paiements_data = []
+    for p in paiements:
+        if devise == "USD":
+            montant = float(p.montant_payer_dollars)
+            reste_p = float(p.montant_reste_dollars)
+        else:
+            montant = float(p.montant_payer_fc)
+            reste_p = float(p.montant_reste_fc)
+
+        paiements_data.append({
+            "date_paiement": p.date_paiement.strftime("%d/%m/%Y"),
+            "type_paiement": p.type_paiement,
+            "montant": montant,
+            "reste": reste_p,
+            "montant_total":dossier_data,
+            "personne_qui_paie": p.personne_qui_paie or "Client",
+           
+            "notes": p.notes or "-",
+        })
+
+
+    context = {
+        "dossier": dossier_data,
+        "today": today,
+        "paiements": paiements_data,
+        "activites": activites_list,
+        "total_dollars": total_dollars,
+        "total_fc": total_fc,
+        "editable": doss.mode_honoraire == "Forfait" and not doss.forfait_defini,
+        "forfait_defini": forfait_defini,
+        "taux_fc": taux_fc,
+        "devise": devise,
+    }
+
+    # Background
+    bg_path = os.path.join(settings.BASE_DIR, "static", "images", "facture_bg.png")
+    with open(bg_path, "rb") as f:
+        background_base64 = base64.b64encode(f.read()).decode()
+    context["background_url"] = f"data:image/png;base64,{background_base64}"
+
+    # Appel jsreport via le service centralisé
+    from utils.jsreport_service import jsreport_service
+    
+    filename = f"extrait_compte_{doss.numero_reference_dossier}.pdf"
+    return jsreport_service.generate_pdf_response(
+        template_name="Extrait_de_compte_client",
+        data=context,
+        filename=filename
+    )
+
+
+@login_required(login_url='Connexion')
+def print_facture(request, dossier_id):
+    today = datetime.now().strftime("%d/%m/%Y")
+    # 1️⃣ Chargement du dossier
+    dossier_instance = get_object_or_404(
+        dossier.objects.select_related('client', 'type_affaire', 'secteur_foncier', 'tarif_reference', 'cabinet'),
+        pk=dossier_id,
+        cabinet=request.user.cabinet
+    )
+
+    paiements = dossier_instance.paiements.all().order_by('-date_paiement')
+
+    # 2️⃣ Préparations des réductions et activités
+    reductions_pour_dossier = ReductionTarifForfaitaire.objects.filter(dossier=dossier_instance).select_related('activite')
+    reductions_dict = {r.activite_id: r for r in reductions_pour_dossier}
+
+    activites = TarifActivite.objects.filter(tarif=dossier_instance.tarif_reference).select_related('activite') if dossier_instance.tarif_reference else TarifActivite.objects.none()
+
+    # 3️⃣ Taux FC
+    tarif_horaire = TarifHoraire.objects.filter(
+        type_dossier=dossier_instance.type_affaire,
+        secteur=dossier_instance.secteur_foncier
+    ).first()
+
+    taux_fc = Decimal(dossier_instance.taux_enreg) if tarif_horaire and dossier_instance.taux_enreg else Decimal("0.0")
+
+    # 4️⃣ Récupération de la devise choisie
+    devise = request.GET.get("devise", "usd").upper()  # Par défaut USD
+    utiliser_fc = devise == "FC"
+
+    # 5️⃣ Calculs activités et totaux
+    total_usd = Decimal("0")
+    total_fc = Decimal("0")
+    forfait_defini = dossier_instance.mode_honoraire == "Forfait" and dossier_instance.forfait_defini
+    activites_json = []
+
+    activites_json = []
+
+    if forfait_defini:
+    # Si forfait défini, une seule activité "Tous"
+     total_usd_forfait = Decimal("0")
+     total_fc_forfait = Decimal("0")
+
+    # Vérifier si réduction forfaitaire existe
+     reduction = reductions_dict.get(activites.first().id) if activites.exists() else None
+
+
+     if reduction:
+        total_usd_forfait = dossier_instance.montant_dollars_enreg or Decimal("0")
+        total_fc_forfait = dossier_instance.montant_fc_enreg or Decimal("0")
+     else:
+        # Si pas de réduction, total = somme de toutes activités
+        for act in activites:
+            total_usd_forfait += act.prix_dollars or Decimal("0")
+            total_fc_forfait += (act.prix_dollars or Decimal("0")) * taux_fc
+
+     total_usd += total_usd_forfait
+     total_fc += total_fc_forfait
+
+     activites_json.append({
+        "id": 0,  # ou None si tu veux
+        "nom": "Tous",
+        "prix": f"{total_fc_forfait:,.2f}" if utiliser_fc else f"{total_usd_forfait:.2f}"
+    })
+
+    else:
+    # Sinon, boucle normale sur toutes les activités
+     for act in activites:
+        base_usd = act.prix_dollars or Decimal("0")
+        base_fc = base_usd * taux_fc
+
+        prix_usd = base_usd
+        prix_fc = base_fc
+
+        reduction = reductions_dict.get(act.id)
+        if reduction:
+            prix_usd = reduction.prix_reduit_dollars or base_usd
+            prix_fc = reduction.prix_reduit_fc or base_fc
+
+        total_usd += prix_usd
+        total_fc += prix_fc
+
+        activites_json.append({
+            "id": act.id,
+            "nom": act.activite.nom_activite,
+            "prix": f"{prix_fc:,.2f}" if utiliser_fc else f"{prix_usd:.2f}"
+        })
+
+
+    # 6️⃣ Paiements et reste
+    montant_deja_paye_usd = paiements.aggregate(Sum("montant_payer_dollars"))["montant_payer_dollars__sum"] or 0
+    montant_deja_paye_fc = paiements.aggregate(Sum("montant_payer_fc"))["montant_payer_fc__sum"] or 0
+
+    reste_usd = total_usd - Decimal(montant_deja_paye_usd)
+    reste_fc = total_fc - Decimal(montant_deja_paye_fc)
+    
+    # 6️⃣ Paiements et reste
+    #tva_montant = total_ht * TVA
+    #total_ttc = total_ht + tva_montant
+
+    # 7️⃣ Construction JSON pour JSReport
+    data_jsreport = {
+        "cabinet": {
+            "nom": dossier_instance.cabinet.nom,
+            "adresse":f"{dossier_instance.cabinet.adresse.numero},{dossier_instance.cabinet.adresse.avenue}, {dossier_instance.cabinet.adresse.quartier}, {dossier_instance.cabinet.adresse.commune}-{dossier_instance.cabinet.adresse.ville}" if dossier_instance.cabinet.adresse else "",
+            "telephone": dossier_instance.cabinet.telephone,
+            "email": dossier_instance.cabinet.email,
+            "logo": dossier_instance.cabinet.logo.url if dossier_instance.cabinet.logo else "",
+            "site_web":dossier_instance.cabinet.site_web,
+        },
+        "client": {
+            "nom": dossier_instance.client.nom,
+            "prenom": dossier_instance.client.prenom,
+            "telephone": dossier_instance.client.telephone,
+            "email": dossier_instance.client.email,
+             "adresse":f"{dossier_instance.client.adresse.numero},{dossier_instance.client.adresse.avenue},    {dossier_instance.client.adresse.quartier}, {dossier_instance.client.adresse.commune}-{dossier_instance.client.adresse.ville}" if dossier_instance.client.adresse else "",        },
+        "dossier": {
+            "id": dossier_instance.id,
+            "reference": dossier_instance.numero_reference_dossier,
+            "type_affaire": dossier_instance.type_affaire.nom_type,
+            "secteur": dossier_instance.secteur_foncier.nom,
+            "date_creation": dossier_instance.date_ouverture.strftime("%d/%m/%Y"),
+            "mode_honoraire": dossier_instance.mode_honoraire,
+            "num_facture":dossier_instance.reference,
+        },
+        "activites": activites_json,
+        "paiements": [
+            {
+                "date": p.date_paiement.strftime("%d/%m/%Y"),
+                "montant": f"{p.montant_payer_fc:,.2f}" if utiliser_fc else f"{p.montant_payer_dollars:.2f}"
+            }
+            for p in paiements
+        ],
+        "totaux": {
+            "total": f"{total_fc:,.2f}" if utiliser_fc else f"{total_usd:.2f}",
+            "deja_paye": f"{montant_deja_paye_fc:,.2f}" if utiliser_fc else f"{montant_deja_paye_usd:.2f}",
+            "reste": f"{reste_fc:,.2f}" if utiliser_fc else f"{reste_usd:.2f}",
+            "taux_fc": f"{taux_fc:.0f}",
+            "devise": "FC" if utiliser_fc else "USD"
+        },
+        "today":today,
+        "devise":devise,
+    }
+
+    # 8️⃣ Envoi à JSReport via le service centralisé
+    from utils.jsreport_service import jsreport_service
+    
+    filename = f"facture_{dossier_instance.numero_reference_dossier}_{paiement_instance.id}.pdf"
+    response = jsreport_service.generate_pdf_response(
+        template_name="Facture_dossier",
+        data=data_jsreport,
+        filename=filename
+    )
+    response["Content-Disposition"] = "inline; filename=facture_dossier.pdf"
+    return response
+
+
+
+@login_required(login_url='Connexion')
+def cloturer_dossier(request, dossier_id):
+    # Récupérer le dossier
+    dossier_instance = get_object_or_404(dossier, pk=dossier_id, cabinet=request.user.cabinet)
+
+    if request.method == "POST":
+        observation = request.POST.get('observation_cloture', '').strip()
+        resultat = request.POST.get('resultat_dossier', '').strip()  # Gagné / Perdu / N/A
+
+        if not observation:
+            messages.error(request, "Veuillez entrer votre observation avant de clôturer le dossier.")
+            return redirect('detail_dossier', dossier_id=dossier_id)
+
+        # Mise à jour du dossier
+        dossier_instance.statut_dossier = 'Clôturé'
+        dossier_instance.date_cloture = timezone.now()
+        dossier_instance.observation = observation
+        dossier_instance.score = resultat if resultat else 'N/A'
+        dossier_instance.save()
+
+        messages.success(request, f"Dossier [{dossier_instance.numero_reference_dossier}] clôturé avec succès.")
+        return redirect('dossier_details', dossier_id=dossier_id)
+
+    # Si GET ou autre, redirection vers la page du dossier
+    messages.error(request, "Action invalide pour la clôture du dossier.")
+    return redirect('dossier_details', dossier_id=dossier_id)

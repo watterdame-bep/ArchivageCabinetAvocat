@@ -55,57 +55,96 @@
 
 								</div>
 							</div>
-							<div class="mt-40">
-								<h4 class="fw-600 mb-5">
-									{% if dossier.client %}
-									<a href="{% url 'client_details' client_id=dossier.client.id %}">
-										{{ dossier.client.nom }} {{ dossier.client.prenom }}
-									</a>
-									{% else %}
-									<span>Client non associé</span>
-									{% endif %}
-								</h4>
-								<h5>Dossier: {{ dossier.titre }}</h5>
-								<h5 class="fw-500 mb-5">#ref: {{ dossier.numero_reference_dossier }}</h5>
-								<p><i class="fa fa-clock-o"></i> {{dossier.date_ouverture|date:"d F Y à H:i"}}</p>
+							<div class="mt-4">
+    <!-- Client -->
+    <h4 class="fw-600 mb-2">
+        {% if dossier.client %}
+            <a href="{% url 'client_details' client_id=dossier.client.id %}">
+                {{ dossier.client.nom }} {{ dossier.client.prenom }}
+            </a>
+        {% else %}
+            <span>Client non associé</span>
+        {% endif %}
+    </h4>
+
+    <!-- Dossier et statut -->
+    <h5 class="d-flex align-items-center mb-2">
+        <span class="me-2">Dossier: {{ dossier.titre }}</span>
+
+        {% if dossier.statut_dossier == 'Clôturé' %}
+            <span class="badge bg-primary text-white rounded-pill px-2 py-1">
+                {{ dossier.statut_dossier }}
+            </span>
+        {% elif dossier.statut_dossier == 'Ouvert' %}
+            <span class="badge bg-success text-white rounded-pill px-2 py-1">
+                {{ dossier.statut_dossier }}
+            </span>
+        {% elif dossier.statut_dossier == 'En Cours' %}
+            <span class="badge bg-warning text-dark rounded-pill px-2 py-1">
+                {{ dossier.statut_dossier }}
+            </span>
+        {% elif dossier.statut_dossier == 'Suspendu' %}
+            <span class="badge bg-secondary text-white rounded-pill px-2 py-1">
+                {{ dossier.statut_dossier }}
+            </span>
+        {% else %}
+            <span class="badge bg-light text-dark rounded-pill px-2 py-1">
+                {{ dossier.statut_dossier }}
+            </span>
+        {% endif %}
+    </h5>
+
+    <!-- Référence et date -->
+    <h5 class="fw-500 mb-2">#ref: {{ dossier.numero_reference_dossier }}</h5>
+    <p><i class="fa fa-clock-o me-1"></i> {{ dossier.date_ouverture|date:"d F Y à H:i" }}</p>
+</div>
+
+						</div>
+					</div>
+					<div class="py-2 px-3" style="background:white; border-bottom:1px solid #dee2e6;">
+						<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+							<!-- 🔹 Boutons à gauche -->
+							<div class="d-flex gap-2 flex-wrap">
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionHonoraire" title="Mode d'honoraire">
+									<i class="fa fa-balance-scale text-success fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionPaiements" title="Paiements">
+									<i class="fa fa-credit-card text-primary fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionPieces" title="Pièces jointes">
+									<i class="fa fa-file-text text-warning fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionAvocats" title="Avocats">
+									<i class="fa fa-gavel text-info fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionDeclaration" title="Déclaration">
+									<i class="fa fa-clipboard text-secondary fa-2x"></i>
+								</button>
 							</div>
-						</div>
-					</div>
-					<!-- ==== BOUTONS FIXES EN HAUT (avec icônes compatibles LawFirm) ==== -->
-					<div class=" py-2 px-3" style="background:white; border-bottom:1px solid #dee2e6;">
-						<div class="d-flex gap-2 flex-wrap justify-content-start">
 
-							<button class="btn btn-light btn-sm border d-flex align-items-center"
-								data-bs-toggle="collapse" data-bs-target="#sectionHonoraire" title="Mode d'honoraire">
-								<i class="fa fa-balance-scale text-success me-1 fa-2x"></i>
-								<span class="visually-hidden">Mode d’honoraire</span>
+							<!-- 🔴 Bouton clôturer à droite -->
+							 {% if  dossier.statut_dossier != 'Clôturé' %}
+							<button class="btn btn-danger btn-sm d-flex align-items-center gap-2 px-3"
+								data-bs-toggle="modal" data-bs-target="#modalClotureDossier">
+								<i class="fa fa-lock"></i>
+								<strong>Clôturer le dossier</strong>
 							</button>
-
-							<button class="btn btn-light btn-sm border d-flex align-items-center"
-								data-bs-toggle="collapse" data-bs-target="#sectionPaiements" title="Paiements">
-								<i class="fa fa-credit-card text-primary me-1 fa-2x"></i>
-								<span class="visually-hidden">Paiements</span>
-							</button>
-
-							<button class="btn btn-light btn-sm border d-flex align-items-center"
-								data-bs-toggle="collapse" data-bs-target="#sectionPieces" title="Pièces jointes">
-								<i class="fa fa-file-text text-warning me-1 fa-2x"></i>
-								<span class="visually-hidden">Pièces jointes</span>
-							</button>
-
-							<button class="btn btn-light btn-sm border d-flex align-items-center"
-								data-bs-toggle="collapse" data-bs-target="#sectionAvocats" title="Avocats">
-								<i class="fa fa-gavel text-info me-1 fa-2x"></i>
-								<span class="visually-hidden">Avocats</span>
-							</button>
-							<button class="btn btn-light btn-sm border d-flex align-items-center"
-								data-bs-toggle="collapse" data-bs-target="#sectionDeclaration" title="Declaration">
-								<i class="fa fa-clipboard text-grey me-1 fa-2x"></i>
-								<span class="visually-hidden">Déclaration</span>
-							</button>
+							{%endif%}
 
 						</div>
 					</div>
+
 
 					<style>
 						.sticky-top .btn:hover {
@@ -250,9 +289,11 @@
 							<div class="box-header d-flex justify-content-between align-items-center">
 								<h4 class="box-title">💸 Gestion des Paiements</h4>
 								<!-- Bouton Imprimer placé à droite -->
-								<button class="btn btn-primary" onclick="printPaymentHistory()">
+								<button class="btn btn-primary"
+									onclick="window.open('{% url 'extrait_compte_date_form' dossier.id %}');">
 									<i class="fa fa-print me-1"></i> Imprimer extrait de compte client
 								</button>
+
 							</div>
 							<div class="box-body">
 
@@ -265,12 +306,15 @@
 												<i class="fa fa-history me-1"></i> Historique des Paiements
 											</a>
 										</li>
+
+										{% if  dossier.statut_dossier != 'Clôturé' %}
 										<li class="nav-item">
 											<a class="nav-link" data-bs-toggle="tab" href="#tab_enregistrer_paiement"
 												role="tab">
 												<i class="fa fa-plus-circle me-1"></i> Ajouter un Paiement
 											</a>
 										</li>
+										{% endif %}
 									</ul>
 								</div>
 
@@ -286,7 +330,8 @@
 
 												{% for p in paiements %}
 												<li class="payment-row" onclick="showPaymentDetails(this)"
-													data-id="{{ p.id }}" data-montant="{{ p.montant }} {{ p.devise }}"
+													data-id="{{ p.id }}"
+													data-montant="{{ p.montant_payer_dollars }} {{ p.devise }}"
 													data-method="{{ p.type_paiement }}"
 													data-date="{{ p.date_paiement|date:'d M Y' }}"
 													data-client="{{ p.client.nom }}"
@@ -318,7 +363,11 @@
 														<div class="d-flex justify-content-between">
 															<div>
 																<h4 class="fw-bold mb-1">
-																	{{ p.montant }} {{ p.devise }}
+																	{%if p.devise == 'USD' %}
+																	{{ p.montant_payer_dollars }} {{ p.devise }}
+																	{%else%}
+																	{{ p.montant_payer_fc }} {{ p.devise }}
+																	{%endif%}
 																	<!-- Badge statut circulaire -->
 																	<span
 																		class="badge bg-success rounded-circle px-2 py-1">
@@ -358,9 +407,7 @@
 
 
 
-									<!-- ==========================
-                         FORMULAIRE AJOUT PAIEMENT
-                    ==============================-->
+									<!-- ==========================FORMULAIRE AJOUT PAIEMENT==============================-->
 									<div class="tab-pane" id="tab_enregistrer_paiement" role="tabpanel">
 										<div class="box-body">
 											<p class="mb-4 text-muted">Utilisez ce formulaire pour enregistrer un
@@ -437,6 +484,35 @@
 										</div>
 									</div>
 
+								</div>
+
+								<!-- Modal pour imprimer la facture -->
+								<div class="modal fade" id="modalImpression" tabindex="-1"
+									aria-labelledby="modalImpressionLabel" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-centered">
+										<div class="modal-content">
+											<div class="modal-header bg-primary text-white">
+												<h5 class="modal-title" id="modalImpressionLabel text-white"><i
+														class="fa fa-check-circle"></i> Paiement enregistré</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal"
+													aria-label="Fermer"></button>
+											</div>
+											<div class="modal-body text-center py-4">
+												<p class="fs-5">Le paiement a été enregistré avec succès.</p>
+												<p class="text-muted">Voulez-vous imprimer la facture maintenant ?</p>
+											</div>
+											<div class="modal-footer justify-content-center">
+												<button type="button" class="btn btn-light border"
+													data-bs-dismiss="modal">Plus tard</button>
+												<button type="button" class="btn btn-primary" id="btnImprimerUSD">
+													<i class="fa fa-print"></i> Imprimer en USD
+												</button>
+												<button type="button" class="btn btn-success" id="btnImprimerCDF">
+													<i class="fa fa-print"></i> Imprimer en CDF
+												</button>
+											</div>
+										</div>
+									</div>
 								</div>
 
 							</div>
@@ -704,8 +780,8 @@
 										<li class="list-group-item list-group-item-action declaration-item"
 											data-contenu="{{ decl.contenu|escapejs }}"
 											data-date="{{ decl.date_ajout|date:'d/m/Y à H:i' }}"
-											data-auteur="{{ decl.auteur.nom|default:'Administrateur' }}"
-											data-id="{{ decl.id }}" style="cursor:pointer;">
+											data-auteur="{{ decl.auteur }}" data-id="{{ decl.id }}"
+											style="cursor:pointer;">
 
 											<div class="d-flex justify-content-between">
 												<div style="max-width: 80%;">
@@ -799,6 +875,11 @@
 									<textarea name="contenu" class="form-control" rows="6"
 										placeholder="Saisissez la nouvelle déclaration..." required></textarea>
 								</div>
+								<div class="modal-body">
+									<input name="auteur" class="form-control" rows="6"
+										placeholder="Nom de l'auteur"></input>
+									<small>Si vous ne renseignez pas ce champs, l'auteur sera le client</small>
+								</div>
 
 								<div class="modal-footer">
 									<button type="submit" class="btn btn-dark">Enregistrer</button>
@@ -861,10 +942,6 @@
 					</div>
 				</div>
 				<!-- ==================== FIN SECTION DECLARATION ==================== -->
-
-
-
-
 				<div class="row">
 
 
@@ -931,299 +1008,8 @@
 
 					<!-- ========================== VERSION FACTURE POUR IMPRESSION ========================== -->
 
-					<div class="invoice-wrapper">
-    <div id="invoice-print-version" style="display:none;" class="invoice-container">
-        
-        <div class="invoice-header-custom">
-
-            <div class="header-left" ">
-                {% if dossier.cabinet.logo %}
-                <img src="{{ dossier.cabinet.logo.url }}" alt="Logo Cabinet"
-                    class="cabinet-logo-img">
-                {% endif %}
-
-                <h2 class="brand-name">{{ dossier.cabinet.nom }}</h2>
-
-                <div class="contact-info-custom" style="font-size: 15px;">
-                    <div class="contact-line">📞<strong>{{ dossier.cabinet.telephone }}/
-                        {{dossier.cabinet.telephone_secondaire }}</strong></div>
-                    <div class="contact-line"><strong>📧{{ dossier.cabinet.email }}</strong> </div>
-                    <div class="contact-line">🌐 <strong>{{ dossier.cabinet.site_web }}</strong></div>
-                    <div class="contact-line">📍 <strong>{{dossier.cabinet.adresse.numero}},{{dossier.cabinet.adresse.avenue.capitalize }}/{{dossier.cabinet.adresse.quartier.capitalize }}/
-                        {{dossier.cabinet.adresse.ville.capitalize }}</strong></div>
-                </div>
-            </div>
-
-            <div class="header-right">
-                <h1 class="invoice-title-main">Paiements</h1>
-
-                <div class="invoice-details-block">
-                    Date :{{ now|date:"d / m / Y" }}<br>
-                    Dossier : <strong>{{ dossier.numero_reference_dossier }}</strong><br>
-                    Type d’affaire :<strong>{{ dossier.type_affaire.nom_type }}</strong> <br>
-                    Secteur:<strong>{{dossier.secteur_foncier.nom}}</strong><br>
-                    Juridiction : <strong>{{ dossier.juridiction }}</strong><br>
-                    Date ouverture :<strong>{{ dossier.date_ouverture|date:"d/m/Y" }}</strong><br>
-                </div>
-
-                <div class="bill-to-block">
-                    <h4>Client:</h4>
-                    <div class="client-info">
-                        <strong>{{ dossier.client.nom }} {{ dossier.client.prenom}}</strong><br>
-                        📞 <strong>{{ dossier.client.telephone }}</strong><br>
-                        📧 <strong>{{ dossier.client.email }}</strong><br>
-                        📍<strong>{{ dossier.client.adresse.numero}},{{ dossier.client.adresse.avenue}}</strong>
-                        <strong>{{dossier.client.adresse.quartier}}</strong><br>
-                        {% if dossier.client.representant_legal != "Aucune"%}
-                        Représentant légal : {{ dossier.client.representant_legal }}<br>
-                        {%endif%}
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <h3 class="payment-title">💳 Extrait de comptes client</h3>
-
-        <table class="payment-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Méthode</th>
-                    <th>Montant $</th>
-                    <th>Payé par</th>
-                    <th>Référence</th>
-                    <th>Notes</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in paiements %}
-                <tr>
-                    <td>{{p.date_paiement|date:"d/m/Y" }}</td>
-                    <td>{{ p.type_paiement}}</td>
-                    <td>{{ p.montant }}</td>
-                    <td>{{p.personne_qui_paie|default:"Client" }}</td>
-                    <td>{{p.reference_transaction|default:"-" }}</td>
-                    <td>{{p.notes|default:"-" }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="7">Aucun paiement enregistré.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-
-        <div style="clear:both;"></div>
-        <!--<div class="totals-wrapper">
-            <table class="totals-table">
-                <tr>
-                    <td class="total-label">SOUS-TOTAL (HT)</td>
-                    <td>{{ montant_deja_paye|default:"0.00" }} $</td>
-                </tr>
-                <tr>
-                    <td class="total-label">TVA (20%)</td>
-                    <td>0.00 $</td>
-                </tr>
-                <tr class="total-line">
-                    <td class="total-label">TOTAL PAYÉ (USD)</td>
-                    <td>{{ montant_deja_paye|default:"0.00" }} $</td>
-                </tr>
-                <tr>
-                    <td class="total-label">RESTE À PAYER (USD)</td>
-                    <td>{{ reste_a_payer|default:"0.00" }} $</td>
-                </tr>
-
-                <tr class="grand-total-line">
-                    <td class="total-label">TOTAL à payer </td>
-                    <td>{{ total_dollars|default:"0" }} $</td>
-                </tr>
-            </table>
-        </div>-->
-
-        
-		<div class="invoice-footer-area">
-            <div style="display: flex; justify-content: space-between; font-size: 10px; margin-top: 20px;">
-
-                <div class="signature-block">
-					 <hr>
-                    <p style="margin-bottom: 20px;">MERCI POUR VOTRE AFFAIRE</p>
-                   
-                </div>
-            </div>
-
-			</div> <div class="print-page-footer"> </div>
-        </div>
-
-    </div>
-    </div>
-
-
-
-
-					<!-- ========================== FIN VERSION FACTURE ========================== -->
-
-
-					<iframe id="print-frame" style="display:none;"></iframe>
-
-
-<script>
-    function printPaymentHistory() {
-        const facture = document.getElementById('invoice-print-version');
-        const iframe = document.getElementById('print-frame');
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-
-        // Vérification de base
-        if (!facture || !iframe) {
-            console.error("Erreur: Les conteneurs d'impression (#invoice-print-version ou #print-frame) sont manquants.");
-            alert("Une erreur s'est produite lors de la préparation de l'impression.");
-            return;
-        }
-
-        doc.open();
-        doc.write(`
-<html>
-<head>
-    <title>Facture Paiements</title>
-    <style>
-        /* ======================================================= */
-        /* RÈGLES CRUCIALES POUR L'IMPRESSION (Paged Media CSS) */
-        /* ======================================================= */
-        
-        @page {
-            size: A4;
-            /* Marges: Haut Droite Bas Gauche. Important d'avoir une marge basse pour le pied de page */
-            margin: 10mm 20mm 25mm 20mm; 
-            
-            /* Configuration du pied de page (nécessite print-page-footer dans le HTML source) */
-            @bottom-left {
-                content: element(footer-page); /* Capture l'élément .print-page-footer */
-                width: 100%;
-            }
-            
-            @bottom-right {
-                /* Pagination */
-                content: "Page " counter(page) " sur " counter(pages);
-                font-size: 10px;
-                color: #555;
-                vertical-align: top;
-                padding-top: 5px;
-            }
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            /* Force l'impression des couleurs et des images de fond */
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            position: relative;
-            font-family: 'Roboto', sans-serif;
-            
-            /* Image de fond gérée par le body 
-            background: url('/static/images/facture_bg.png') no-repeat center top;
-            background-size: cover;S
-            background-attachment: fixed; */
-        }
-
-        /* Capture le div du pied de page pour le positionner via @page */
-        .print-page-footer {
-            position: running(footer-page); 
-            display: none; /* Cache l'élément dans le flux normal */
-        }
-        
-        /* Supprimez le body::before car il est redondant et moins fiable */
-        body::before { display: none; }
-        
-        /* Styles du pied de page capturé */
-        .footer-content {
-            font-size: 10px;
-            color: #555;
-            text-align: left;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .footer-separator {
-            border: none;
-            border-top: 1px solid #ccc;
-            margin: 0 0 5px 0;
-        }
-
-        /* Le contenu doit respecter les marges */
-        .invoice-wrapper {
-            padding: 0; /* Les marges sont définies par @page */
-            box-sizing: border-box;
-        }
-        
-        /* Styles de Design (Conservés) */
-        :root {
-            --blue-dark: #064085;
-            --blue-light-bg: #EAF4FF;
-            --text-dark: #333;
-            --text-light: white;
-        }
-
-        .invoice-header-custom {
-            display: flex; justify-content: space-between; padding: 30px 0; margin-bottom: 20px; color: var(--text-dark);
-        }
-        .header-left { width: 45%; text-align: left; }
-        .cabinet-logo-img { width: 60px; height: auto; object-fit: contain; margin-bottom: 5px; }
-        .brand-name { font-size: 20px; color: var(--blue-dark); margin: 0; padding: 0; }
-        .contact-info-custom { font-size: 10px; line-height: 1.5; margin-top: 10px; }
-        .header-right { width: 45%; text-align: right; margin-top: -10px; }
-        .invoice-title-main {
-            background-color: var(--blue-dark); color: var(--text-light); font-size: 36px;
-            padding: 10px 15px; margin: 0 0 15px 0; display: inline-block;
-            font-family: 'Arial Black', sans-serif; letter-spacing: 2px;
-        }
-        .bill-to-block { margin-top: 20px; font-size: 15px; padding: 10px 15px; }
-        .bill-to-block h4 { margin: 0 0 5px 0; color: var(--blue-dark); font-size: 14px; }
-
-        .payment-table { width: 100%; border-collapse: collapse; font-size: 17px; margin-bottom: 20px; background: white; }
-        .payment-table thead tr { background: var(--blue-dark) !important; color: var(--text-light); }
-        .payment-table th { padding: 10px 8px; text-align: left; font-weight: bold; border: none; border-bottom: 1px solid white; }
-        .payment-table td { border: none; padding: 8px; color: var(--text-dark); }
-        .payment-table tbody tr:nth-child(odd) { background: white; }
-        .payment-table tbody tr:nth-child(even) { background: var(--blue-light-bg); }
-        
-        .totals-wrapper { display: flex; justify-content: flex-end; margin-top: 30px; margin-bottom: 50px; }
-        .totals-table { width: 350px; border-collapse: collapse; font-size: 13px; }
-        .totals-table tr td { padding: 5px 15px; border: none; text-align: right; background-color: white; }
-        .totals-table .grand-total-line td { background-color: var(--blue-dark); color: var(--text-light); font-size: 16px; padding: 10px 15px; }
-        
-        /* Assurez-vous que l'ancien pied de page ne chevauche pas la marge du bas */
-        .invoice-footer-area {
-            margin-top: 50px;
-            margin-bottom: 25mm; 
-            text-align: center;
-        }
-        
-    </style>
-</head>
-<body>
-    <div class="invoice-wrapper">
-        ${facture.innerHTML}
-    </div>
-</body>
-</html>
-        `);
-        doc.close();
-
-        // Lancement de l'impression après un court délai
-        setTimeout(() => {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-        }, 500); 
-    }
-
-</script>
 
 				</div>
-
-
-
-
-
 			</div>
 
 	</div>
@@ -1364,10 +1150,6 @@
 	</div>
 </div>
 
-
-
-
-
 <!-- Modal Ajouter Pièces -->
 <div class="modal fade" id="modalAjouterPieces" tabindex="-1">
 	<div class="modal-dialog modal-xl modal-dialog-centered">
@@ -1417,7 +1199,6 @@
 		</div>
 	</div>
 </div>
-
 
 <script>
 	document.addEventListener('DOMContentLoaded', function () {
@@ -1542,9 +1323,6 @@
 </script>
 
 
-
-
-
 <!-- Bouton pour ouvrir le modal -->
 <button type="button" class="btn btn-info btn-sm mb-3" data-bs-toggle="modal"
 	data-bs-target="#modalActivites{{ dossier.id }}">
@@ -1654,72 +1432,103 @@
 
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-				<button type="button" class="btn btn-success"
-					onclick="printModalActivites('modalActivites{{ dossier.id }}', 'usd')">
+				<button type="button" class="btn btn-success" onclick="printModalActivites({{ dossier.id }}, 'usd')">
 					<i class="fa fa-print"></i> Imprimer en $
 				</button>
 
-				<button type="button" class="btn btn-success"
-					onclick="printModalActivites('modalActivites{{ dossier.id }}', 'fc')">
+				<button type="button" class="btn btn-success" onclick="printModalActivites({{ dossier.id }}, 'fc')">
 					<i class="fa fa-print"></i> Imprimer en Fc
 				</button>
 
 
 			</div>
+
 		</div>
 	</div>
 </div>
 
+<!-- Modal pour cloturer le dossier -->
+<div class="modal fade" id="modalClotureDossier" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+
+            <!-- En-tête -->
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="fa fa-gavel me-2"></i> Clôture définitive du dossier
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Corps -->
+            <form method="post" action="{% url 'cloturer_dossier' dossier.id %}">
+                        {% csrf_token %}
+                <div class="modal-body">
+
+                    <!-- Alerte -->
+                    <div class="alert alert-danger d-flex align-items-center">
+                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        <div>
+                            Cette action est <strong>irréversible</strong>. 
+                            Une fois le dossier clôturé, il ne pourra plus être modifié.
+                        </div>
+                    </div>
+
+                    <!-- Observation obligatoire -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Observation / Dernier mot de l’avocat</label>
+                        <textarea name="observation_cloture" rows="5"
+                            class="form-control"
+                            placeholder="Ex : Dossier clôturé après exécution complète des obligations légales..."
+                            required></textarea>
+                    </div>
+
+                    <!-- Résultat du dossier (optionnel) -->
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Résultat du dossier (optionnel)</label>
+                        <select name="resultat_dossier" class="form-select">
+                            <option value="" selected>-- Sélectionner --</option>
+                            <option value="gagne">Gagné</option>
+                            <option value="perdu">Perdu</option>
+                            <option value="n/a">Non défini / N/A</option>
+                        </select>
+                    </div>
+
+                    <!-- Date et avocat (optionnel pour info) -->
+                    <div class="mb-2 text-muted">
+                        <small>Cette clôture sera enregistrée avec votre nom et la date actuelle.</small>
+                    </div>
+
+                </div>
+
+                <!-- Pied -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
+                        <i class="fa fa-check-circle"></i>
+                        Confirmer la clôture
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+
+
 <!--Le script pour imprimer la liste des activités-->
 <script>
-	function printModalActivites(modalId, mode) {
-		// Cloner le contenu du modal
-		const modalContent = document.querySelector(`#${modalId} .modal-body`).cloneNode(true);
+	function printModalActivites(dossierId, devise) {
+		const url = `/dossiers/${dossierId}/print/?devise=${devise}`;
 
-		// Supprimer la colonne non désirée selon le mode
-		if (mode === "usd") {
-			// Impression en dollars → supprimer FC (colonne 4)
-			modalContent.querySelectorAll(
-				"table thead tr th:nth-child(4), table tbody tr td:nth-child(4), table tfoot tr td:nth-child(4)"
-			).forEach(el => el.remove());
-		} else if (mode === "fc") {
-			// Impression en FC → supprimer USD (colonne 3)
-			modalContent.querySelectorAll(
-				"table thead tr th:nth-child(3), table tbody tr td:nth-child(3), table tfoot tr td:nth-child(3)"
-			).forEach(el => el.remove());
-		}
-
-		// Chemin CSS Bootstrap
-		const bootstrapCSS = "{% static 'css/bootstrap.min.css' %}";
-
-		// Ouvrir la fenêtre d'impression
-		const w = window.open('', '', 'height=800,width=1200');
-
-		w.document.write(`
-        <html>
-        <head>
-            <title>Impression activités</title>
-            <link rel="stylesheet" href="${bootstrapCSS}">
-            <style>
-                body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                th, td { border: 1px solid #ddd; padding: 8px; }
-                th { background-color: #f8f9fa; text-align: center; }
-                td.text-end { text-align: right; }
-            </style>
-        </head>
-        <body>
-            ${modalContent.innerHTML}
-        </body>
-        </html>
-    `);
-
-		w.document.close();
-		w.focus();
-		w.print();
-		w.close();
+		window.open(url, "_blank");
 	}
 </script>
+
 
 
 
@@ -2478,5 +2287,66 @@
 	});
 
 </script>
+
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const formPaiement = document.querySelector('#tab_enregistrer_paiement form');
+
+		formPaiement.addEventListener('submit', function (e) {
+			e.preventDefault(); // Empêche le submit classique
+
+			const formData = new FormData(formPaiement);
+
+			fetch(formPaiement.action, {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest',
+					'X-CSRFToken': formPaiement.querySelector('[name=csrfmiddlewaretoken]').value
+				},
+				body: formData
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						// Afficher la modal
+						const modalElement = document.getElementById('modalImpression');
+						const modal = new bootstrap.Modal(modalElement);
+						modal.show();
+
+						// Fonction pour ouvrir la facture avec la devise choisie
+						function imprimerFacture(devise) {
+							const url = data.url_facture + '?devise=' + devise;
+							window.open(url, '_blank');
+							modal.hide();
+						}
+
+						// Boutons USD et CDF
+						const btnUSD = document.getElementById('btnImprimerUSD');
+						const btnCDF = document.getElementById('btnImprimerCDF');
+
+						btnUSD.addEventListener('click', function () {
+							imprimerFacture('USD');
+						});
+
+						btnCDF.addEventListener('click', function () {
+							imprimerFacture('CDF');
+						});
+
+						// Réinitialiser le formulaire après succès
+						formPaiement.reset();
+					} else {
+						alert('Erreur lors de l\'enregistrement du paiement.');
+					}
+				})
+				.catch(error => {
+					console.error('Erreur:', error);
+					alert('Une erreur est survenue. Veuillez réessayer.');
+				});
+		});
+	});
+</script>
+
+
 
 {%endblock%}

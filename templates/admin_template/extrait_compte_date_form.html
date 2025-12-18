@@ -1,0 +1,97 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+    /* Wrapper contenu principal pour LawFirm template */
+    .content-wrapper {
+        margin-left: 260px;
+        /* Largeur du sidebar */
+        transition: margin-left 0.3s ease;
+    }
+
+
+    /* Sur mobile : padding horizontal pour ne pas coller les bords */
+    @media (max-width: 767px) {
+        .content-wrapper {
+            padding-left: 15px;
+            padding-right: 15px;
+        }
+    }
+</style>
+<div class="content-wrapper"
+    style="min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding-top: 100px;">
+    <!-- padding-top: hauteur approximative du header pour ne pas être caché -->
+    <div class="container" style="max-width: 600px;">
+        <div class="card shadow-lg border-0 rounded-4">
+            <div class="card-header bg-primary text-white rounded-top-4 py-3">
+                <h4 class="mb-0"><i class="fa fa-calendar"></i> Sélectionner une période</h4>
+            </div>
+
+            <div class="card-body p-4">
+                <form id="dateForm" method="GET" action="{% url 'extrait_compte_pdf' dossier_id %}">
+                    <label class="form-label">Date début</label>
+                    <input type="date" name="date_debut" id="date_debut" class="form-control form-control-lg mb-3"
+                        required>
+
+                    <label class="form-label">Date fin</label>
+                    <input type="date" name="date_fin" id="date_fin" class="form-control form-control-lg mb-3" required>
+
+                    <label class="form-label">Devise</label>
+                    <select name="devise" class="form-control form-control-lg mb-3" required>
+                        <option value="USD">Dollar ($)</option>
+                        <option value="FC">Franc Congolais (FC)</option>
+                    </select>
+
+                    <div class="d-flex justify-content-between mt-4 flex-wrap gap-2">
+                        <button type="button" id="previewBtn" class="btn btn-secondary btn-lg flex-grow-1">
+                            <i class="fa fa-eye"></i> Aperçu
+                        </button>
+
+                        <button type="submit" class="btn btn-primary btn-lg flex-grow-1">
+                            <i class="fa fa-file-pdf"></i> Générer PDF
+                        </button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    // Empêcher dates futures
+    const today = new Date().toISOString().split("T")[0];
+    const dateDebutInput = document.getElementById("date_debut");
+    const dateFinInput = document.getElementById("date_fin");
+
+    dateDebutInput.setAttribute("max", today);
+    dateFinInput.setAttribute("max", today);
+
+    // Aperçu HTML
+    document.getElementById("previewBtn").onclick = function () {
+        const debut = dateDebutInput.value;
+        const fin = dateFinInput.value;
+        const devise = document.querySelector("select[name='devise']").value; // récupère la devise actuelle
+
+        if (!debut || !fin) {
+            alert("Veuillez sélectionner une période.");
+            return;
+        }
+
+        // Vérification supplémentaire : empêcher de dépasser aujourd'hui
+        if (debut > today || fin > today) {
+            alert("La date ne peut pas être supérieure à aujourd'hui.");
+            return;
+        }
+
+        // Redirection vers l'aperçu avec les bons paramètres
+        window.location.href = `{% url 'extrait_compte_preview' dossier_id %}?date_debut=${debut}&date_fin=${fin}&devise=${devise}`;
+    };
+</script>
+
+
+
+{% endblock %}

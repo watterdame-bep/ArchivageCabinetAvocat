@@ -1,0 +1,112 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+<div class=" content-wrapper container my-5"
+    style="min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding-top: 100px;">
+    <div class="card shadow-lg border-0 rounded-4 mx-auto" style="max-width: 1500px;">
+        <div class="card-header bg-primary text-white rounded-top-4 py-3">
+            <h4 class="mb-0"><i class="fa fa-calendar"></i> Extrait de compte</h4>
+            <p class="mb-0">Période :
+                <strong>{{ date_debut }} → {{ date_fin }}</strong>
+            </p>
+        </div>
+        <div class="card-body p-3 p-md-4">
+
+            <!-- Informations client/dossier -->
+            <div class="row mb-4">
+                <div class="col-12 col-md-6 mb-3 mb-md-0">
+                    <h5>Dossier :</h5>
+                    <p><strong>{{ dossier.numero_reference_dossier }}</strong></p>
+                    <p>Type : {{ dossier.type_affaire.nom_type }}</p>
+                    <p>Secteur : {{ dossier.secteur_foncier.nom }}</p>
+                </div>
+                <div class="col-12 col-md-6">
+                    <h5>Client :</h5>
+                    <p>{{ dossier.client.nom }} {{ dossier.client.prenom }}</p>
+                    <p>📞 {{ dossier.client.telephone }}</p>
+                    <p>📧 {{ dossier.client.email }}</p>
+                </div>
+            </div>
+
+            <!-- Table des paiements -->
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Date</th>
+                            <th>Méthode</th>
+                            <th>Montant payé {% if devise == "USD" %}($){% else %}(FC){% endif %}</th>
+                            <th>Reste{% if devise == "USD" %}($){% else %}(FC){% endif %}</th>
+                            <th>Payé par</th>
+                            <th>Référence</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if paiements %}
+                        {% for p in paiements %}
+                        <tr>
+                            <td>{{ p.date_paiement|date:"d/m/Y" }}</td>
+                            <td>{{ p.type_paiement }}</td>
+
+                            {% if devise == "USD" %}
+                            <td>{{ p.montant_payer_dollars }}</td>
+                            <td>{{ p.montant_reste_dollars }}</td>
+                            {% else %}
+                            <td>{{ p.montant_payer_fc }}</td>
+                            <td>{{ p.montant_reste_fc }}</td>
+                            {% endif %}
+
+                            <td>{{ p.personne_qui_paie|default:dossier.client.nom }}</td>
+                            <td>{{ p.reference|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center">Aucun paiement enregistré sur cette période.</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Totaux -->
+            <div class="mt-3 d-flex flex-column flex-md-row justify-content-md-end gap-3 text-end">
+                {% if devise == "USD" %}
+                <div><strong>Total facturé :</strong> ${{ dossier.montant_dollars_enreg|floatformat:2 }}</div>
+                <div><strong>Total payé :</strong> ${{ total_paye|floatformat:2 }}</div>
+                <div><strong>Reste à payer :</strong> ${{ reste_a_payer|floatformat:2 }}</div>
+                {% else %}
+                <div><strong>Total facturé :</strong> FC{{ dossier.montant_fc_enreg|floatformat:2 }}</div>
+                <div><strong>Total payé :</strong> FC{{ total_paye|floatformat:2 }}</div>
+                <div><strong>Reste à payer :</strong> FC{{ reste_a_payer|floatformat:2 }}</div>
+                {% endif %}
+
+            </div>
+
+            <!-- Boutons -->
+            <div class="mt-4 d-flex flex-column flex-md-row justify-content-between gap-2">
+                <a href="{% url 'extrait_compte_date_form' dossier.id %}" class="btn btn-secondary w-100 w-md-auto">
+                    <i class="fa fa-arrow-left"></i> Retours
+                </a>
+                <a href="{% url 'extrait_compte_pdf' dossier.id %}?date_debut={{ date_debut }}&date_fin={{ date_fin }}&devise={{ devise }}"
+                    target="_blank" class="btn btn-primary w-100 w-md-auto">
+                    <i class="fa fa-file-pdf"></i> Générer PDF
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* S'assure que la carte est toujours visible même avec la sidebar */
+    @media (min-width: 992px) {
+        .container {
+            margin-left: 200px;
+            /* largeur sidebar si fixe */
+        }
+    }
+</style>
+{% endblock %}

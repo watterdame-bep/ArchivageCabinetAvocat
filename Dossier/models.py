@@ -144,6 +144,8 @@ class dossier (models.Model):
     montant_dollars_enreg = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     montant_fc_enreg = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     taux_enreg = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    reference = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    observation=models.TextField(verbose_name="Dernier mot de l'avocat", default='')
 
     
     class Meta:
@@ -175,7 +177,8 @@ class DeclarationDossier(models.Model):
     dossier = models.ForeignKey(dossier, on_delete=models.CASCADE,related_name="declarations",verbose_name="Dossier associé")
     contenu = models.TextField(verbose_name="Contenu de la Déclaration")
     date_ajout = models.DateTimeField(auto_now_add=True)
-    auteur = models.ForeignKey('Agent.agent',on_delete=models.SET_NULL,null=True,blank=True, verbose_name="Agent ayant ajouté la déclaration")
+    ecrit_par = models.ForeignKey('Agent.agent',on_delete=models.SET_NULL,null=True,blank=True, verbose_name="Agent ayant ajouté la déclaration")
+    auteur = models.CharField(max_length=100, null=False, default='')
 
     class Meta:
         ordering = ['-date_ajout']  # Les plus récentes en premier

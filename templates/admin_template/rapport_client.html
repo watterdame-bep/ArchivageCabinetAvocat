@@ -1,0 +1,389 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+
+<style>
+  .rapport-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+  }
+  
+  .rapport-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+  }
+  
+  .client-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .client-card:hover {
+    background-color: #f8f9fa;
+    border-color: #007bff;
+  }
+  
+  .client-card.selected {
+    background-color: #e7f3ff;
+    border-color: #007bff;
+    border-width: 2px;
+  }
+  
+  .rapport-preview {
+    min-height: 400px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .loading-spinner {
+    display: none;
+  }
+  
+  .loading-spinner.active {
+    display: flex;
+  }
+  
+  .rapport-type-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid #e0e0e0;
+  }
+  
+  .rapport-type-card:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+  }
+  
+  .rapport-type-card.selected {
+    border-color: #007bff;
+    background-color: #e7f3ff;
+  }
+</style>
+
+<div class="content-wrapper">
+  <div class="container-full">
+    <!-- En-tête -->
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <div class="me-auto">
+          <h3 class="page-title">📊 Rapport Client</h3>
+          <div class="d-inline-block align-items-center">
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                <li class="breadcrumb-item">Rapports</li>
+                <li class="breadcrumb-item active" aria-current="page">Rapport Client</li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+        <div class="text-end">
+          <button class="btn btn-primary" id="btnGenererRapport" disabled>
+            <i class="fa fa-file-pdf-o me-2"></i>Générer le Rapport
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <section class="content">
+      <div class="row">
+        <!-- Colonne gauche : Sélection -->
+        <div class="col-lg-4">
+          <!-- Statistiques -->
+          <div class="box rapport-card mb-3">
+            <div class="box-header with-border">
+              <h4 class="box-title">📈 Statistiques</h4>
+            </div>
+            <div class="box-body">
+              <div class="row text-center">
+                <div class="col-6 mb-3">
+                  <div class="p-3 bg-light rounded">
+                    <h2 class="mb-0 text-primary">{{ total_clients }}</h2>
+                    <small class="text-muted">Clients</small>
+                  </div>
+                </div>
+                <div class="col-6 mb-3">
+                  <div class="p-3 bg-light rounded">
+                    <h2 class="mb-0 text-success" id="rapportsGeneres">0</h2>
+                    <small class="text-muted">Rapports générés</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sélection du client -->
+          <div class="box rapport-card">
+            <div class="box-header with-border">
+              <h4 class="box-title">👤 Sélectionner un Client</h4>
+            </div>
+            <div class="box-body">
+              <!-- Barre de recherche -->
+              <div class="mb-3">
+                <input type="text" class="form-control" id="searchClient" placeholder="🔍 Rechercher un client...">
+              </div>
+
+              <!-- Liste des clients -->
+              <div id="clientsList" style="max-height: 400px; overflow-y: auto;">
+                {% if clients %}
+                  {% for c in clients %}
+                  <div class="client-card p-3 mb-2 border rounded" data-client-id="{{ c.id }}" data-client-nom="{{ c.nom }} {{ c.prenom }}">
+                    <div class="d-flex align-items-center">
+                      <div class="me-3">
+                        {% if c.photo %}
+                        <img src="{{ c.photo.url }}" alt="{{ c.nom }}" class="rounded-circle" width="40" height="40">
+                        {% else %}
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                          {{ c.nom|first }}{{ c.prenom|first }}
+                        </div>
+                        {% endif %}
+                      </div>
+                      <div class="flex-grow-1">
+                        <h6 class="mb-0">{{ c.nom }} {{ c.prenom }}</h6>
+                        <small class="text-muted">{{ c.email }}</small>
+                      </div>
+                      <div>
+                        <i class="fa fa-check-circle text-success" style="display: none;"></i>
+                      </div>
+                    </div>
+                  </div>
+                  {% endfor %}
+                {% else %}
+                  <div class="text-center text-muted py-5">
+                    <i class="fa fa-users fa-3x mb-3"></i>
+                    <p>Aucun client disponible</p>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Colonne droite : Configuration et Aperçu -->
+        <div class="col-lg-8">
+          <!-- Configuration du rapport -->
+          <div class="box rapport-card mb-3">
+            <div class="box-header with-border">
+              <h4 class="box-title">⚙️ Configuration du Rapport</h4>
+            </div>
+            <div class="box-body">
+              <div class="row">
+                <!-- Type de rapport -->
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Type de Rapport</label>
+                  <div class="row g-2">
+                    <div class="col-12">
+                      <div class="rapport-type-card p-3 rounded selected" data-type="complet">
+                        <div class="d-flex align-items-center">
+                          <i class="fa fa-file-text-o fa-2x text-primary me-3"></i>
+                          <div>
+                            <h6 class="mb-0">Rapport Complet</h6>
+                            <small class="text-muted">Toutes les informations</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="rapport-type-card p-3 rounded" data-type="resume">
+                        <div class="d-flex align-items-center">
+                          <i class="fa fa-list-alt fa-2x text-info me-3"></i>
+                          <div>
+                            <h6 class="mb-0">Résumé</h6>
+                            <small class="text-muted">Informations essentielles</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-12">
+                      <div class="rapport-type-card p-3 rounded" data-type="financier">
+                        <div class="d-flex align-items-center">
+                          <i class="fa fa-money fa-2x text-success me-3"></i>
+                          <div>
+                            <h6 class="mb-0">Rapport Financier</h6>
+                            <small class="text-muted">Aspects financiers uniquement</small>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Format et options -->
+                <div class="col-md-6 mb-3">
+                  <label class="form-label fw-bold">Format de Sortie</label>
+                  <select class="form-select mb-3" id="formatRapport">
+                    <option value="pdf" selected>📄 PDF</option>
+                    <option value="docx">📝 Word (DOCX)</option>
+                    <option value="xlsx">📊 Excel (XLSX)</option>
+                    <option value="html">🌐 HTML</option>
+                  </select>
+
+                  <label class="form-label fw-bold">Options</label>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="inclurePhotos" checked>
+                    <label class="form-check-label" for="inclurePhotos">
+                      Inclure les photos
+                    </label>
+                  </div>
+                  <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" id="inclureStatistiques" checked>
+                    <label class="form-check-label" for="inclureStatistiques">
+                      Inclure les statistiques
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="inclureLogo" checked>
+                    <label class="form-check-label" for="inclureLogo">
+                      Inclure le logo du cabinet
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Aperçu / Résultat -->
+          <div class="box rapport-card">
+            <div class="box-header with-border">
+              <h4 class="box-title">👁️ Aperçu</h4>
+            </div>
+            <div class="box-body">
+              <div id="rapportPreview" class="rapport-preview">
+                <div class="text-center text-muted">
+                  <i class="fa fa-file-pdf-o fa-5x mb-3"></i>
+                  <h5>Sélectionnez un client pour générer un rapport</h5>
+                  <p>Le rapport sera généré via JSReport</p>
+                </div>
+              </div>
+
+              <!-- Zone de chargement -->
+              <div class="loading-spinner text-center py-5">
+                <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                  <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p class="mt-3">Génération du rapport en cours...</p>
+              </div>
+
+              <!-- Zone de résultat -->
+              <div id="rapportResult" style="display: none;">
+                <div class="alert alert-success">
+                  <h5><i class="fa fa-check-circle me-2"></i>Rapport généré avec succès !</h5>
+                  <p class="mb-3">Le rapport pour <strong id="clientNomResult"></strong> a été généré.</p>
+                  <div class="d-flex gap-2">
+                    <a href="#" id="btnTelechargerRapport" class="btn btn-success" download>
+                      <i class="fa fa-download me-2"></i>Télécharger
+                    </a>
+                    <button class="btn btn-primary" id="btnVoirRapport">
+                      <i class="fa fa-eye me-2"></i>Visualiser
+                    </button>
+                    <button class="btn btn-secondary" id="btnNouveauRapport">
+                      <i class="fa fa-refresh me-2"></i>Nouveau Rapport
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+$(document).ready(function() {
+  let clientSelectionne = null;
+  let typeRapport = 'complet';
+  let rapportsGeneres = 0;
+
+  // Sélection d'un client
+  $('.client-card').on('click', function() {
+    $('.client-card').removeClass('selected');
+    $('.client-card .fa-check-circle').hide();
+    
+    $(this).addClass('selected');
+    $(this).find('.fa-check-circle').show();
+    
+    clientSelectionne = $(this).data('client-id');
+    $('#btnGenererRapport').prop('disabled', false);
+    
+    console.log('Client sélectionné:', clientSelectionne);
+  });
+
+  // Recherche de client
+  $('#searchClient').on('keyup', function() {
+    const searchTerm = $(this).val().toLowerCase();
+    
+    $('.client-card').each(function() {
+      const clientNom = $(this).data('client-nom').toLowerCase();
+      if (clientNom.includes(searchTerm)) {
+        $(this).show();
+      } else {
+        $(this).hide();
+      }
+    });
+  });
+
+  // Sélection du type de rapport
+  $('.rapport-type-card').on('click', function() {
+    $('.rapport-type-card').removeClass('selected');
+    $(this).addClass('selected');
+    typeRapport = $(this).data('type');
+    
+    console.log('Type de rapport:', typeRapport);
+  });
+
+  // Génération du rapport (impression directe comme les factures)
+  $('#btnGenererRapport').on('click', function() {
+    if (!clientSelectionne) {
+      alert('Veuillez sélectionner un client');
+      return;
+    }
+
+    // Construire l'URL d'impression directe
+    const typeRapport = $('.rapport-type-card.selected').data('type') || 'complet';
+    const urlImpression = `/rapport/client/imprimer/${clientSelectionne}/?type=${typeRapport}`;
+    
+    // Ouvrir le PDF dans un nouvel onglet (même approche que vos factures)
+    window.open(urlImpression, '_blank');
+    
+    // Incrémenter le compteur
+    rapportsGeneres++;
+    $('#rapportsGeneres').text(rapportsGeneres);
+    
+    // Notification
+    toastr.success('Rapport généré avec succès !', 'Succès');
+    
+    // Afficher le résultat
+    const clientNom = $('.client-card.selected').data('client-nom');
+    $('#clientNomResult').text(clientNom);
+    $('#btnTelechargerRapport').attr('href', urlImpression);
+    $('#btnVoirRapport').attr('onclick', `window.open('${urlImpression}', '_blank')`);
+    $('#rapportResult').show();
+    $('.rapport-preview').hide();
+  });
+
+  // Nouveau rapport
+  $('#btnNouveauRapport').on('click', function() {
+    $('#rapportResult').hide();
+    $('.rapport-preview').show();
+    $('.client-card').removeClass('selected');
+    $('.client-card .fa-check-circle').hide();
+    clientSelectionne = null;
+    $('#btnGenererRapport').prop('disabled', true);
+  });
+
+  // Visualiser le rapport
+  $('#btnVoirRapport').on('click', function() {
+    const rapportUrl = $('#btnTelechargerRapport').attr('href');
+    window.open(rapportUrl, '_blank');
+  });
+});
+</script>
+
+{% endblock %}

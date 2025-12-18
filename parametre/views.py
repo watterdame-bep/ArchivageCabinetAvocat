@@ -4,11 +4,12 @@ from django.contrib.auth.decorators import login_required
 from Adresse.models import commune,Ville
 from Dossier.models import SecteurFoncier, type_dossier,TarifHoraire,TarifActivite,TypePiece
 from Structure.models import Activite, Specialite
-from Structure.models import Cabinet,PosteAvocat,Juridiction
+from Structure.models import Cabinet,PosteAvocat,Juridiction, ServiceCabinet,Banque
 from Adresse.models import adresse
 from django.urls import reverse
 from decimal import Decimal, InvalidOperation
 from parametre.models import taux
+
 
 
 # -------------------- COMMUNE --------------------
@@ -445,8 +446,6 @@ def supprimer_specialite_ajax(request, id):
 
 
 
-
-
 # -------------------- --------------------------TARIFICATION ------------------------------------------------
 from decimal import Decimal, InvalidOperation
 
@@ -721,14 +720,87 @@ def modifier_poste_avocat_ajax(request, id):
     return JsonResponse({'success': False, 'message': "Méthode non autorisée."})
 
 
-
-
-
 @login_required
 def supprimer_poste_avocat_ajax(request, id):
     poste = get_object_or_404(PosteAvocat, id=id, cabinet=request.user.cabinet)
     poste.delete()
     return JsonResponse({'success': True, 'message': "Poste supprimé avec succès."})
+
+
+# ================= Service cabinet ====================
+
+@login_required
+def ajouter_service_cabinet_ajax(request):
+    if request.method == "POST":
+        nom_service = request.POST.get("nom_service")
+        #description = request.POST.get("description", "")
+        cabinet = request.user.cabinet
+
+        # Vérifier doublon pour le cabinet
+        if ServiceCabinet.objects.filter(nom_service__iexact=nom_service, cabinet=cabinet).exists():
+            return JsonResponse({'success': False, 'message': "Ce service existe déjà pour votre cabinet."})
+
+        service = ServiceCabinet.objects.create(
+            nom_service=nom_service,
+           # description=description,
+            cabinet=cabinet
+        )
+        return JsonResponse({
+            'success': True,
+            'message': "Service ajouté avec succès.",
+            'row_html': f"""
+                <tr id='service{service.id}'>
+                    <td>-</td>
+                    <td>{service.nom_service}</td>
+                    <td>{service.date_ajouter or ''}</td>
+                    <td class='text-center'>
+                        <button class='btn btn-sm btn-warning btn-edit-ajax' data-row='service{service.id}' data-msg='msgServiceCabinet' data-url='/service/{service.id}/modifier/'>
+                            <i class='mdi mdi-pencil'></i>
+                        </button>
+                        <button class='btn btn-sm btn-danger btn-delete-ajax' data-row='service{service.id}' data-url='/service/{service.id}/supprimer/'>
+                            <i class='mdi mdi-delete'></i>
+                        </button>
+                    </td>
+                </tr>
+            """
+        })
+    return JsonResponse({'success': False, 'message': "Requête invalide."})
+
+
+@login_required
+def modifier_service_cabinet_ajax(request, id):
+    service = get_object_or_404(ServiceCabinet, id=id, cabinet=request.user.cabinet)
+    if request.method == "POST":
+        nom_service = request.POST.get("nom_service")
+        service.nom_service= nom_service
+        service.save()
+        return JsonResponse({
+            'success': True,
+            'message': "Service modifié avec succès.",
+            'row_html': f"""
+                <tr id='poste{service.id}'>
+                    <td>-</td>
+                    <td>{service.nom_service}</td>
+                    <td>{service.date_ajouter.strftime("%d/%m/%Y %H:%M")}</td>                   
+                    <td class='text-center'>
+                        <button class='btn btn-sm btn-warning btn-edit-ajax' data-row='service{service.id}' data-msg='msgServiceCabinet' data-url='/service/{service.id}/modifier/'>
+                            <i class='mdi mdi-pencil'></i>
+                        </button>
+                        <button class='btn btn-sm btn-danger btn-delete-ajax' data-row='poste{service.id}' data-url='/service/{service.id}/supprimer/'>
+                            <i class='mdi mdi-delete'></i>
+                        </button>
+                    </td>
+                </tr>
+            """
+        })
+    return JsonResponse({'success': False, 'message': "Méthode non autorisée."})
+
+
+@login_required
+def supprimer_service_cabinet_ajax(request, id):
+    service = get_object_or_404(ServiceCabinet, id=id, cabinet=request.user.cabinet)
+    service.delete()
+    return JsonResponse({'success': True, 'message': "Service supprimé avec succès."})
 
 
 # ===================== VILLES ======================
@@ -1003,7 +1075,7 @@ def ajouter_taux_ajax(request):
          )
         # Construction de la ligne HTML
         row_html = f"""
-        <tr id='taux{new_taux.id}'>
+        <tr id='taux{new_taux.id}' style="background-color:green;">
             <td>{new_taux.id}</td>
             <td>{new_taux.cout}</td>
             <td>{new_taux.date_ajouter.strftime('%d/%m/%Y')}</td>
@@ -1030,3 +1102,49 @@ def supprimer_taux_ajax(request, id):
     taux_obj.delete()
 
     return JsonResponse({'success': True, 'id': id})
+
+
+
+def ajouter_banque_ajax(request):
+    if request.method == "POST":
+        nom = request.POST.get("nom_banque")
+        numero = request.POST.get("numero_compte")
+
+        if Banque.objects.filter(nom_banque__iexact=nom, cabinet=request.user.cabinet).exists():
+            return JsonResponse({"status": "error", "message": "Cette banque existe déjà."})
+
+        b = Banque.objects.create(
+            nom_banque=nom,
+            numero_compte=numero
+        )
+
+        return JsonResponse({
+            "success": True,
+            "row_html": f"""
+                <tr id='banque{b.id}'  style="background-color:green;">
+                    <td>NEW</td>
+                    <td>{b.nom_banque}</td>
+                    <td>{b.numero_compte}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-danger btn-delete-ajax"
+                                data-row="banque{b.id}"
+                                data-url="/banque/supprimer/{b.id}/">
+                            <i class="mdi mdi-delete"></i>
+                        </button>
+                    </td>
+                </tr>
+            """,
+             "message": "Taux ajouté avec succès."
+        })
+   
+
+
+def supprimer_banque_ajax(request, id):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "message": "Méthode non autorisée."}, status=400)
+
+    banque = get_object_or_404(Banque, id=id)
+    banque.delete()
+
+    return JsonResponse({'success': True, 'id': id})
+

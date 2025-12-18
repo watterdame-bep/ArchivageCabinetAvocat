@@ -1,0 +1,34 @@
+# Dockerfile pour JSReport sur Railway
+FROM jsreport/jsreport:4.7.0
+
+# Variables d'environnement pour Railway
+ENV NODE_ENV=production
+ENV httpPort=$PORT
+
+# Configuration de sécurité pour la production
+ENV trustUserCode=false
+ENV allowLocalFilesAccess=false
+
+# Configuration d'authentification
+ENV authentication_enabled=true
+ENV extensions_authentication_cookieSession_secret=$JSREPORT_COOKIE_SECRET
+
+# Configuration de performance
+ENV workers_numberOfWorkers=2
+ENV workers_timeout=60000
+
+# Configuration de stockage
+ENV store=fs
+ENV blobStorage=fs
+
+# Créer les répertoires nécessaires
+RUN mkdir -p /app/data /app/logs
+
+# Copier les templates pré-configurés (si vous en avez)
+# COPY ./jsreport-templates/ /app/data/
+
+# Exposer le port (Railway utilisera la variable $PORT)
+EXPOSE $PORT
+
+# Commande de démarrage
+CMD ["node", "server.js"]
