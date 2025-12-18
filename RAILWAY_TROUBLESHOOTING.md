@@ -71,6 +71,8 @@ cmds = [
 4. Ajouter les variables nécessaires
 
 ### ❌ **Problème : Base de Données Non Connectée**
+**Erreur:** `Connection refused` ou `Can't connect to MySQL server`
+
 **Solution :**
 1. Ajouter un service MySQL dans Railway
 2. Railway configurera automatiquement les variables :
@@ -79,6 +81,20 @@ cmds = [
    - `MYSQL_DATABASE`
    - `MYSQL_USER`
    - `MYSQL_PASSWORD`
+
+**⚠️ IMPORTANT:** La nouvelle configuration `settings_production.py` **refuse** de démarrer si ces variables manquent (pas de fallback vers localhost).
+
+**Diagnostic:**
+```bash
+# Utiliser le script de diagnostic
+python diagnose_railway.py
+
+# Vérifier les variables MySQL
+railway variables
+
+# Voir le guide détaillé
+# Consulter RAILWAY_DATABASE_FIX.md
+```
 
 ### ❌ **Problème : Fichiers Statiques**
 **Solution :**

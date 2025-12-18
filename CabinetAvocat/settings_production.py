@@ -18,14 +18,50 @@ pymysql.install_as_MySQLdb()
 
 # Configuration de la base de données pour Railway
 # Railway fournira automatiquement les variables d'environnement pour MySQL
+# IMPORTANT: Validation stricte - pas de fallback vers localhost
+
+# Récupérer les variables MySQL de Railway
+mysql_host = os.environ.get('MYSQL_HOST')
+mysql_database = os.environ.get('MYSQL_DATABASE')
+mysql_user = os.environ.get('MYSQL_USER')
+mysql_password = os.environ.get('MYSQL_PASSWORD')
+mysql_port = os.environ.get('MYSQL_PORT', '3306')
+
+# Validation stricte des variables critiques
+if not mysql_host:
+    raise ValueError(
+        "❌ MYSQL_HOST manquante! "
+        "Assurez-vous d'avoir ajouté un service MySQL dans Railway Dashboard."
+    )
+
+if not mysql_database:
+    raise ValueError(
+        "❌ MYSQL_DATABASE manquante! "
+        "Railway doit auto-générer cette variable avec le service MySQL."
+    )
+
+if not mysql_user:
+    raise ValueError(
+        "❌ MYSQL_USER manquante! "
+        "Railway doit auto-générer cette variable avec le service MySQL."
+    )
+
+if not mysql_password:
+    raise ValueError(
+        "❌ MYSQL_PASSWORD manquante! "
+        "Railway doit auto-générer cette variable avec le service MySQL."
+    )
+
+print(f"🔗 Connexion MySQL Railway: {mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}")
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DATABASE', 'railway'),
-        'USER': os.environ.get('MYSQL_USER', 'root'),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
-        'HOST': os.environ.get('MYSQL_HOST', 'localhost'),
-        'PORT': os.environ.get('MYSQL_PORT', '3306'),
+        'NAME': mysql_database,
+        'USER': mysql_user,
+        'PASSWORD': mysql_password,
+        'HOST': mysql_host,
+        'PORT': mysql_port,
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
