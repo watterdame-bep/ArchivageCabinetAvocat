@@ -20,39 +20,25 @@ pymysql.install_as_MySQLdb()
 # Railway fournira automatiquement les variables d'environnement pour MySQL
 # IMPORTANT: Validation stricte - pas de fallback vers localhost
 
-# Récupérer les variables MySQL de Railway
-mysql_host = os.environ.get('MYSQL_HOST')
-mysql_database = os.environ.get('MYSQL_DATABASE')
-mysql_user = os.environ.get('MYSQL_USER')
-mysql_password = os.environ.get('MYSQL_PASSWORD')
-mysql_port = os.environ.get('MYSQL_PORT', '3306')
-
-# Validation stricte des variables critiques
-if not mysql_host:
+# Récupérer les variables MySQL de Railway avec validation stricte
+# ⚠️ Utilisation de os.environ[] au lieu de get() pour forcer l'erreur si manquante
+try:
+    mysql_host = os.environ['MYSQL_HOST']
+    mysql_database = os.environ['MYSQL_DATABASE'] 
+    mysql_user = os.environ['MYSQL_USER']
+    mysql_password = os.environ['MYSQL_PASSWORD']
+    mysql_port = os.environ['MYSQL_PORT']
+    
+    print(f"🔗 Connexion MySQL Railway: {mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}")
+    
+except KeyError as e:
+    missing_var = str(e).strip("'")
     raise ValueError(
-        "❌ MYSQL_HOST manquante! "
-        "Assurez-vous d'avoir ajouté un service MySQL dans Railway Dashboard."
+        f"❌ Variable MySQL manquante: {missing_var}\n"
+        f"💡 Solution: Ajouter un service MySQL dans Railway Dashboard\n"
+        f"   Railway Dashboard → Add Service → Database → MySQL\n"
+        f"   Attendre 2-3 minutes que Railway génère les variables automatiquement"
     )
-
-if not mysql_database:
-    raise ValueError(
-        "❌ MYSQL_DATABASE manquante! "
-        "Railway doit auto-générer cette variable avec le service MySQL."
-    )
-
-if not mysql_user:
-    raise ValueError(
-        "❌ MYSQL_USER manquante! "
-        "Railway doit auto-générer cette variable avec le service MySQL."
-    )
-
-if not mysql_password:
-    raise ValueError(
-        "❌ MYSQL_PASSWORD manquante! "
-        "Railway doit auto-générer cette variable avec le service MySQL."
-    )
-
-print(f"🔗 Connexion MySQL Railway: {mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}")
 
 DATABASES = {
     'default': {

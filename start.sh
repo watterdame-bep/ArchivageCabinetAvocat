@@ -1,17 +1,26 @@
 #!/bin/bash
 
-# Script de démarrage pour Railway
+# Script de démarrage pour Railway avec attente MySQL
 
 echo "🚀 Démarrage de l'application Cabinet Avocat..."
 
 # Vérifier les variables d'environnement critiques
 if [ -z "$MYSQL_HOST" ]; then
-    echo "⚠️  Variable MYSQL_HOST non définie"
+    echo "❌ Variable MYSQL_HOST non définie - Service MySQL manquant!"
+    exit 1
 fi
 
-# Attendre que la base de données soit prête
-echo "⏳ Attente de la base de données..."
-python manage.py check --database default
+# Attendre que MySQL soit prêt avec script dédié
+echo "⏳ Vérification de MySQL Railway..."
+python wait_for_mysql.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Impossible de se connecter à MySQL Railway"
+    echo "🔧 Vérifiez que le service MySQL est ajouté dans Railway Dashboard"
+    exit 1
+fi
+
+echo "✅ MySQL Railway prêt!"
 
 # Exécuter les migrations
 echo "📊 Exécution des migrations..."
