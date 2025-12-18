@@ -22,23 +22,25 @@ pymysql.install_as_MySQLdb()
 
 # Récupérer les variables MySQL de Railway avec validation stricte
 # ⚠️ Utilisation de os.environ[] au lieu de get() pour forcer l'erreur si manquante
+# settings_production.py
+
+DEBUG = False
+pymysql.install_as_MySQLdb()
+
 try:
-    mysql_host = os.environ['MYSQL_HOST']
-    mysql_database = os.environ['MYSQL_DATABASE'] 
-    mysql_user = os.environ['MYSQL_USER']
-    mysql_password = os.environ['MYSQL_PASSWORD']
-    mysql_port = os.environ['MYSQL_PORT']
-    
-    print(f"🔗 Connexion MySQL Railway: {mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}")
-    
-except KeyError as e:
-    missing_var = str(e).strip("'")
-    raise ValueError(
-        f"❌ Variable MySQL manquante: {missing_var}\n"
-        f"💡 Solution: Ajouter un service MySQL dans Railway Dashboard\n"
-        f"   Railway Dashboard → Add Service → Database → MySQL\n"
-        f"   Attendre 2-3 minutes que Railway génère les variables automatiquement"
+    mysql_host = os.environ['MYSQLHOST']
+    mysql_database = os.environ['MYSQLDATABASE']
+    mysql_user = os.environ['MYSQLUSER']
+    mysql_password = os.environ['MYSQLPASSWORD']
+    mysql_port = os.environ.get('MYSQLPORT', '3306')
+
+    print(
+        f"🔗 Connexion MySQL Railway: "
+        f"{mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}"
     )
+
+except KeyError as e:
+    raise RuntimeError(f"❌ Variable Railway MySQL manquante: {e}")
 
 DATABASES = {
     'default': {
@@ -49,14 +51,16 @@ DATABASES = {
         'HOST': mysql_host,
         'PORT': mysql_port,
         'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
-            'connect_timeout': 60,
-            'read_timeout': 60,
-            'write_timeout': 60,
+            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
         },
     }
 }
+
+
+
+
+
 
 # Configuration des fichiers statiques pour la production
 STATIC_URL = '/static/'
