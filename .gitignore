@@ -107,6 +107,8 @@ dmypy.json
 media/
 staticfiles/
 static/
+*.log
+db.sqlite3
 
 # IDE
 .vscode/

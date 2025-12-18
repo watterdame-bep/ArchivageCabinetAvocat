@@ -12,12 +12,16 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+# Configuration PyMySQL pour Railway
+import pymysql
+pymysql.install_as_MySQLdb()
+
 # Configuration de la base de données pour Railway
 # Railway fournira automatiquement les variables d'environnement pour MySQL
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DATABASE', 'cabinet_avocat'),
+        'NAME': os.environ.get('MYSQL_DATABASE', 'railway'),
         'USER': os.environ.get('MYSQL_USER', 'root'),
         'PASSWORD': os.environ.get('MYSQL_PASSWORD', ''),
         'HOST': os.environ.get('MYSQL_HOST', 'localhost'),
@@ -25,6 +29,9 @@ DATABASES = {
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'charset': 'utf8mb4',
+            'connect_timeout': 60,
+            'read_timeout': 60,
+            'write_timeout': 60,
         },
     }
 }
