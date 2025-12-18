@@ -17,50 +17,47 @@ import pymysql
 pymysql.install_as_MySQLdb()
 
 # Configuration de la base de données pour Railway
-# Railway fournira automatiquement les variables d'environnement pour MySQL
-# IMPORTANT: Validation stricte - pas de fallback vers localhost
+# ⚠️ IMPORTANT: Railway injecte les variables MySQL AU RUNTIME (pas au build)
+# Pendant le build (collectstatic), les variables MySQL ne sont pas encore disponibles
 
-# Récupérer les variables MySQL de Railway avec validation stricte
-# ⚠️ Utilisation de os.environ[] au lieu de get() pour forcer l'erreur si manquante
-# settings_production.py
+# Variables MySQL Railway (noms utilisés par Railway)
+MYSQLHOST = os.environ.get('MYSQLHOST')
+MYSQLDATABASE = os.environ.get('MYSQLDATABASE') 
+MYSQLUSER = os.environ.get('MYSQLUSER')
+MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
+MYSQLPORT = os.environ.get('MYSQLPORT', '3306')
 
-DEBUG = False
-pymysql.install_as_MySQLdb()
-
-try:
-    mysql_host = os.environ['MYSQLHOST']
-    mysql_database = os.environ['MYSQLDATABASE']
-    mysql_user = os.environ['MYSQLUSER']
-    mysql_password = os.environ['MYSQLPASSWORD']
-    mysql_port = os.environ.get('MYSQLPORT', '3306')
-
-    print(
-        f"🔗 Connexion MySQL Railway: "
-        f"{mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}"
-    )
-
-except KeyError as e:
-    raise RuntimeError(f"❌ Variable Railway MySQL manquante: {e}")
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': mysql_database,
-        'USER': mysql_user,
-        'PASSWORD': mysql_password,
-        'HOST': mysql_host,
-        'PORT': mysql_port,
-        'OPTIONS': {
-            'charset': 'utf8mb4',
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-        },
+if MYSQLHOST:
+    # 🚀 Production (Railway runtime) - MySQL disponible
+    print(f"🔗 Connexion MySQL Railway: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.mysql',
+            'NAME': MYSQLDATABASE,
+            'USER': MYSQLUSER,
+            'PASSWORD': MYSQLPASSWORD,
+            'HOST': MYSQLHOST,
+            'PORT': MYSQLPORT,
+            'OPTIONS': {
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+                'charset': 'utf8mb4',
+                'connect_timeout': 60,
+                'read_timeout': 60,
+                'write_timeout': 60,
+            },
+        }
     }
-}
-
-
-
-
-
+else:
+    # 🔧 Build phase (collectstatic) - MySQL pas encore disponible
+    print("⚠️ Variables MySQL non disponibles - Utilisation SQLite pour le build")
+    
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'build_temp.sqlite3',  # DB temporaire pour le build
+        }
+    }
 
 # Configuration des fichiers statiques pour la production
 STATIC_URL = '/static/'
