@@ -31,7 +31,11 @@ def wait_for_mysql(max_attempts=30, delay=5):
         'port': int(os.environ['MYSQLPORT']),
         'connect_timeout': 10,
         'read_timeout': 10,
-        'write_timeout': 10
+        'write_timeout': 10,
+        # Configuration pour MySQL 9.x Railway
+        'auth_plugin_map': {
+            'caching_sha2_password': 'mysql_native_password'
+        }
     }
     
     print(f"🔗 Tentative de connexion: {config['user']}@{config['host']}:{config['port']}/{config['database']}")

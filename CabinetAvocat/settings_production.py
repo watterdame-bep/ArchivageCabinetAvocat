@@ -45,6 +45,8 @@ if MYSQLHOST:
                 'connect_timeout': 60,
                 'read_timeout': 60,
                 'write_timeout': 60,
+                # Configuration pour MySQL 9.x Railway
+                'auth_plugin': 'mysql_native_password',  # Fallback auth plus compatible
             },
         }
     }
