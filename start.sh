@@ -22,8 +22,17 @@ fi
 
 echo "✅ MySQL Railway connecté!"
 
-# 3️⃣ Vérifier la connexion à la base de données existante
-echo "🔍 Step 1: Vérification de la base de données existante..."
+# 3️⃣ Test détaillé de la connexion MySQL
+echo "🔍 Step 1: Test détaillé de la connexion MySQL..."
+python test_mysql_connection.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Test de connexion MySQL échoué"
+    exit 1
+fi
+
+# 4️⃣ Vérifier la connexion à la base de données existante via Django
+echo "🔍 Step 2: Vérification de la base de données existante via Django..."
 python manage.py shell -c "
 from Authentification.models import CompteUtilisateur
 try:
@@ -37,15 +46,15 @@ except Exception as e:
     exit(1)
 "
 
-# 4️⃣ Appliquer uniquement les nouvelles migrations (sans --run-syncdb)
-echo "🔧 Step 2: Application des nouvelles migrations seulement..."
+# 5️⃣ Appliquer uniquement les nouvelles migrations (sans --run-syncdb)
+echo "🔧 Step 3: Application des nouvelles migrations seulement..."
 python manage.py migrate --noinput
 
-# 5️⃣ Collecter les fichiers statiques
-echo "📦 Step 3: Collection des fichiers statiques..."
+# 6️⃣ Collecter les fichiers statiques
+echo "📦 Step 4: Collection des fichiers statiques..."
 python manage.py collectstatic --noinput
 
-echo "🚀 Step 4: Lancement du serveur Gunicorn..."
+echo "🚀 Step 5: Lancement du serveur Gunicorn..."
 echo "✅ Toutes les étapes terminées - Application prête!"
 
 # Démarrer l'application avec Gunicorn optimisé pour Railway

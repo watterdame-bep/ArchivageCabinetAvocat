@@ -31,9 +31,8 @@ def wait_for_mysql(max_attempts=30, delay=5):
         'connect_timeout': 10,
         'read_timeout': 10,
         'write_timeout': 10,
-        # Configuration pour MySQL 9.x Railway avec PyMySQL
-        'ssl_disabled': True,  # Simplifie la connexion Railway
         'autocommit': True
+        # SSL requis par Railway - pas de ssl_disabled
     }
     
     print(f"🔗 Tentative de connexion: {config['user']}@{config['host']}:{config['port']}/{config['database']}")

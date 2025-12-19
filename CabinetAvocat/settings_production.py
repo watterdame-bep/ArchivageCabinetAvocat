@@ -34,10 +34,12 @@ MYSQLHOST = os.environ.get('MYSQLHOST')
 MYSQLDATABASE = os.environ.get('MYSQLDATABASE') 
 MYSQLUSER = os.environ.get('MYSQLUSER')
 MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
-MYSQLPORT = os.environ.get('MYSQLPORT', '3306')
+MYSQLPORT = int(os.environ.get('MYSQLPORT', 3306))
 
 if MYSQLHOST:
     print(f"🔗 Connexion MySQL Railway: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
+    print(f"🔍 Debug - MYSQLHOST: {MYSQLHOST}")
+    print(f"🔍 Debug - MYSQLPORT type: {type(MYSQLPORT)} value: {MYSQLPORT}")
     
     DATABASES = {
         'default': {
@@ -53,7 +55,7 @@ if MYSQLHOST:
                 'connect_timeout': 60,
                 'read_timeout': 60,
                 'write_timeout': 60,
-                'ssl_disabled': True,
+                # SSL requis par Railway - pas de ssl_disabled
             },
         }
     }
