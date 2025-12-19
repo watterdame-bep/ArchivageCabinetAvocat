@@ -22,23 +22,18 @@ fi
 
 echo "✅ MySQL Railway prêt!"
 
-# Exécuter les migrations
-echo "📊 Exécution des migrations..."
-python manage.py migrate --noinput
+# Setup initial de la base de données Railway
+echo "🔧 Setup initial de la base de données..."
+python setup_railway_database.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Échec du setup initial"
+    exit 1
+fi
 
 # Collecter les fichiers statiques
 echo "📁 Collection des fichiers statiques..."
 python manage.py collectstatic --noinput
-
-# Vérifier la connexion à la base de données existante
-echo "👤 Vérification de la base de données existante..."
-python manage.py shell -c "
-from django.contrib.auth import get_user_model
-User = get_user_model()
-user_count = User.objects.count()
-admin_count = User.objects.filter(is_superuser=True).count()
-print(f'✅ Base de données connectée: {user_count} utilisateur(s), {admin_count} admin(s)')
-"
 
 echo "✅ Application prête à démarrer!"
 
