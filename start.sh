@@ -30,17 +30,19 @@ python manage.py migrate --noinput
 echo "📁 Collection des fichiers statiques..."
 python manage.py collectstatic --noinput
 
-# Créer un superutilisateur si nécessaire (optionnel)
-echo "👤 Vérification du superutilisateur..."
+# Créer un superutilisateur automatiquement pour Railway
+echo "👤 Vérification du superutilisateur Railway..."
 python manage.py shell -c "
 from django.contrib.auth import get_user_model
 User = get_user_model()
 if not User.objects.filter(is_superuser=True).exists():
-    print('Création du superutilisateur admin...')
-    User.objects.create_superuser('admin', 'admin@cabinet.com', 'admin123')
-    print('Superutilisateur créé: admin/admin123')
+    print('🔧 Création du superutilisateur admin pour Railway...')
+    User.objects.create_superuser('admin', 'admin@cabinet.com', 'Admin123!')
+    print('✅ Superutilisateur créé: admin / Admin123!')
+    print('⚠️ Changez le mot de passe après la première connexion!')
 else:
-    print('Superutilisateur déjà existant')
+    admin_user = User.objects.filter(is_superuser=True).first()
+    print(f'✅ Superutilisateur existant: {admin_user.username}')
 "
 
 echo "✅ Application prête à démarrer!"
