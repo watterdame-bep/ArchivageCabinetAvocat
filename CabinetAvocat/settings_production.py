@@ -46,8 +46,8 @@ MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
 MYSQLPORT = os.environ.get('MYSQLPORT')
 
 if MYSQLHOST:
-    # 🚀 Production (Railway runtime) - MySQL disponible
-    print(f"🔗 Connexion MySQL Railway: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
+    # 🚀 Production (Railway runtime) - Connexion à la base de données existante
+    print(f"🔗 Connexion à la base de données existante: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
     
     DATABASES = {
         'default': {
@@ -70,7 +70,7 @@ if MYSQLHOST:
     }
 else:
     # 🔧 Build phase (collectstatic) - MySQL pas encore disponible
-    print("⚠️ Variables MySQL non disponibles - Utilisation SQLite pour le build")
+    print("⚠️ Variables MySQL non disponibles - Utilisation SQLite temporaire pour le build")
     
     DATABASES = {
         'default': {
