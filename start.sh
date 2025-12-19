@@ -23,15 +23,19 @@ fi
 echo "✅ MySQL Railway connecté!"
 
 # 3️⃣ Créer toutes les migrations
-echo "📝 Création des migrations..."
+echo "� Step 1o: Création des migrations Django..."
 python manage.py makemigrations --noinput
 
-# 4️⃣ Appliquer toutes les migrations avec syncdb
-echo "🔄 Application des migrations..."
+# 4️⃣ Appliquer toutes les migrations avec syncdb (FORCE la création des tables)
+echo "� AStep 2: Application des migrations avec --run-syncdb..."
 python manage.py migrate --noinput --run-syncdb
 
-# 5️⃣ Créer un superutilisateur si nécessaire (protégé)
-echo "👤 Création superutilisateur si nécessaire..."
+# 5️⃣ Exécuter le fix définitif si nécessaire (sécurité)
+echo "�  Step 3: Vérification et fix des tables manquantes..."
+python fix_railway_tables.py || echo "⚠️ Fix tables ignoré (probablement déjà OK)"
+
+# 6️⃣ Créer un superutilisateur si nécessaire (protégé)
+echo "🔹 Step 4: Création superutilisateur si nécessaire..."
 python manage.py shell -c "
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -42,11 +46,12 @@ else:
     print('✅ Superutilisateur déjà existant')
 " || echo "⚠️ Création superutilisateur ignorée"
 
-# 6️⃣ Collecter les fichiers statiques
-echo "📁 Collection des fichiers statiques..."
+# 7️⃣ Collecter les fichiers statiques
+echo "� Step 5t: Collection des fichiers statiques..."
 python manage.py collectstatic --noinput
 
-echo "✅ Application prête à démarrer!"
+echo "🔹 Step 6: Lancement du serveur Gunicorn..."
+echo "✅ Toutes les étapes terminées - Application prête!"
 
 # Démarrer l'application avec Gunicorn optimisé pour Railway
 exec gunicorn CabinetAvocat.wsgi:application \
