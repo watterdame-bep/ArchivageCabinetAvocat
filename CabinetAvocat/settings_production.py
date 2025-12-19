@@ -94,10 +94,10 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
-# JSReport
-JSREPORT_URL = os.environ.get('JSREPORT_URL', 'https://your-jsreport-service.railway.app')
+# JSReport (service externe - optionnel)
+JSREPORT_URL = os.environ.get('JSREPORT_URL', 'http://localhost:5488')
 JSREPORT_USERNAME = os.environ.get('JSREPORT_USERNAME', 'admin')
-JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD')
+JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD', '')
 JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '120'))
 
 # Logging
