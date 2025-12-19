@@ -22,12 +22,14 @@ fi
 
 echo "✅ MySQL Railway prêt!"
 
-# Setup initial de la base de données Railway
-echo "🔧 Setup initial de la base de données..."
-python setup_railway_database.py
+# Fix définitif des tables Railway
+echo "🔧 Fix définitif des tables Railway..."
+python fix_railway_tables.py
 
 if [ $? -ne 0 ]; then
-    echo "❌ Échec du setup initial"
+    echo "❌ Échec du fix des tables"
+    echo "🔍 Diagnostic des tables..."
+    python diagnose_table_names.py
     exit 1
 fi
 
