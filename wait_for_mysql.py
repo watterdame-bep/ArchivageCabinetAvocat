@@ -12,23 +12,22 @@ def wait_for_mysql(max_attempts=30, delay=5):
     """Attend que MySQL soit prêt"""
     print("⏳ Attente de MySQL Railway...")
     
-    # Vérifier les variables d'environnement Railway (noms exacts)
-    required_vars = ['MYSQL_HOST', 'MYSQLUSER', 'MYSQL_PASSWORD', 'MYSQL_DATABASE', 'MYSQL_PORT']
+    # Vérifier les variables d'environnement Railway (service MySQL)
+    required_vars = ['MYSQLHOST', 'MYSQLUSER', 'MYSQLPASSWORD', 'MYSQLDATABASE', 'MYSQLPORT']
     missing_vars = [var for var in required_vars if not os.environ.get(var)]
     
     if missing_vars:
         print(f"❌ Variables MySQL manquantes: {', '.join(missing_vars)}")
-        print("💡 Ajouter un service MySQL dans Railway Dashboard")
-        print("💡 Puis connecter les variables au service Django")
+        print("💡 Connecter le service MySQL au service Django dans Railway Dashboard")
         sys.exit(1)
     
-    # Configuration MySQL Railway (noms exacts des variables)
+    # Configuration MySQL Railway
     config = {
-        'host': os.environ['MYSQL_HOST'],
-        'user': os.environ['MYSQLUSER'],  # Railway utilise MYSQLUSER
-        'password': os.environ['MYSQL_PASSWORD'],
-        'database': os.environ['MYSQL_DATABASE'],
-        'port': int(os.environ['MYSQL_PORT']),
+        'host': os.environ['MYSQLHOST'],
+        'user': os.environ['MYSQLUSER'],
+        'password': os.environ['MYSQLPASSWORD'],
+        'database': os.environ['MYSQLDATABASE'],
+        'port': int(os.environ['MYSQLPORT']),
         'connect_timeout': 10,
         'read_timeout': 10,
         'write_timeout': 10,

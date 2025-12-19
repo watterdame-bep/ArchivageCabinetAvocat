@@ -29,24 +29,24 @@ MIDDLEWARE = [
 import pymysql
 pymysql.install_as_MySQLdb()
 
-# Variables MySQL Railway
-MYSQL_HOST_VAR = os.environ.get('MYSQL_HOST')
-MYSQL_DATABASE_VAR = os.environ.get('MYSQL_DATABASE') 
-MYSQL_USER_VAR = os.environ.get('MYSQLUSER')
-MYSQL_PASSWORD_VAR = os.environ.get('MYSQL_PASSWORD')
-MYSQL_PORT_VAR = os.environ.get('MYSQL_PORT', '3306')
+# Variables MySQL Railway (noms exacts du service MySQL)
+MYSQLHOST = os.environ.get('MYSQLHOST')
+MYSQLDATABASE = os.environ.get('MYSQLDATABASE') 
+MYSQLUSER = os.environ.get('MYSQLUSER')
+MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
+MYSQLPORT = os.environ.get('MYSQLPORT', '3306')
 
-if MYSQL_HOST_VAR:
-    print(f"🔗 Connexion MySQL Railway: {MYSQL_USER_VAR}@{MYSQL_HOST_VAR}:{MYSQL_PORT_VAR}/{MYSQL_DATABASE_VAR}")
+if MYSQLHOST:
+    print(f"🔗 Connexion MySQL Railway: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
     
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': MYSQL_DATABASE_VAR,
-            'USER': MYSQL_USER_VAR,
-            'PASSWORD': MYSQL_PASSWORD_VAR,
-            'HOST': MYSQL_HOST_VAR,
-            'PORT': MYSQL_PORT_VAR,
+            'NAME': MYSQLDATABASE,
+            'USER': MYSQLUSER,
+            'PASSWORD': MYSQLPASSWORD,
+            'HOST': MYSQLHOST,
+            'PORT': MYSQLPORT,
             'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',

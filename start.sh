@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Script de démarrage optimisé pour Railway
+# Script de démarrage optimisé pour Railway - Base de données existante
 
 echo "🚀 Démarrage Cabinet Avocat - Railway Production"
 
 # 1️⃣ Vérifier les variables d'environnement critiques
-if [ -z "$MYSQL_HOST" ]; then
+if [ -z "$MYSQLHOST" ]; then
     echo "❌ Variables MySQL manquantes - Service MySQL non connecté!"
     echo "💡 Connectez le service MySQL au service Django dans Railway Dashboard"
     exit 1
@@ -22,35 +22,30 @@ fi
 
 echo "✅ MySQL Railway connecté!"
 
-# 3️⃣ Créer toutes les migrations
-echo "� Step 1o: Création des migrations Django..."
-python manage.py makemigrations --noinput
-
-# 4️⃣ Appliquer toutes les migrations avec syncdb (FORCE la création des tables)
-echo "� AStep 2: Application des migrations avec --run-syncdb..."
-python manage.py migrate --noinput --run-syncdb
-
-# 5️⃣ Exécuter le fix définitif si nécessaire (sécurité)
-echo "�  Step 3: Vérification et fix des tables manquantes..."
-python fix_railway_tables.py || echo "⚠️ Fix tables ignoré (probablement déjà OK)"
-
-# 6️⃣ Créer un superutilisateur si nécessaire (protégé)
-echo "🔹 Step 4: Création superutilisateur si nécessaire..."
+# 3️⃣ Vérifier la connexion à la base de données existante
+echo "🔍 Step 1: Vérification de la base de données existante..."
 python manage.py shell -c "
-from django.contrib.auth import get_user_model
-User = get_user_model()
-if not User.objects.filter(is_superuser=True).exists():
-    User.objects.create_superuser('admin', 'admin@cabinet.com', 'Admin123!')
-    print('✅ Superutilisateur créé: admin / Admin123!')
-else:
-    print('✅ Superutilisateur déjà existant')
-" || echo "⚠️ Création superutilisateur ignorée"
+from Authentification.models import CompteUtilisateur
+try:
+    user_count = CompteUtilisateur.objects.count()
+    admin_count = CompteUtilisateur.objects.filter(is_superuser=True).count()
+    print(f'✅ Base de données connectée!')
+    print(f'👥 Utilisateurs existants: {user_count}')
+    print(f'👤 Administrateurs: {admin_count}')
+except Exception as e:
+    print(f'❌ Erreur de connexion à la base: {e}')
+    exit(1)
+"
 
-# 7️⃣ Collecter les fichiers statiques
-echo "� Step 5t: Collection des fichiers statiques..."
+# 4️⃣ Appliquer uniquement les nouvelles migrations (sans --run-syncdb)
+echo "🔧 Step 2: Application des nouvelles migrations seulement..."
+python manage.py migrate --noinput
+
+# 5️⃣ Collecter les fichiers statiques
+echo "📦 Step 3: Collection des fichiers statiques..."
 python manage.py collectstatic --noinput
 
-echo "🔹 Step 6: Lancement du serveur Gunicorn..."
+echo "🚀 Step 4: Lancement du serveur Gunicorn..."
 echo "✅ Toutes les étapes terminées - Application prête!"
 
 # Démarrer l'application avec Gunicorn optimisé pour Railway
