@@ -1,39 +1,48 @@
 #!/bin/bash
 
-# Script de démarrage pour Railway avec attente MySQL
+# Script de démarrage optimisé pour Railway
 
-echo "🚀 Démarrage de l'application Cabinet Avocat..."
+echo "🚀 Démarrage Cabinet Avocat - Railway Production"
 
-# Vérifier les variables d'environnement critiques
-if [ -z "$MYSQL_HOST" ]; then
-    echo "❌ Variable MYSQL_HOST non définie - Service MySQL manquant!"
+# 1️⃣ Vérifier les variables d'environnement critiques
+if [ -z "$MYSQLHOST" ]; then
+    echo "❌ Variables MySQL manquantes - Service MySQL non connecté!"
+    echo "💡 Connectez le service MySQL au service Django dans Railway Dashboard"
     exit 1
 fi
 
-# Attendre que MySQL soit prêt avec script dédié
-echo "⏳ Vérification de MySQL Railway..."
+# 2️⃣ Attendre que MySQL soit prêt
+echo "⏳ Attente de MySQL Railway..."
 python wait_for_mysql.py
 
 if [ $? -ne 0 ]; then
-    echo "❌ Impossible de se connecter à MySQL Railway"
-    echo "🔧 Vérifiez que le service MySQL est ajouté dans Railway Dashboard"
+    echo "❌ MySQL Railway non accessible"
     exit 1
 fi
 
-echo "✅ MySQL Railway prêt!"
+echo "✅ MySQL Railway connecté!"
 
-# Fix définitif des tables Railway
-echo "🔧 Fix définitif des tables Railway..."
-python fix_railway_tables.py
+# 3️⃣ Créer toutes les migrations
+echo "📝 Création des migrations..."
+python manage.py makemigrations --noinput
 
-if [ $? -ne 0 ]; then
-    echo "❌ Échec du fix des tables"
-    echo "🔍 Diagnostic des tables..."
-    python diagnose_table_names.py
-    exit 1
-fi
+# 4️⃣ Appliquer toutes les migrations avec syncdb
+echo "🔄 Application des migrations..."
+python manage.py migrate --noinput --run-syncdb
 
-# Collecter les fichiers statiques
+# 5️⃣ Créer un superutilisateur si nécessaire (protégé)
+echo "👤 Création superutilisateur si nécessaire..."
+python manage.py shell -c "
+from django.contrib.auth import get_user_model
+User = get_user_model()
+if not User.objects.filter(is_superuser=True).exists():
+    User.objects.create_superuser('admin', 'admin@cabinet.com', 'Admin123!')
+    print('✅ Superutilisateur créé: admin / Admin123!')
+else:
+    print('✅ Superutilisateur déjà existant')
+" || echo "⚠️ Création superutilisateur ignorée"
+
+# 6️⃣ Collecter les fichiers statiques
 echo "📁 Collection des fichiers statiques..."
 python manage.py collectstatic --noinput
 
