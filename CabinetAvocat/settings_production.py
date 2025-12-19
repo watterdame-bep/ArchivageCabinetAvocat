@@ -1,10 +1,8 @@
 import os
 from .settings import *
 
-# Configuration pour la production
 DEBUG = False
 
-# Hosts autorisés - Railway fournira automatiquement le domaine
 ALLOWED_HOSTS = [
     '.railway.app',
     '.up.railway.app',
@@ -12,16 +10,14 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
-# Configuration CSRF pour Railway
 CSRF_TRUSTED_ORIGINS = [
     'https://*.railway.app',
     'https://*.up.railway.app',
 ]
 
-# Middleware avec WhiteNoise pour servir les fichiers statiques
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',  # Ajouté pour Railway
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -30,82 +26,71 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Configuration PyMySQL pour Railway
 import pymysql
 pymysql.install_as_MySQLdb()
 
-# Configuration de la base de données pour Railway
-# ⚠️ IMPORTANT: Railway injecte les variables MySQL AU RUNTIME (pas au build)
-# Pendant le build (collectstatic), les variables MySQL ne sont pas encore disponibles
+# Variables MySQL Railway
+MYSQL_HOST_VAR = os.environ.get('MYSQL_HOST')
+MYSQL_DATABASE_VAR = os.environ.get('MYSQL_DATABASE') 
+MYSQL_USER_VAR = os.environ.get('MYSQLUSER')
+MYSQL_PASSWORD_VAR = os.environ.get('MYSQL_PASSWORD')
+MYSQL_PORT_VAR = os.environ.get('MYSQL_PORT', '3306')
 
-# Variables MySQL Railway (noms utilisés par Railway)
-MYSQLHOST = os.environ.get('MYSQL_HOST')
-MYSQLDATABASE = os.environ.get('MYSQL_DATABASE') 
-MYSQLUSER = os.environ.get('MYSQ_LUSER')
-MYSQLPASSWORD = os.environ.get('MYSQL_PASSWORD')
-MYSQLPORT = os.environ.get('MYSQL_PORT')
-
-if MYSQLHOST:
-    # 🚀 Production (Railway runtime) - Connexion à la base de données existante
-    print(f"🔗 Connexion à la base de données existante: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
+if MYSQL_HOST_VAR:
+    print(f"🔗 Connexion MySQL Railway: {MYSQL_USER_VAR}@{MYSQL_HOST_VAR}:{MYSQL_PORT_VAR}/{MYSQL_DATABASE_VAR}")
     
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': MYSQLDATABASE,
-            'USER': MYSQLUSER,
-            'PASSWORD': MYSQLPASSWORD,
-            'HOST': MYSQLHOST,
-            'PORT': MYSQLPORT,
+            'NAME': MYSQL_DATABASE_VAR,
+            'USER': MYSQL_USER_VAR,
+            'PASSWORD': MYSQL_PASSWORD_VAR,
+            'HOST': MYSQL_HOST_VAR,
+            'PORT': MYSQL_PORT_VAR,
             'OPTIONS': {
                 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
                 'charset': 'utf8mb4',
                 'connect_timeout': 60,
                 'read_timeout': 60,
                 'write_timeout': 60,
-                # Configuration pour MySQL 9.x Railway avec PyMySQL
-                'ssl_disabled': True,  # Simplifie la connexion Railway
+                'ssl_disabled': True,
             },
         }
     }
 else:
-    # 🔧 Build phase (collectstatic) - MySQL pas encore disponible
-    print("⚠️ Variables MySQL non disponibles - Utilisation SQLite temporaire pour le build")
+    print("⚠️ Variables MySQL non disponibles - Utilisation SQLite temporaire")
     
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'build_temp.sqlite3',  # DB temporaire pour le build
+            'NAME': BASE_DIR / 'build_temp.sqlite3',
         }
     }
 
-# Configuration des fichiers statiques pour la production avec WhiteNoise
+# Fichiers statiques
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Configuration des médias
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Sécurité pour la production
+# Sécurité
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-
-# Configuration des sessions
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
-# Configuration JSReport pour la production
+# JSReport
 JSREPORT_URL = os.environ.get('JSREPORT_URL', 'https://your-jsreport-service.railway.app')
 JSREPORT_USERNAME = os.environ.get('JSREPORT_USERNAME', 'admin')
-JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD')  # Obligatoire en production
-JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '120'))  # Plus long en production
+JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD')
+JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '120'))
 
-# Configuration des logs
+# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -114,19 +99,10 @@ LOGGING = {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
             'style': '{',
         },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
-        },
-        'file': {
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'django.log'),  # Chemin relatif au projet
             'formatter': 'verbose',
         },
     },
@@ -136,7 +112,7 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console'],  # Console seulement pour éviter problèmes de fichier
+            'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
@@ -158,7 +134,7 @@ LOGGING = {
     },
 }
 
-# Configuration de cache pour améliorer les performances
+# Cache
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
@@ -170,6 +146,6 @@ CACHES = {
     }
 }
 
-# Configuration de session pour la production
+# Sessions
 SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
 SESSION_CACHE_ALIAS = 'default'

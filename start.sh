@@ -5,7 +5,7 @@
 echo "🚀 Démarrage Cabinet Avocat - Railway Production"
 
 # 1️⃣ Vérifier les variables d'environnement critiques
-if [ -z "$MYSQLHOST" ]; then
+if [ -z "$MYSQL_HOST" ]; then
     echo "❌ Variables MySQL manquantes - Service MySQL non connecté!"
     echo "💡 Connectez le service MySQL au service Django dans Railway Dashboard"
     exit 1
