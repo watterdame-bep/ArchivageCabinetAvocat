@@ -25,7 +25,7 @@ MYSQLHOST = os.environ.get('MYSQLHOST')
 MYSQLDATABASE = os.environ.get('MYSQLDATABASE') 
 MYSQLUSER = os.environ.get('MYSQLUSER')
 MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
-MYSQLPORT = os.environ.get('MYSQLPORT', '3306')
+MYSQLPORT = os.environ.get('MYSQLPORT')
 
 if MYSQLHOST:
     # 🚀 Production (Railway runtime) - MySQL disponible
