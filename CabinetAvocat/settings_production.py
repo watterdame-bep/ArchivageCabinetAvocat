@@ -12,6 +12,24 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
 ]
 
+# Configuration CSRF pour Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+]
+
+# Middleware avec WhiteNoise pour servir les fichiers statiques
+MIDDLEWARE = [
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Ajouté pour Railway
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
 # Configuration PyMySQL pour Railway
 import pymysql
 pymysql.install_as_MySQLdb()
@@ -61,9 +79,10 @@ else:
         }
     }
 
-# Configuration des fichiers statiques pour la production
+# Configuration des fichiers statiques pour la production avec WhiteNoise
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Configuration des médias
 MEDIA_URL = '/media/'
@@ -107,7 +126,7 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.FileHandler',
-            'filename': '/tmp/django.log',
+            'filename': os.path.join(BASE_DIR, 'django.log'),  # Chemin relatif au projet
             'formatter': 'verbose',
         },
     },
@@ -117,22 +136,22 @@ LOGGING = {
     },
     'loggers': {
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],  # Console seulement pour éviter problèmes de fichier
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
         'utils.jsreport_service': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
         'rapport': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
         'paiement': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': False,
         },
