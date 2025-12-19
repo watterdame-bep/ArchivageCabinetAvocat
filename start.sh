@@ -68,9 +68,9 @@ except Exception as e:
 echo "🔧 Step 3: Application des nouvelles migrations seulement..."
 python manage.py migrate --noinput
 
-# 6️⃣ Collecter les fichiers statiques
-echo "📦 Step 4: Collection des fichiers statiques..."
-python manage.py collectstatic --noinput
+# 6️⃣ Collecter les fichiers statiques (mode sécurisé)
+echo "📦 Step 4: Collection sécurisée des fichiers statiques..."
+python collectstatic_safe.py
 
 echo "🚀 Step 5: Lancement du serveur Gunicorn..."
 echo "✅ Toutes les étapes terminées - Application prête!"

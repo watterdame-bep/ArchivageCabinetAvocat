@@ -1,4 +1,5 @@
 import os
+import sys
 from .settings import *
 
 DEBUG = False
@@ -36,7 +37,11 @@ MYSQLUSER = os.environ.get('MYSQLUSER')
 MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
 MYSQLPORT = int(os.environ.get('MYSQLPORT', 3306))
 
-if MYSQLHOST:
+# SOLUTION CRITIQUE: Éviter la connexion MySQL pendant collectstatic
+# Railway exécute collectstatic pendant le BUILD, avant que les variables MySQL soient disponibles
+COLLECTSTATIC_MODE = os.environ.get('RAILWAY_STATIC_BUILD', False) or 'collectstatic' in ' '.join(sys.argv)
+
+if MYSQLHOST and not COLLECTSTATIC_MODE:
     print(f"🔗 Connexion MySQL Railway: {MYSQLUSER}@{MYSQLHOST}:{MYSQLPORT}/{MYSQLDATABASE}")
     print(f"🔍 Debug - MYSQLHOST: {MYSQLHOST}")
     print(f"🔍 Debug - MYSQLPORT type: {type(MYSQLPORT)} value: {MYSQLPORT}")
@@ -60,7 +65,10 @@ if MYSQLHOST:
         }
     }
 else:
-    print("⚠️ Variables MySQL non disponibles - Utilisation SQLite temporaire")
+    if COLLECTSTATIC_MODE:
+        print("📦 Mode collectstatic détecté - Utilisation SQLite temporaire")
+    else:
+        print("⚠️ Variables MySQL non disponibles - Utilisation SQLite temporaire")
     
     DATABASES = {
         'default': {
