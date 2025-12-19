@@ -4,6 +4,24 @@
 
 echo "🚀 Démarrage Cabinet Avocat - Railway Production"
 
+# 0️⃣ Diagnostic complet de l'environnement Railway
+echo "🔍 Diagnostic complet de l'environnement Railway..."
+python debug_railway_env.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Problème de configuration détecté - Arrêt du déploiement"
+    exit 1
+fi
+
+# 0️⃣bis Forcer la configuration production
+echo "🔧 Forçage de la configuration production..."
+python force_production_settings.py
+
+if [ $? -ne 0 ]; then
+    echo "❌ Impossible de forcer la configuration production"
+    exit 1
+fi
+
 # 1️⃣ Vérifier les variables d'environnement critiques
 if [ -z "$MYSQLHOST" ]; then
     echo "❌ Variables MySQL manquantes - Service MySQL non connecté!"
