@@ -39,11 +39,11 @@ pymysql.install_as_MySQLdb()
 # Pendant le build (collectstatic), les variables MySQL ne sont pas encore disponibles
 
 # Variables MySQL Railway (noms utilisés par Railway)
-MYSQLHOST = os.environ.get('MYSQLHOST')
-MYSQLDATABASE = os.environ.get('MYSQLDATABASE') 
-MYSQLUSER = os.environ.get('MYSQLUSER')
-MYSQLPASSWORD = os.environ.get('MYSQLPASSWORD')
-MYSQLPORT = os.environ.get('MYSQLPORT')
+MYSQLHOST = os.environ.get('MYSQL_HOST')
+MYSQLDATABASE = os.environ.get('MYSQL_DATABASE') 
+MYSQLUSER = os.environ.get('MYSQ_LUSER')
+MYSQLPASSWORD = os.environ.get('MYSQL_PASSWORD')
+MYSQLPORT = os.environ.get('MYSQL_PORT')
 
 if MYSQLHOST:
     # 🚀 Production (Railway runtime) - Connexion à la base de données existante
