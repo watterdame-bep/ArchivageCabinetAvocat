@@ -24,12 +24,22 @@ class client (models.Model):
     photo = models.ImageField(upload_to="clients_photos/", blank=True, null=True)
     date_enregistrement = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        db_table = 'dossier_client'
+        verbose_name = 'Client'
+        verbose_name_plural = 'Clients'
+
 
 
 class SecteurFoncier(models.Model):
     nom = models.CharField(max_length=100 )
     communes = models.ManyToManyField(commune, blank=True, related_name='secteurs')
     cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE,default=1, related_name="cabinet_secteur")
+
+    class Meta:
+        db_table = 'dossier_secteurfoncier'
+        verbose_name = 'Secteur Foncier'
+        verbose_name_plural = 'Secteurs Fonciers'
 
     def __str__(self):
         return self.nom
@@ -40,6 +50,11 @@ class type_dossier(models.Model):
     nom_type = models.CharField(max_length=100)
     date_ajouter = models.DateField(auto_now_add=True)
     cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE,default=1, related_name="cabinet_type_dossier")
+
+    class Meta:
+        db_table = 'dossier_type_dossier'
+        verbose_name = 'Type de dossier'
+        verbose_name_plural = 'Types de dossiers'
 
     def __str__(self):
         return f""
@@ -57,6 +72,7 @@ class TarifHoraire(models.Model):
     taux_jour=models.DecimalField( max_digits=10,decimal_places=2, default=0.00)
    
     class Meta:
+        db_table = 'dossier_tarifhoraire'
         verbose_name = "Tarif Horaire"
         verbose_name_plural = "Tarifs Horaires"
         unique_together = ('type_dossier', 'secteur')  # un tarif par type de dossier + secteur
@@ -86,6 +102,7 @@ class TarifActivite(models.Model):
     prix_dollars = models.DecimalField(max_digits=10, decimal_places=2,verbose_name="Prix de l’activité (Fc)")
     cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE,default=1, related_name="cabinet_Tarifactivite")
     class Meta:
+        db_table = 'dossier_tarifactivite'
         unique_together = ('tarif', 'activite')
         verbose_name = "Tarif par Activité"
         verbose_name_plural = "Tarifs par Activité"
@@ -105,6 +122,9 @@ class ReductionTarifForfaitaire(models.Model):
     prix_reduit_dollars = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     prix_reduit_fc = models.DecimalField(max_digits=15, decimal_places=2, null=True, blank=True)
     date_modification = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'dossier_reductiontarifforfaitaire'
 
     def __str__(self):
         return f"{self.dossier.numero_reference_dossier} - {self.activite.nom_activite}"
@@ -149,6 +169,7 @@ class dossier (models.Model):
 
     
     class Meta:
+        db_table = 'dossier_dossier'
         verbose_name = "Dossier Client"
         verbose_name_plural = "Dossiers Clients"
 
@@ -181,6 +202,7 @@ class DeclarationDossier(models.Model):
     auteur = models.CharField(max_length=100, null=False, default='')
 
     class Meta:
+        db_table = 'dossier_declarationdossier'
         ordering = ['-date_ajout']  # Les plus récentes en premier
 
     def __str__(self):
@@ -201,6 +223,7 @@ class AvocatDossier(models.Model):
     
     # Pour s'assurer qu'un avocat n'est pas deux fois dans le même dossier
     class Meta:
+        db_table = 'dossier_avocatdossier'
         unique_together = (('dossier', 'avocat'),) 
         verbose_name = "Assignation Avocat-Dossier"
 
@@ -221,6 +244,9 @@ class ActiviteHeure(models.Model):
     description = models.TextField(verbose_name="Description de l'activité (pour la facture)")   
     facturee = models.BooleanField(default=False) # Pour marquer si l'heure a déjà été incluse dans une facture
     cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE,default=1, related_name="cabinet_activite")
+    
+    class Meta:
+        db_table = 'dossier_activiteheure'
     
     def calculer_cout_activite(self):
         try:
@@ -255,6 +281,7 @@ class PieceDossier(models.Model):
     ajoute_par = models.ForeignKey('Agent.agent',on_delete=models.SET_NULL, null=True,blank=True, related_name="pieces_ajoutees", verbose_name="Ajouté par")
   
     class Meta:
+        db_table = 'dossier_piecedossier'
         verbose_name = "Pièce du dossier"
         verbose_name_plural = "Pièces du dossier"
         ordering = ['-date_ajout']
@@ -268,8 +295,9 @@ class TypePiece(models.Model):
     date_ajout=models.DateField(auto_now_add=True)
     cabinet = models.ForeignKey(Cabinet, on_delete=models.CASCADE, default=1)
 
+    class Meta:
+        db_table = 'dossier_typepiece'
 
-    
     def __str__(self):
         return f"{self.nom_type}"
    

@@ -1,0 +1,31 @@
+# Corrections à appliquer manuellement pour Dossier/models.py
+
+## ReductionTarifForfaitaire
+Ajouter après la ligne "date_modification = models.DateTimeField(auto_now=True)":
+
+    class Meta:
+        db_table = 'dossier_reductiontarifforfaitaire'
+
+## DeclarationDossier  
+Modifier la classe Meta existante pour ajouter:
+        db_table = 'dossier_declarationdossier'
+
+## AvocatDossier
+Modifier la classe Meta existante pour ajouter:
+        db_table = 'dossier_avocatdossier'
+
+## ActiviteHeure
+Ajouter après "cabinet = models.ForeignKey(Cabinet...)":
+
+    class Meta:
+        db_table = 'dossier_activiteheure'
+
+## PieceDossier
+Modifier la classe Meta existante pour ajouter:
+        db_table = 'dossier_piecedossier'
+
+## TypePiece
+Ajouter après "cabinet = models.ForeignKey(Cabinet...)":
+
+    class Meta:
+        db_table = 'dossier_typepiece'
