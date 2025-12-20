@@ -11,6 +11,12 @@ class CompteUtilisateur(AbstractUser):
     type_compte=models.CharField(max_length=50,default='user')
    
     USERNAME_FIELD='username'
+    
+    class Meta:
+        # SOLUTION: Forcer le nom de table en minuscules pour compatibilité avec import MySQL
+        db_table = 'authentification_compteutilisateur'
+        verbose_name = 'Compte Utilisateur'
+        verbose_name_plural = 'Comptes Utilisateurs'
   
     def __str__(self):
       return self.username

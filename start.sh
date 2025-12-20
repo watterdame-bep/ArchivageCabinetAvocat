@@ -49,23 +49,43 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# 4️⃣ Vérifier la connexion à la base de données existante via Django
-echo "🔍 Step 2: Vérification de la base de données existante via Django..."
+# 4️⃣ Vérifier si les tables existent, sinon les créer
+echo "🔍 Step 2: Vérification de l'état de la base de données..."
 python manage.py shell -c "
-from Authentification.models import CompteUtilisateur
+from django.db import connection
 try:
-    user_count = CompteUtilisateur.objects.count()
-    admin_count = CompteUtilisateur.objects.filter(is_superuser=True).count()
-    print(f'✅ Base de données connectée!')
-    print(f'👥 Utilisateurs existants: {user_count}')
-    print(f'👤 Administrateurs: {admin_count}')
+    with connection.cursor() as cursor:
+        cursor.execute('SHOW TABLES LIKE \\'%Authentification%\\'')
+        tables = cursor.fetchall()
+        if not tables:
+            print('⚠️ Tables manquantes - Base de données vide détectée')
+            print('🔧 Exécution de la migration forcée...')
+            exit(2)  # Code spécial pour migration forcée
+        else:
+            print(f'✅ Tables existantes trouvées: {len(tables)}')
+            from Authentification.models import CompteUtilisateur
+            user_count = CompteUtilisateur.objects.count()
+            admin_count = CompteUtilisateur.objects.filter(is_superuser=True).count()
+            print(f'👥 Utilisateurs existants: {user_count}')
+            print(f'👤 Administrateurs: {admin_count}')
 except Exception as e:
-    print(f'❌ Erreur de connexion à la base: {e}')
+    print(f'❌ Erreur de vérification: {e}')
     exit(1)
 "
 
-# 5️⃣ Appliquer uniquement les nouvelles migrations (sans --run-syncdb)
-echo "🔧 Step 3: Application des nouvelles migrations seulement..."
+# Vérifier le code de retour
+if [ $? -eq 2 ]; then
+    echo "🔧 Exécution de la migration forcée pour base vide..."
+    python force_migrate_railway.py
+    if [ $? -ne 0 ]; then
+        echo "❌ Migration forcée échouée"
+        exit 1
+    fi
+    echo "✅ Migration forcée terminée avec succès"
+fi
+
+# 5️⃣ Appliquer les migrations normales
+echo "🔧 Step 3: Application des migrations..."
 python manage.py migrate --noinput
 
 # 6️⃣ Collecter les fichiers statiques (mode sécurisé)

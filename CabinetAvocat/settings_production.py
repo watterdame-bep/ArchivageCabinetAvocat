@@ -62,8 +62,17 @@ if MYSQLHOST and not COLLECTSTATIC_MODE:
                 'write_timeout': 60,
                 # SSL requis par Railway - pas de ssl_disabled
             },
+            # SOLUTION: Forcer les noms de tables en minuscules
+            'TEST': {
+                'CHARSET': 'utf8mb4',
+                'COLLATION': 'utf8mb4_unicode_ci',
+            }
         }
     }
+    
+    # IMPORTANT: Configurer Django pour utiliser les noms de tables en minuscules
+    # Cela résout le problème d'import depuis SQLite vers MySQL
+    print("🔧 Configuration: Noms de tables en minuscules activée")
 else:
     if COLLECTSTATIC_MODE:
         print("📦 Mode collectstatic détecté - Utilisation SQLite temporaire")
