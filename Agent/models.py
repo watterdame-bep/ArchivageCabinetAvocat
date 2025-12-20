@@ -39,6 +39,11 @@ class agent(models.Model):
     # Nouveau champ pour mémoriser le groupe lié au poste
     groupe_attribue = models.ForeignKey(Group,on_delete=models.SET_NULL,null=True,blank=True,related_name="groupe_agents")
 
+    class Meta:
+        db_table = 'agent_agent'
+        verbose_name = 'Agent'
+        verbose_name_plural = 'Agents'
+
     def __str__(self):
         return f"{self.nom} {self.prenom}"
 
@@ -50,6 +55,11 @@ class PieceJustificative(models.Model):
     numero_piece = models.CharField(max_length=50, blank=True, null=True)
     fichier = models.FileField(upload_to='pieces_justificatives/')
     date_ajout = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'agent_piecejustificative'
+        verbose_name = 'Pièce justificative'
+        verbose_name_plural = 'Pièces justificatives'
 
     def __str__(self):
         cible = self.agent if self.agent else self.client
