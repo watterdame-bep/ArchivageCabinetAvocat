@@ -1,7 +1,7 @@
 # views.py
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
-from .forms import LoginForm,CompteForm
+from django.contrib.auth import authenticate, login, update_session_auth_hash
+from .forms import LoginForm,CompteForm, ChangePasswordForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group 
 from Authentification.models import CompteUtilisateur
@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django.shortcuts import redirect
 from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 
 User = get_user_model()
@@ -114,3 +115,29 @@ def deconnexion(request):
     response['Expires'] = '0'
 
     return response
+
+
+@login_required
+def change_password(request):
+    """Vue pour changer le mot de passe de l'utilisateur connecté"""
+    if request.method == 'POST':
+        form = ChangePasswordForm(user=request.user, data=request.POST)
+        if form.is_valid():
+            form.save()
+            # Maintenir la session après changement de mot de passe
+            update_session_auth_hash(request, request.user)
+            messages.success(request, 'Votre mot de passe a été modifié avec succès ! ✅')
+            
+            # Rediriger selon le type d'utilisateur
+            if request.user.type_compte == 'admin':
+                return redirect('Dashboard_Administrator')
+            elif request.user.type_compte == 'user':
+                return redirect('Dashboard_Cabinet_Administrateur')
+            else:
+                return redirect('change_password')
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous. ❌')
+    else:
+        form = ChangePasswordForm(user=request.user)
+    
+    return render(request, 'auth_template/auth_user_pass.html', {'form': form})

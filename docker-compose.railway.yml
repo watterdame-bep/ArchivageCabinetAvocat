@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  jsreport:
+    build:
+      context: .
+      dockerfile: Dockerfile.jsreport
+    ports:
+      - "${PORT:-5488}:${PORT:-5488}"
+    environment:
+      - NODE_ENV=production
+      - httpPort=${PORT:-5488}
+      - authentication_enabled=true
+      - authentication_admin_username=${JSREPORT_USERNAME:-admin}
+      - authentication_admin_password=${JSREPORT_PASSWORD:-admin123}
+      - extensions_authentication_cookieSession_secret=${JSREPORT_COOKIE_SECRET:-your-secret-key}
+      - workers_numberOfWorkers=2
+      - workers_timeout=120000
+      - store=fs
+      - blobStorage=fs
+    volumes:
+      - jsreport_data:/app/data
+    restart: unless-stopped
+
+volumes:
+  jsreport_data:

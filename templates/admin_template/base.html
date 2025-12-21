@@ -1,4 +1,4 @@
-{%load static %}
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -20,7 +20,8 @@
 	<!-- Style-->
 	<link rel="stylesheet" href="{% static 'css/style.css' %}">
 	<link rel="stylesheet" href="{% static 'css/skin_color.css' %}">
-	-<!-- Chosen CSS -->
+	
+	<!-- Chosen CSS -->
 
 
 
@@ -192,6 +193,8 @@
 						<li><a href="contact_app_chat.html" data-bs-toggle="tooltip" title="Chat"><i
 									class="icon-Group-chat fs-24"><span class="path1"></span><span
 										class="path2"></span></i></a></li>
+						<li><a href="{% url 'change_password' %}" data-bs-toggle="tooltip" title="Changer mot de passe"><i
+									class="icon-Key fs-24"></i></a></li>
 						<li><a href="{% url 'Deconnecter' %}" data-bs-toggle="tooltip" title="Déconnexion"><i
 									class="icon-Lock-overturning fs-24"><span class="path1"></span><span
 										class="path2"></span></i></a></li>
