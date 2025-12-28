@@ -1,0 +1,1037 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Rapport Commune/District{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Rapport Commune/District</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dashboard' %}">Rapport</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Commune/District</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-success" onclick="exporterToutesCommunes()">
+                        <i class="mdi mdi-download"></i> Rapport Global
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-map text-primary"></i> 
+                                Liste des Communes/Districts ({{ total_communes }})
+                            </h4>
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
+                                    <i class="mdi mdi-printer"></i> Imprimer
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="box-body">
+                            <!-- Statistiques rapides -->
+                            <div class="row mb-4">
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-info">
+                                        <div class="inner">
+                                            <h3>{{ total_communes }}</h3>
+                                            <p>Total Communes/Districts</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-map"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-success">
+                                        <div class="inner">
+                                            <h3 id="communes-actives">0</h3>
+                                            <p>Communes/Districts Actifs</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-check-circle"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-warning">
+                                        <div class="inner">
+                                            <h3 id="communes-recentes">0</h3>
+                                            <p>Créées ce mois</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-calendar-plus"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-danger">
+                                        <div class="inner">
+                                            <h3 id="rapports-generes">0</h3>
+                                            <p>Rapports générés</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-file-document"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtres avancés -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Filtrer par statut:</label>
+                                        <select id="filtre-statut" class="form-control">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="Actif">Actif</option>
+                                            <option value="Inactif">Inactif</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Période de création:</label>
+                                        <select id="filtre-periode" class="form-control">
+                                            <option value="">Toutes les périodes</option>
+                                            <option value="7">7 derniers jours</option>
+                                            <option value="30">30 derniers jours</option>
+                                            <option value="90">3 derniers mois</option>
+                                            <option value="365">Cette année</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Rechercher:</label>
+                                        <input type="text" id="recherche-commune" class="form-control" placeholder="Nom de commune/district...">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="button" class="btn btn-secondary btn-block" onclick="reinitialiserFiltres()">
+                                            <i class="mdi mdi-refresh"></i> Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Actions en lot -->
+                            <div class="row mb-3" id="actions-lot" style="display: none;">
+                                <div class="col-12">
+                                    <div class="alert alert-info">
+                                        <strong><span id="nb-selectionnes">0</span> commune(s) sélectionnée(s)</strong>
+                                        <div class="btn-group ms-3">
+                                            <button type="button" class="btn btn-sm btn-primary" onclick="genererRapportsLot()">
+                                                <i class="mdi mdi-file-document"></i> Générer rapports
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success" onclick="exporterSelectionPDF()">
+                                                <i class="mdi mdi-file-pdf"></i> Export PDF
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tableau des communes -->
+                            <div class="table-responsive">
+                                <table id="tableau-communes" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <th width="40">
+                                                <input type="checkbox" id="select-all" onchange="toggleSelectAll()">
+                                            </th>
+                                            <th>ID</th>
+                                            <th>Nom Commune/District</th>
+                                            <th>Date Ouverture</th>
+                                            <th>Statut</th>
+                                            <th>Dernière Activité</th>
+                                            <th width="150">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in communes_data %}
+                                        <tr data-statut="Actif" data-commune-id="{{ item.commune.id }}" data-date-creation="{{ item.commune.date_ouverture|date:'Y-m-d' }}">
+                                            <td class="text-center">
+                                                <input type="checkbox" class="commune-checkbox" value="{{ item.commune.id }}" onchange="updateSelection()">
+                                            </td>
+                                            <td class="text-center">
+                                                <strong>{{ item.commune.id }}</strong>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong>{{ item.commune.nom }}</strong>
+                                                    <small class="text-muted">
+                                                        <i class="mdi mdi-map-marker"></i> Commune
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">
+                                                    {{ item.commune.date_ouverture|date:"d/m/Y H:i"|default:"-" }}
+                                                </span>
+                                                {% if item.commune.date_ouverture %}
+                                                <br><small class="text-info">
+                                                    {{ item.commune.date_ouverture|timesince }} ago
+                                                </small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-success">
+                                                    <i class="mdi mdi-check-circle"></i> Actif
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-clock"></i> Récente
+                                                </small>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-info" 
+                                                            onclick="voirDetailsCommune({{ item.commune.id }})"
+                                                            title="Voir détails">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-primary" 
+                                                            onclick="genererRapportCommune({{ item.commune.id }})"
+                                                            title="Générer rapport">
+                                                        <i class="mdi mdi-file-document"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-success" 
+                                                            onclick="imprimerRapportCommune({{ item.commune.id }})"
+                                                            title="Imprimer rapport">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="7" class="text-center text-muted py-4">
+                                                <i class="mdi mdi-information mdi-48px"></i>
+                                                <br>Aucune commune trouvée
+                                                <br><small>Vérifiez vos filtres ou ajoutez des communes</small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="row mt-3">
+                                <div class="col-md-6">
+                                    <p class="text-muted">
+                                        Affichage de <span id="nb-affiches">{{ communes_data|length }}</span> commune(s) sur {{ total_communes }}
+                                    </p>
+                                </div>
+                                <div class="col-md-6 text-end">
+                                    <!-- Pagination à implémenter si nécessaire -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Modal Détails Commune -->
+<div class="modal fade" id="modalDetailsCommune" tabindex="-1" aria-labelledby="modalDetailsCommuneLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetailsCommuneLabel">
+                    <i class="mdi mdi-map"></i> Détails de la Commune
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenu-details-commune">
+                <div class="text-center">
+                    <i class="mdi mdi-loading mdi-spin"></i> Chargement...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="genererRapportCommuneModal()">
+                    <i class="mdi mdi-file-document"></i> Générer Rapport
+                </button>
+                <button type="button" class="btn btn-success" onclick="imprimerRapportCommuneModal()">
+                    <i class="mdi mdi-printer"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Options de Rapport -->
+<div class="modal fade" id="modalOptionsRapport" tabindex="-1" aria-labelledby="modalOptionsRapportLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalOptionsRapportLabel">
+                    <i class="mdi mdi-file-document"></i> Options de Rapport
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-options-rapport">
+                    <div class="mb-3">
+                        <label class="form-label">Type de rapport:</label>
+                        <select class="form-control" id="type-rapport">
+                            <option value="complet">Rapport Complet</option>
+                            <option value="resume">Résumé</option>
+                            <option value="statistiques">Statistiques uniquement</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Format:</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" id="format-pdf" value="pdf" checked>
+                            <label class="form-check-label" for="format-pdf">
+                                <i class="mdi mdi-file-pdf text-danger"></i> PDF
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="format" id="format-html" value="html">
+                            <label class="form-check-label" for="format-html">
+                                <i class="mdi mdi-web text-info"></i> HTML (Aperçu)
+                            </label>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="inclure-statistiques" checked>
+                            <label class="form-check-label" for="inclure-statistiques">
+                                Inclure les statistiques détaillées
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="inclure-historique">
+                            <label class="form-check-label" for="inclure-historique">
+                                Inclure l'historique des modifications
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" onclick="confirmerGenerationRapport()">
+                    <i class="mdi mdi-check"></i> Générer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Progression -->
+<div class="modal fade" id="modalProgression" tabindex="-1" aria-labelledby="modalProgressionLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalProgressionLabel">
+                    <i class="mdi mdi-file-document"></i> Génération en cours
+                </h5>
+            </div>
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Chargement...</span>
+                </div>
+                <p id="texte-progression">Préparation du rapport...</p>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%" id="barre-progression"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variables globales
+let communeSelectionnee = null;
+let communesSelectionnees = [];
+let modalProgression = null;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    calculerStatistiques();
+    initialiserFiltres();
+    modalProgression = new bootstrap.Modal(document.getElementById('modalProgression'));
+});
+
+// Calculer les statistiques
+function calculerStatistiques() {
+    const lignes = document.querySelectorAll('#tableau-communes tbody tr[data-statut]');
+    let communesActives = 0;
+    let communesRecentes = 0;
+    const maintenant = new Date();
+    const unMoisAgo = new Date(maintenant.getFullYear(), maintenant.getMonth() - 1, maintenant.getDate());
+    
+    lignes.forEach(ligne => {
+        const statut = ligne.getAttribute('data-statut');
+        const dateCreation = ligne.getAttribute('data-date-creation');
+        
+        if (statut === 'Actif') {
+            communesActives++;
+        }
+        
+        if (dateCreation) {
+            const dateCreationObj = new Date(dateCreation);
+            if (dateCreationObj >= unMoisAgo) {
+                communesRecentes++;
+            }
+        }
+    });
+    
+    document.getElementById('communes-actives').textContent = communesActives;
+    document.getElementById('communes-recentes').textContent = communesRecentes;
+    
+    // Simuler le nombre de rapports générés (à remplacer par des données réelles)
+    document.getElementById('rapports-generes').textContent = Math.floor(Math.random() * 50);
+}
+
+// Initialiser les filtres
+function initialiserFiltres() {
+    const filtreStatut = document.getElementById('filtre-statut');
+    const filtrePeriode = document.getElementById('filtre-periode');
+    const rechercheCommune = document.getElementById('recherche-commune');
+    
+    [filtreStatut, filtrePeriode, rechercheCommune].forEach(element => {
+        element.addEventListener('change', appliquerFiltres);
+        element.addEventListener('keyup', appliquerFiltres);
+    });
+}
+
+// Appliquer les filtres
+function appliquerFiltres() {
+    const filtreStatut = document.getElementById('filtre-statut').value.toLowerCase();
+    const filtrePeriode = parseInt(document.getElementById('filtre-periode').value) || 0;
+    const recherche = document.getElementById('recherche-commune').value.toLowerCase();
+    
+    const lignes = document.querySelectorAll('#tableau-communes tbody tr[data-statut]');
+    let nbAffiches = 0;
+    const maintenant = new Date();
+    
+    lignes.forEach(ligne => {
+        const statut = ligne.getAttribute('data-statut').toLowerCase();
+        const texte = ligne.textContent.toLowerCase();
+        const dateCreation = ligne.getAttribute('data-date-creation');
+        
+        const correspondStatut = !filtreStatut || statut.includes(filtreStatut);
+        const correspondRecherche = !recherche || texte.includes(recherche);
+        
+        let correspondPeriode = true;
+        if (filtrePeriode > 0 && dateCreation) {
+            const dateCreationObj = new Date(dateCreation);
+            const dateLimit = new Date(maintenant.getTime() - (filtrePeriode * 24 * 60 * 60 * 1000));
+            correspondPeriode = dateCreationObj >= dateLimit;
+        }
+        
+        if (correspondStatut && correspondRecherche && correspondPeriode) {
+            ligne.style.display = '';
+            nbAffiches++;
+        } else {
+            ligne.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('nb-affiches').textContent = nbAffiches;
+}
+
+// Réinitialiser les filtres
+function reinitialiserFiltres() {
+    document.getElementById('filtre-statut').value = '';
+    document.getElementById('filtre-periode').value = '';
+    document.getElementById('recherche-commune').value = '';
+    document.getElementById('select-all').checked = false;
+    
+    // Décocher toutes les cases
+    document.querySelectorAll('.commune-checkbox').forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    communesSelectionnees = [];
+    updateSelection();
+    appliquerFiltres();
+}
+
+// Gestion de la sélection multiple
+function toggleSelectAll() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.commune-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        const ligne = checkbox.closest('tr');
+        if (ligne.style.display !== 'none') {
+            checkbox.checked = selectAll.checked;
+        }
+    });
+    
+    updateSelection();
+}
+
+function updateSelection() {
+    const checkboxes = document.querySelectorAll('.commune-checkbox:checked');
+    communesSelectionnees = Array.from(checkboxes).map(cb => cb.value);
+    
+    const nbSelectionnes = communesSelectionnees.length;
+    document.getElementById('nb-selectionnes').textContent = nbSelectionnes;
+    
+    const actionsLot = document.getElementById('actions-lot');
+    if (nbSelectionnes > 0) {
+        actionsLot.style.display = 'block';
+    } else {
+        actionsLot.style.display = 'none';
+    }
+    
+    // Mettre à jour la case "Tout sélectionner"
+    const toutesCheckboxes = document.querySelectorAll('.commune-checkbox');
+    const checkboxesVisibles = Array.from(toutesCheckboxes).filter(cb => 
+        cb.closest('tr').style.display !== 'none'
+    );
+    const checkboxesCochees = checkboxesVisibles.filter(cb => cb.checked);
+    
+    const selectAll = document.getElementById('select-all');
+    selectAll.indeterminate = checkboxesCochees.length > 0 && checkboxesCochees.length < checkboxesVisibles.length;
+    selectAll.checked = checkboxesCochees.length === checkboxesVisibles.length && checkboxesVisibles.length > 0;
+}
+
+// Imprimer rapport avec filtres appliqués (même logique que les autres rapports)
+function imprimerRapportFiltre(typeRapport = 'complet') {
+    // Récupérer les communes visibles (après filtrage)
+    const lignesVisibles = document.querySelectorAll('#tableau-communes tbody tr[data-commune-id]:not([style*="display: none"])');
+    
+    if (lignesVisibles.length === 0) {
+        alert('Aucune commune visible à imprimer. Vérifiez vos filtres.');
+        return;
+    }
+    
+    // Extraire les IDs des communes visibles
+    const communesIds = Array.from(lignesVisibles).map(ligne => 
+        ligne.getAttribute('data-commune-id')
+    );
+    
+    // Récupérer les filtres appliqués
+    const filtreStatut = document.getElementById('filtre-statut').value;
+    const filtrePeriode = document.getElementById('filtre-periode').value;
+    const recherche = document.getElementById('recherche-commune').value;
+    
+    // Créer un formulaire pour envoyer les données en POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/commune/imprimer-filtre/';
+    form.target = '_blank'; // Ouvrir dans un nouvel onglet
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Ajouter les IDs des communes
+    communesIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'communes_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
+    
+    // Ajouter les filtres
+    const filtres = [
+        { name: 'filtre_statut', value: filtreStatut },
+        { name: 'filtre_periode', value: filtrePeriode },
+        { name: 'recherche', value: recherche }
+    ];
+    
+    filtres.forEach(filtre => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = filtre.name;
+        input.value = filtre.value;
+        form.appendChild(input);
+    });
+    
+    // Ajouter le formulaire au DOM et le soumettre
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+    
+    // L'impression se fait dans le nouvel onglet - pas besoin d'alerte
+}
+
+// Voir détails d'une commune
+function voirDetailsCommune(communeId) {
+    communeSelectionnee = communeId;
+    
+    // Récupérer les données de la commune depuis le tableau
+    const ligne = document.querySelector(`tr[data-commune-id="${communeId}"]`);
+    const nom = ligne.querySelector('td:nth-child(3) strong').textContent;
+    const dateOuverture = ligne.querySelector('td:nth-child(4)').textContent.trim();
+    
+    document.getElementById('contenu-details-commune').innerHTML = `
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="avatar avatar-xl bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
+                    <i class="mdi mdi-map fs-1 text-white"></i>
+                </div>
+                <h5>${nom}</h5>
+                <p class="text-muted">Commune #${communeId}</p>
+            </div>
+            <div class="col-md-8">
+                <h6><i class="mdi mdi-information"></i> Informations générales</h6>
+                <table class="table table-sm">
+                    <tr>
+                        <td><strong>Nom:</strong></td>
+                        <td>${nom}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Date ouverture:</strong></td>
+                        <td>${dateOuverture || 'Non définie'}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Statut:</strong></td>
+                        <td><span class="badge badge-success">Actif</span></td>
+                    </tr>
+                </table>
+                
+                <h6 class="mt-3"><i class="mdi mdi-chart-bar"></i> Statistiques</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <strong class="text-success">Actif</strong><br>
+                            <small>Statut</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <strong class="text-info">Cabinet</strong><br>
+                            <small>Rattachement</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <h6><i class="mdi mdi-history"></i> Activité récente</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="mdi mdi-circle-small text-success"></i> Commune créée</li>
+                        <li><i class="mdi mdi-circle-small text-info"></i> Informations mises à jour</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDetailsCommune'));
+    modal.show();
+}
+
+// Générer rapport d'une commune avec options
+function genererRapportCommune(communeId) {
+    communeSelectionnee = communeId;
+    const modal = new bootstrap.Modal(document.getElementById('modalOptionsRapport'));
+    modal.show();
+}
+
+// Confirmer la génération du rapport
+function confirmerGenerationRapport() {
+    const typeRapport = document.getElementById('type-rapport').value;
+    const format = document.querySelector('input[name="format"]:checked').value;
+    
+    // Fermer le modal des options
+    bootstrap.Modal.getInstance(document.getElementById('modalOptionsRapport')).hide();
+    
+    // Afficher la progression
+    afficherProgression();
+    
+    // Simuler la génération
+    simulerGenerationRapport(communeSelectionnee, typeRapport, format);
+}
+
+// Afficher la progression
+function afficherProgression() {
+    modalProgression.show();
+    
+    let progression = 0;
+    const barreProgression = document.getElementById('barre-progression');
+    const texteProgression = document.getElementById('texte-progression');
+    
+    const etapes = [
+        'Préparation du rapport...',
+        'Collecte des données...',
+        'Génération du document...',
+        'Finalisation...'
+    ];
+    
+    let etapeActuelle = 0;
+    
+    const interval = setInterval(() => {
+        progression += Math.random() * 30;
+        if (progression > 100) progression = 100;
+        
+        barreProgression.style.width = progression + '%';
+        
+        if (etapeActuelle < etapes.length - 1 && progression > (etapeActuelle + 1) * 25) {
+            etapeActuelle++;
+            texteProgression.textContent = etapes[etapeActuelle];
+        }
+        
+        if (progression >= 100) {
+            clearInterval(interval);
+            setTimeout(() => {
+                modalProgression.hide();
+            }, 500);
+        }
+    }, 200);
+}
+
+// Simuler la génération du rapport
+function simulerGenerationRapport(communeId, typeRapport, format) {
+    setTimeout(() => {
+        if (format === 'pdf') {
+            const urlImpression = `/rapport/commune/imprimer/${communeId}/?type=${typeRapport}`;
+            window.open(urlImpression, '_blank');
+        } else {
+            // Pour HTML, on peut ouvrir une page de prévisualisation
+            alert('Prévisualisation HTML (à implémenter)');
+        }
+        
+        alert('Rapport généré avec succès !');
+    }, 2000);
+}
+
+// Générer rapport depuis le modal
+function genererRapportCommuneModal() {
+    if (communeSelectionnee) {
+        genererRapportCommune(communeSelectionnee);
+    }
+}
+
+// Imprimer rapport depuis le modal
+function imprimerRapportCommuneModal() {
+    if (communeSelectionnee) {
+        imprimerRapportCommune(communeSelectionnee);
+    }
+}
+
+// Imprimer rapport d'une commune
+function imprimerRapportCommune(communeId) {
+    const typeRapport = 'complet';
+    const urlImpression = `/rapport/commune/imprimer/${communeId}/?type=${typeRapport}`;
+    window.open(urlImpression, '_blank');
+    alert('Rapport envoyé à l\'impression !');
+}
+
+// Actions en lot
+function genererRapportsLot() {
+    if (communesSelectionnees.length === 0) {
+        alert('Aucune commune sélectionnée');
+        return;
+    }
+    
+    afficherProgression();
+    
+    // Simuler la génération en lot
+    setTimeout(() => {
+        modalProgression.hide();
+        alert(`${communesSelectionnees.length} rapport(s) généré(s) avec succès !`);
+    }, 3000);
+}
+
+function exporterSelectionPDF() {
+    if (communesSelectionnees.length === 0) {
+        alert('Aucune commune sélectionnée');
+        return;
+    }
+    
+    // Créer un rapport consolidé
+    const url = `/rapport/commune/export-selection/?communes=${communesSelectionnees.join(',')}`;
+    window.open(url, '_blank');
+    alert('Export PDF en cours...');
+}
+
+// Export global
+function exporterToutesCommunes() {
+    const url = `/rapport/commune/export-global/`;
+    window.open(url, '_blank');
+    alert('Export global en cours...');
+}
+
+// Exporter le tableau
+function exporterTableau(format) {
+    if (format === 'pdf') {
+        window.print();
+    } else if (format === 'excel') {
+        // Implémenter l'export Excel
+        alert('Export Excel (à implémenter)');
+    }
+}
+
+// Exporter les statistiques
+function exporterStatistiques() {
+    const url = `/rapport/commune/statistiques/`;
+    window.open(url, '_blank');
+    alert('Export des statistiques en cours...');
+}
+</script>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease-in-out;
+}
+
+.small-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.small-box > .inner {
+    padding: 15px;
+}
+
+.small-box .icon {
+    transition: all .3s linear;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.small-box:hover .icon {
+    font-size: 95px;
+}
+
+.bg-info {
+    background: linear-gradient(135deg, #17a2b8, #138496) !important;
+    color: white;
+}
+
+.bg-success {
+    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+    color: white;
+}
+
+.bg-warning {
+    background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+    color: white;
+}
+
+.bg-danger {
+    background: linear-gradient(135deg, #dc3545, #c82333) !important;
+    color: white;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.avatar-xl {
+    width: 80px;
+    height: 80px;
+}
+
+.table-responsive {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.table thead th {
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0,123,255,0.05);
+}
+
+.btn-group .btn {
+    margin: 0 1px;
+}
+
+.badge {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+}
+
+.modal-content {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    border-radius: 10px 10px 0 0;
+    border-bottom: none;
+}
+
+.modal-footer {
+    border-top: 1px solid #e9ecef;
+    border-radius: 0 0 10px 10px;
+}
+
+.progress {
+    height: 8px;
+    border-radius: 4px;
+    background-color: #e9ecef;
+}
+
+.progress-bar {
+    border-radius: 4px;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.form-check-input:checked {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+.alert-info {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    color: #0c5460;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.box {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .small-box .icon {
+        font-size: 60px;
+    }
+    
+    .small-box:hover .icon {
+        font-size: 65px;
+    }
+    
+    .btn-group .btn {
+        margin-bottom: 5px;
+    }
+    
+    .table-responsive {
+        font-size: 0.9rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .box-tools,
+    .btn-group,
+    .modal,
+    .alert {
+        display: none !important;
+    }
+    
+    .table {
+        font-size: 12px;
+    }
+    
+    .small-box {
+        break-inside: avoid;
+    }
+}
+
+/* Custom scrollbar */
+.table-responsive::-webkit-scrollbar {
+    height: 8px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+}
+
+.table-responsive::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+</style>
+{% endblock %}

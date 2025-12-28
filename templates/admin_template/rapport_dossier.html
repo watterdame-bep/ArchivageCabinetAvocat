@@ -1,0 +1,600 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Rapport Dossiers{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">📋 Rapport Dossiers</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dashboard' %}">Rapport</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Dossiers</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
+                        <i class="mdi mdi-printer"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-folder-multiple text-primary"></i> 
+                                Liste des Dossiers ({{ total_dossiers }})
+                            </h4>
+                        </div>
+                        
+                        <div class="box-body">
+                            <!-- Statistiques rapides -->
+                            <div class="row mb-4">
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-info">
+                                        <div class="inner">
+                                            <h3>{{ total_dossiers }}</h3>
+                                            <p>Total Dossiers</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-folder-multiple"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-success">
+                                        <div class="inner">
+                                            <h3 id="dossiers-actifs">0</h3>
+                                            <p>Avec Activités Récentes</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-chart-line"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-warning">
+                                        <div class="inner">
+                                            <h3 id="total-activites">0</h3>
+                                            <p>Total Activités</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-history"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-danger">
+                                        <div class="inner">
+                                            <h3 id="rapports-generes">0</h3>
+                                            <p>Rapports générés</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-file-document"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtres -->
+                            <div class="row mb-3">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Filtrer par statut:</label>
+                                        <select id="filtre-statut" class="form-control">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="Ouvert">Ouvert</option>
+                                            <option value="Clôturé">Clôturé</option>
+                                            <option value="En cours">En cours</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Activité récente:</label>
+                                        <select id="filtre-activite" class="form-control">
+                                            <option value="">Toutes</option>
+                                            <option value="7">7 derniers jours</option>
+                                            <option value="30">30 derniers jours</option>
+                                            <option value="0">Aucune activité</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Rechercher:</label>
+                                        <input type="text" id="recherche-dossier" class="form-control" placeholder="Numéro, titre, client...">
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="button" class="btn btn-secondary btn-block" onclick="reinitialiserFiltres()">
+                                            <i class="mdi mdi-refresh"></i> Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Tableau des dossiers -->
+                            <div class="table-responsive">
+                                <table id="tableau-dossiers" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Numéro Référence</th>
+                                            <th>Titre</th>
+                                            <th>Client</th>
+                                            <th>Type Affaire</th>
+                                            <th>Avocat Principal</th>
+                                            <th>Statut</th>
+                                            
+                                            <th width="150">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in dossiers_data %}
+                                        <tr data-statut="{{ item.dossier.statut_dossier }}" 
+                                            data-dossier-id="{{ item.dossier.id }}" 
+                                            data-activites-recentes="{{ item.activites_recentes }}">
+                                            <td class="text-center">
+                                                <strong>{{ item.dossier.id }}</strong>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">
+                                                    {{ item.dossier.numero_reference_dossier|default:"-" }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong>{{ item.dossier.titre|truncatechars:30 }}</strong>
+                                                    <small class="text-muted">
+                                                        <i class="mdi mdi-calendar"></i> {{ item.dossier.date_ouverture|date:"d/m/Y"|default:"-" }}
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong>{{ item.client_nom }}</strong>
+                                                    <small class="text-muted">
+                                                        <i class="mdi mdi-account"></i> Client
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-secondary">
+                                                    {{ item.type_affaire }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small>{{ item.avocat_principal }}</small>
+                                            </td>
+                                            <td>
+                                                {% if item.dossier.statut_dossier == 'Ouvert' %}
+                                                    <span class="badge badge-success">
+                                                        <i class="mdi mdi-folder-open"></i> {{ item.dossier.statut_dossier }}
+                                                    </span>
+                                                {% elif item.dossier.statut_dossier == 'Clôturé' %}
+                                                    <span class="badge badge-secondary">
+                                                        <i class="mdi mdi-folder-check"></i> {{ item.dossier.statut_dossier }}
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge badge-warning">
+                                                        <i class="mdi mdi-folder"></i> {{ item.dossier.statut_dossier }}
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            
+                                            
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-info" 
+                                                            onclick="voirActivitesDossier({{ item.dossier.id }})"
+                                                            title="Voir activités">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-primary" 
+                                                            onclick="genererRapportActivites({{ item.dossier.id }})"
+                                                            title="Générer rapport">
+                                                        <i class="mdi mdi-file-document"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-success" 
+                                                            onclick="imprimerRapportActivites({{ item.dossier.id }})"
+                                                            title="Imprimer rapport">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="10" class="text-center text-muted py-4">
+                                                <i class="mdi mdi-information mdi-48px"></i>
+                                                <br>Aucun dossier trouvé
+                                                <br><small>Vérifiez vos filtres ou ajoutez des dossiers</small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+<!-- Modal Activités Dossier -->
+<div class="modal fade" id="modalActivitesDossier" tabindex="-1" aria-labelledby="modalActivitesDossierLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalActivitesDossierLabel">
+                    <i class="mdi mdi-history"></i> Activités du Dossier
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenu-activites-dossier">
+                <div class="text-center">
+                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des activités...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="genererRapportActivitesModal()">
+                    <i class="mdi mdi-file-document"></i> Générer Rapport
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Imprimer rapport avec filtres appliqués (même logique que les autres rapports)
+function imprimerRapportFiltre(typeRapport = 'complet') {
+    // Récupérer les dossiers visibles (après filtrage)
+    const lignesVisibles = document.querySelectorAll('#tableau-dossiers tbody tr[data-dossier-id]:not([style*="display: none"])');
+    
+    if (lignesVisibles.length === 0) {
+        alert('Aucun dossier visible à imprimer. Vérifiez vos filtres.');
+        return;
+    }
+    
+    // Extraire les IDs des dossiers visibles
+    const dossiersIds = Array.from(lignesVisibles).map(ligne => 
+        ligne.getAttribute('data-dossier-id')
+    );
+    
+    // Récupérer les filtres appliqués
+    const filtreStatut = document.getElementById('filtre-statut').value;
+    const filtreActivite = document.getElementById('filtre-activite').value;
+    const recherche = document.getElementById('recherche-dossier').value;
+    
+    // Créer un formulaire pour envoyer les données en POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/dossier/imprimer-filtre/';
+    form.target = '_blank'; // Ouvrir dans un nouvel onglet
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Ajouter les IDs des dossiers
+    dossiersIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'dossiers_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
+    
+    // Ajouter les filtres
+    const filtres = [
+        { name: 'filtre_statut', value: filtreStatut },
+        { name: 'filtre_activite', value: filtreActivite },
+        { name: 'recherche', value: recherche }
+    ];
+    
+    filtres.forEach(filtre => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = filtre.name;
+        input.value = filtre.value;
+        form.appendChild(input);
+    });
+    
+    // Ajouter le formulaire au DOM et le soumettre
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// Variables globales
+let dossierSelectionne = null;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    calculerStatistiques();
+    initialiserFiltres();
+});
+
+// Calculer les statistiques
+function calculerStatistiques() {
+    const lignes = document.querySelectorAll('#tableau-dossiers tbody tr[data-dossier-id]');
+    let dossiersActifs = 0;
+    let totalActivites = 0;
+    
+    lignes.forEach(ligne => {
+        const activitesRecentes = parseInt(ligne.getAttribute('data-activites-recentes')) || 0;
+        const activitesTotales = parseInt(ligne.querySelector('td:nth-child(8) strong').textContent) || 0;
+        
+        if (activitesRecentes > 0) {
+            dossiersActifs++;
+        }
+        totalActivites += activitesTotales;
+    });
+    
+    document.getElementById('dossiers-actifs').textContent = dossiersActifs;
+    document.getElementById('total-activites').textContent = totalActivites;
+    
+    // Simuler le nombre de rapports générés
+    document.getElementById('rapports-generes').textContent = Math.floor(Math.random() * 25);
+}
+
+// Initialiser les filtres
+function initialiserFiltres() {
+    const filtreStatut = document.getElementById('filtre-statut');
+    const filtreActivite = document.getElementById('filtre-activite');
+    const rechercheDossier = document.getElementById('recherche-dossier');
+    
+    [filtreStatut, filtreActivite, rechercheDossier].forEach(element => {
+        element.addEventListener('change', appliquerFiltres);
+        element.addEventListener('keyup', appliquerFiltres);
+    });
+}
+
+// Appliquer les filtres
+function appliquerFiltres() {
+    const filtreStatut = document.getElementById('filtre-statut').value;
+    const filtreActivite = document.getElementById('filtre-activite').value;
+    const recherche = document.getElementById('recherche-dossier').value.toLowerCase();
+    
+    const lignes = document.querySelectorAll('#tableau-dossiers tbody tr[data-dossier-id]');
+    let nbAffiches = 0;
+    
+    lignes.forEach(ligne => {
+        const statut = ligne.getAttribute('data-statut');
+        const activitesRecentes = parseInt(ligne.getAttribute('data-activites-recentes')) || 0;
+        const texte = ligne.textContent.toLowerCase();
+        
+        const correspondStatut = !filtreStatut || statut === filtreStatut;
+        const correspondRecherche = !recherche || texte.includes(recherche);
+        
+        let correspondActivite = true;
+        if (filtreActivite) {
+            if (filtreActivite === '0') {
+                correspondActivite = activitesRecentes === 0;
+            } else {
+                correspondActivite = activitesRecentes > 0;
+            }
+        }
+        
+        if (correspondStatut && correspondRecherche && correspondActivite) {
+            ligne.style.display = '';
+            nbAffiches++;
+        } else {
+            ligne.style.display = 'none';
+        }
+    });
+}
+
+// Réinitialiser les filtres
+function reinitialiserFiltres() {
+    document.getElementById('filtre-statut').value = '';
+    document.getElementById('filtre-activite').value = '';
+    document.getElementById('recherche-dossier').value = '';
+    appliquerFiltres();
+}
+
+// Voir les activités d'un dossier
+function voirActivitesDossier(dossierId) {
+    dossierSelectionne = dossierId;
+    
+    // Afficher le modal
+    const modal = new bootstrap.Modal(document.getElementById('modalActivitesDossier'));
+    modal.show();
+    
+    // Charger les activités via AJAX
+    fetch(`/rapport/dossier/activites-ajax/${dossierId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                afficherActivitesDossier(data.activites, data.pagination);
+            } else {
+                document.getElementById('contenu-activites-dossier').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="mdi mdi-alert"></i> Erreur: ${data.error}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('contenu-activites-dossier').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="mdi mdi-alert"></i> Erreur de chargement: ${error.message}
+                </div>
+            `;
+        });
+}
+
+// Afficher les activités dans le modal
+function afficherActivitesDossier(activites, pagination) {
+    let html = '';
+    
+    if (activites.length === 0) {
+        html = `
+            <div class="text-center text-muted py-4">
+                <i class="mdi mdi-information mdi-48px"></i>
+                <br>Aucune activité trouvée pour ce dossier
+            </div>
+        `;
+    } else {
+        html = '<div class="timeline">';
+        
+        activites.forEach(activite => {
+            html += `
+                <div class="timeline-item mb-3">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <div class="avatar avatar-sm bg-${activite.color} rounded-circle d-flex align-items-center justify-content-center">
+                                <i class="${activite.icon} text-white"></i>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="mb-1">Activité du ${activite.date_activite}</h6>
+                                    <p class="text-muted mb-1">${activite.description}</p>
+                                    <div class="d-flex align-items-center">
+                                        <small class="text-muted me-3">
+                                            <i class="mdi mdi-account"></i> ${activite.avocat}
+                                        </small>
+                                        <small class="text-info me-3">
+                                            <i class="mdi mdi-timer"></i> ${activite.duree_heures}h
+                                        </small>
+                                        <span class="badge badge-${activite.color}">${activite.statut_facturation}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <small class="text-muted">${activite.date_activite}</small>
+                                    ${activite.cout_estime > 0 ? `<br><small class="text-success">${activite.cout_estime.toFixed(2)} USD</small>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        // Ajouter la pagination si nécessaire
+        if (pagination.pages > 1) {
+            html += `
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <small class="text-muted">
+                        Page ${pagination.page} sur ${pagination.pages} (${pagination.total} activités)
+                    </small>
+                    <div class="btn-group">
+                        ${pagination.has_prev ? `<button class="btn btn-sm btn-outline-primary" onclick="chargerPageActivites(${pagination.page - 1})">Précédent</button>` : ''}
+                        ${pagination.has_next ? `<button class="btn btn-sm btn-outline-primary" onclick="chargerPageActivites(${pagination.page + 1})">Suivant</button>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+    }
+    
+    document.getElementById('contenu-activites-dossier').innerHTML = html;
+}
+
+// Charger une page d'activités
+function chargerPageActivites(page) {
+    if (!dossierSelectionne) return;
+    
+    document.getElementById('contenu-activites-dossier').innerHTML = `
+        <div class="text-center">
+            <i class="mdi mdi-loading mdi-spin"></i> Chargement...
+        </div>
+    `;
+    
+    fetch(`/rapport/dossier/activites-ajax/${dossierSelectionne}/?page=${page}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                afficherActivitesDossier(data.activites, data.pagination);
+            }
+        })
+        .catch(error => console.error('Erreur:', error));
+}
+
+// Générer rapport d'activités
+function genererRapportActivites(dossierId) {
+    window.open(`/rapport/dossier/activites/${dossierId}/`, '_blank');
+}
+
+// Générer rapport depuis le modal
+function genererRapportActivitesModal() {
+    if (dossierSelectionne) {
+        genererRapportActivites(dossierSelectionne);
+    }
+}
+
+// Imprimer rapport d'activités
+function imprimerRapportActivites(dossierId) {
+    window.open(`/rapport/dossier/activites/${dossierId}/?format=pdf`, '_blank');
+}
+</script>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.timeline-item {
+    border-left: 2px solid #e9ecef;
+    padding-left: 1rem;
+    position: relative;
+}
+
+.timeline-item:last-child {
+    border-left: none;
+}
+
+.avatar {
+    width: 2rem;
+    height: 2rem;
+}
+
+.avatar-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+</style>
+
+{% endblock %}

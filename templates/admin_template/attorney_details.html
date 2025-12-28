@@ -1,0 +1,541 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Détails de l'agent - {{ agent.nom }} {{ agent.prenom }}{% endblock %}
+
+{% block content %}
+<style>
+/* Styles personnalisés pour la page agent */
+.agent-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 15px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.agent-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('{% static "images/gallery/landscape14.jpg" %}') center/cover;
+    opacity: 0.2;
+}
+
+.agent-avatar {
+    width: 120px;
+    height: 120px;
+    border: 4px solid white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.stat-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 20px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: -20px;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.timeline-content {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid #dee2e6;
+}
+
+.dossier-card {
+    border-left: 4px solid #007bff;
+    transition: all 0.2s;
+}
+
+.dossier-card:hover {
+    border-left-color: #0056b3;
+    box-shadow: 0 4px 15px rgba(0,123,255,0.1);
+}
+</style>
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Profil de l'agent</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'Agent_Liste' %}">Agents</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">{{ agent.nom }} {{ agent.prenom }}</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <a href="{% url 'Agent_Liste' %}" class="btn btn-outline-secondary me-2">
+                        <i class="mdi mdi-arrow-left me-1"></i>Retour à la liste
+                    </a>
+                    <a href="{% url 'modifier_agent' agent.id %}" class="btn btn-primary">
+                        <i class="mdi mdi-pencil me-1"></i>Modifier
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <!-- Colonne principale -->
+                <div class="col-xl-8 col-lg-7">
+                    <!-- En-tête de l'agent -->
+                    <div class="card agent-header mb-4">
+                        <div class="card-body p-4 position-relative">
+                            <div class="row align-items-center">
+                                <div class="col-auto">
+                                    {% if agent.photo %}
+                                        <img src="{{ agent.photo.url }}" alt="{{ agent.nom }} {{ agent.prenom }}" 
+                                             class="rounded-circle agent-avatar">
+                                    {% else %}
+                                        <div class="rounded-circle agent-avatar bg-white d-flex align-items-center justify-content-center">
+                                            <i class="mdi mdi-account text-primary" style="font-size: 48px;"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col">
+                                    <h2 class="mb-1">{{ agent.nom|title }} {{ agent.prenom|title }}</h2>
+                                    <h5 class="mb-2 opacity-75">{{ agent.poste|default:"Agent" }}</h5>
+                                    {% if agent.specialite %}
+                                        <div class=" bg-opacity-25 text-white fs-14 px-3 py-2">
+                                           <i>{{ agent.specialite.nom }}</i> 
+                                        </div>
+                                    {% endif %}
+                                    <div class="mt-3">
+                                        <small class="opacity-75">
+                                            <i class="mdi mdi-calendar me-1"></i>
+                                            Embauché le {{ agent.date_creation|date:"d F Y"|default:"Date non disponible" }}
+                                        </small>
+                                    </div>
+                                </div>
+                                <div class="col-auto text-end">
+                                    <div class="mt-2">
+                                        <button class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#agentInfoModal">
+                                            <i class="mdi mdi-information me-1"></i>Plus d'infos
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistiques -->
+                    <div class="row mb-4">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card stat-card border-0 bg-info bg-opacity-10" style="min-height: 140px;">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-info mb-2">
+                                        <i class="mdi mdi-folder-open" style="font-size: 32px;"></i>
+                                    </div>
+                                    <h4 class="text-white mb-1" style="font-weight: bold;">{{ statistiques.total_dossiers|default:0 }}</h4>
+                                    <p class="text-muted mb-0 small">Total dossiers</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card stat-card border-0 bg-primary bg-opacity-10" style="min-height: 140px;">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-primary mb-2">
+                                        <i class="mdi mdi-briefcase" style="font-size: 32px;"></i>
+                                    </div>
+                                    <h4 class="text-white mb-1" style="font-weight: bold;">{{ statistiques.dossiers_actifs|default:0 }}</h4>
+                                    <p class="text-muted mb-0 small">Dossiers en cours</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card stat-card border-0 bg-warning bg-opacity-10" style="min-height: 140px;">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-warning mb-2">
+                                        <i class="mdi mdi-folder-check" style="font-size: 32px;"></i>
+                                    </div>
+                                    <h4 class="text-white mb-1" style="font-weight: bold;">{{ statistiques.dossiers_clotures|default:0 }}</h4>
+                                    <p class="text-muted mb-0 small">Dossiers clôturés</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="card stat-card border-0 bg-success bg-opacity-10" style="min-height: 140px;">
+                                <div class="card-body text-center py-3">
+                                    <div class="text-success mb-2">
+                                        <i class="mdi mdi-trophy" style="font-size: 32px;"></i>
+                                    </div>
+                                    <h4 class="text-white mb-1" style="font-weight: bold;">{{ statistiques.dossiers_gagnes|default:0 }}</h4>
+                                    <p class="text-muted mb-0 small">Dossiers gagnés</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dossiers actifs -->
+                    {% if dossiers_actifs %}
+                    <div class="card mb-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-briefcase-check me-2"></i>Dossiers actifs
+                            </h5>
+                            <span class="badge bg-primary">{{ statistiques.dossiers_actifs|default:0 }}</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div style="max-height: 400px; overflow-y: auto;" class="p-3">
+                                {% for dossier in dossiers_actifs %}
+                                <div class="dossier-card card mb-3">
+                                    <div class="card-body">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">{{ dossier.numero_reference_dossier }}</h6>
+                                                <p class="text-muted mb-1">
+                                                    <strong>Client:</strong> {{ dossier.client.nom }} {{ dossier.client.prenom }}
+                                                </p>
+                                                <p class="text-muted mb-1">
+                                                    <strong>Type:</strong> {{ dossier.type_affaire.nom_type }}
+                                                </p>
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-calendar me-1"></i>
+                                                    Ouvert le {{ dossier.date_ouverture|date:"d/m/Y" }}
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-success mb-2">{{ dossier.statut_dossier }}</span>
+                                                <br>
+                                                <a href="{% url 'dossier_details' dossier.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="mdi mdi-eye me-1"></i>Voir
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Activités récentes -->
+                    {% if activites_recentes %}
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-history me-2"></i>Activités récentes
+                            </h5>
+                            <span class="badge bg-info">{{ activites_recentes|length }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                {% for activite in activites_recentes|slice:":4" %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        <div class="bg-{{ activite.color }} rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <i class="{{ activite.icon }} text-white" style="font-size: 14px;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">{{ activite.titre }}</h6>
+                                                <p class="text-muted mb-1 small">{{ activite.description }}</p>
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-clock-outline me-1"></i>
+                                                    {{ activite.date|timesince }} ago
+                                                </small>
+                                            </div>
+                                            {% if activite.dossier_id %}
+                                            <a href="{% url 'dossier_details' activite.dossier_id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="mdi mdi-eye"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                                
+                                <!-- Activités cachées -->
+                                <div id="activites-cachees" style="display: none;">
+                                    {% for activite in activites_recentes|slice:"4:" %}
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker">
+                                            <div class="bg-{{ activite.color }} rounded-circle d-flex align-items-center justify-content-center" 
+                                                 style="width: 32px; height: 32px;">
+                                                <i class="{{ activite.icon }} text-white" style="font-size: 14px;"></i>
+                                            </div>
+                                        </div>
+                                        <div class="timeline-content">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="mb-1">{{ activite.titre }}</h6>
+                                                    <p class="text-muted mb-1 small">{{ activite.description }}</p>
+                                                    <small class="text-muted">
+                                                        <i class="mdi mdi-clock-outline me-1"></i>
+                                                        {{ activite.date|timesince }} ago
+                                                    </small>
+                                                </div>
+                                                {% if activite.dossier_id %}
+                                                <a href="{% url 'dossier_details' activite.dossier_id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="mdi mdi-eye"></i>
+                                                </a>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            <!-- Boutons d'action -->
+                            {% if activites_recentes|length > 4 %}
+                            <div class="text-center mt-3">
+                                <button id="btn-voir-tout" class="btn btn-outline-primary btn-sm" onclick="toggleActivites()">
+                                    <i class="mdi mdi-chevron-down me-1"></i>Voir tout ({{ activites_recentes|length }})
+                                </button>
+                                <button id="btn-voir-moins" class="btn btn-outline-secondary btn-sm" onclick="toggleActivites()" style="display: none;">
+                                    <i class="mdi mdi-chevron-up me-1"></i>Voir moins
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <script>
+                    function toggleActivites() {
+                        const activitesCachees = document.getElementById('activites-cachees');
+                        const btnVoirTout = document.getElementById('btn-voir-tout');
+                        const btnVoirMoins = document.getElementById('btn-voir-moins');
+                        
+                        if (activitesCachees.style.display === 'none') {
+                            activitesCachees.style.display = 'block';
+                            btnVoirTout.style.display = 'none';
+                            btnVoirMoins.style.display = 'inline-block';
+                        } else {
+                            activitesCachees.style.display = 'none';
+                            btnVoirTout.style.display = 'inline-block';
+                            btnVoirMoins.style.display = 'none';
+                        }
+                    }
+                    </script>
+                    {% endif %}
+                </div>
+
+                <!-- Sidebar droite -->
+                <div class="col-xl-4 col-lg-5">
+                    <!-- Informations de contact -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-contact-mail me-2"></i>Informations de contact
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if agent.telephone %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-primary bg-opacity-10 rounded p-2">
+                                        <i class="mdi mdi-phone text-primary"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">{{ agent.telephone }}</h6>
+                                    <small class="text-muted">Téléphone</small>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if agent.email %}
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-success bg-opacity-10 rounded p-2">
+                                        <i class="mdi mdi-email text-success"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">{{ agent.email }}</h6>
+                                    <small class="text-muted">Email</small>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            {% if agent.adresse %}
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <div class="bg-info bg-opacity-10 rounded p-2">
+                                        <i class="mdi mdi-map-marker text-info"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <h6 class="mb-0">
+                                        {{ agent.adresse.numero }} {{ agent.adresse.avenue }}<br>
+                                        {{ agent.adresse.quartier }}, {{ agent.adresse.commune }}
+                                    </h6>
+                                    <small class="text-muted">Adresse</small>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Statistiques détaillées -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-chart-pie me-2"></i>Statistiques détaillées
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6 border-end">
+                                    <h4 class="text-info mb-1">{{ statistiques.declarations_total|default:0 }}</h4>
+                                    <p class="text-muted mb-0 small">Déclarations</p>
+                                </div>
+                                <div class="col-6">
+                                    <h4 class="text-secondary mb-1">{{ statistiques.documents_total|default:0 }}</h4>
+                                    <p class="text-muted mb-0 small">Documents</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Modal pour les informations détaillées de l'agent -->
+<div class="modal fade" id="agentInfoModal" tabindex="-1" aria-labelledby="agentInfoModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="agentInfoModalLabel">
+                    <i class="mdi mdi-account-details me-2"></i>
+                    Informations détaillées - {{ agent.nom|title }} {{ agent.prenom|title }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Onglets -->
+                <ul class="nav nav-tabs" id="agentInfoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="apropos-tab" data-bs-toggle="tab" data-bs-target="#apropos" type="button" role="tab" aria-controls="apropos" aria-selected="true">
+                            <i class="mdi mdi-account-details me-1"></i>À propos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pieces-tab" data-bs-toggle="tab" data-bs-target="#pieces" type="button" role="tab" aria-controls="pieces" aria-selected="false">
+                            <i class="mdi mdi-file-document-multiple me-1"></i>Pièces justificatives
+                            <span class="badge bg-primary ms-1">{{ statistiques.total_pieces_justificatives|default:0 }}</span>
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Contenu des onglets -->
+                <div class="tab-content mt-3" id="agentInfoTabsContent">
+                    <!-- Onglet À propos -->
+                    <div class="tab-pane fade show active" id="apropos" role="tabpanel" aria-labelledby="apropos-tab">
+                        {% if agent.a_propos %}
+                            <div class="card border-0 bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="mdi mdi-text-account me-2"></i>Biographie
+                                    </h6>
+                                    <p class="card-text">{{ agent.a_propos }}</p>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="mdi mdi-account-question text-muted" style="font-size: 48px;"></i>
+                                <p class="text-muted mt-2">Aucune information biographique disponible</p>
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Informations supplémentaires -->
+                        <div class="row mt-4">
+                            
+                            
+                        </div>
+                    </div>
+                    
+                    <!-- Onglet Pièces justificatives -->
+                    <div class="tab-pane fade" id="pieces" role="tabpanel" aria-labelledby="pieces-tab">
+                        {% if pieces_justificatives %}
+                            <div class="row">
+                                {% for piece in pieces_justificatives %}
+                                <div class="col-md-6 mb-3">
+                                    <div class="card border">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <div class="bg-secondary bg-opacity-10 rounded p-3">
+                                                        <i class="mdi mdi-file-document text-secondary" style="font-size: 24px;"></i>
+                                                    </div>
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <h6 class="mb-1">{{ piece.type_piece.nom_type_piece }}</h6>
+                                                    <p class="text-muted mb-2 small">{{ piece.numero_piece }}</p>
+                                                    {% if piece.fichier %}
+                                                        <a href="{{ piece.fichier.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                            <i class="mdi mdi-download me-1"></i>Télécharger
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="badge bg-warning">Fichier non disponible</span>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="mdi mdi-file-document-remove text-muted" style="font-size: 48px;"></i>
+                                <p class="text-muted mt-2">Aucune pièce justificative disponible</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="mdi mdi-close me-1"></i>Fermer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

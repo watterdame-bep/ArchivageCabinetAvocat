@@ -1,0 +1,1129 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- CSS personnalisé pour le select des clients -->
+<style>
+  /* Style pour le select des clients avec recherche */
+  .client-select-with-search .select2-container .select2-selection--single {
+    border: 2px solid #007bff;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+  }
+
+  .client-select-with-search .select2-container .select2-selection--single:hover {
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+  }
+
+  /* Style pour le select des clients simple */
+  .client-select-simple .select2-container .select2-selection--single {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+  }
+
+  /* Amélioration de la barre de recherche */
+  .select2-search--dropdown .select2-search__field {
+    border: 1px solid #007bff;
+    border-radius: 4px;
+    padding: 8px 12px;
+  }
+
+  .select2-search--dropdown .select2-search__field:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    outline: none;
+  }
+
+  /* Style pour les résultats de recherche */
+  .select2-results__option--highlighted {
+    background-color: #007bff !important;
+    color: white !important;
+  }
+
+  /* Indicateur visuel pour la recherche */
+  .client-select-with-search::before {
+    content: "🔍";
+    position: absolute;
+    right: 35px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    pointer-events: none;
+    font-size: 14px;
+  }
+
+  .client-select-with-search {
+    position: relative;
+  }
+</style>
+<script>
+  $(document).ready(function() {
+    $('.select2').select2({
+        dropdownParent: $('#ajoutDossierModal'), // Important pour les modales Bootstrap
+        width: '100%'
+    });
+});
+</script>
+
+<!-- jQuery (obligatoire pour Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
+<div class="content-wrapper">
+  <div class="container-full">
+
+    <div class="content-header">
+      <div class="d-flex align-items-center">
+        <div class="me-auto">
+          <h4 class="page-title">Dossiers</h4>
+          <div class="d-inline-block align-items-center">
+            <nav>
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                  <a href="#"><i class="mdi mdi-home-outline"></i></a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                  Gestion des Dossiers
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <section class="content">
+      <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutDossierModal">
+            <i class="fa fa-plus"></i> Nouveau dossier
+          </button>
+        </div>
+        <div class="col-md-6">
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-info" data-bs-toggle="collapse" data-bs-target="#filtresAvances" aria-expanded="false">
+              <i class="fa fa-filter"></i> Filtres avancés
+            </button>
+            <form method="get" action="" class="d-flex flex-grow-1">
+              <input type="text" name="q" class="form-control me-2" placeholder="Recherche rapide...">
+              <button type="submit" class="btn btn-outline-secondary">
+                <i class="fa fa-search"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filtres avancés (collapsible) -->
+      <div class="collapse mb-3" id="filtresAvances">
+        <div class="card card-body bg-light">
+          <div class="row g-3">
+            <div class="col-md-2">
+              <label class="form-label small">ID Dossier</label>
+              <input type="text" class="form-control form-control-sm" id="filtreId" placeholder="Ex: 123">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Date début</label>
+              <input type="date" class="form-control form-control-sm" id="filtreDateDebut">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Date fin</label>
+              <input type="date" class="form-control form-control-sm" id="filtreDateFin">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Client</label>
+              <input type="text" class="form-control form-control-sm" id="filtreClient" placeholder="Nom du client">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Référence</label>
+              <input type="text" class="form-control form-control-sm" id="filtreReference" placeholder="Référence">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Statut</label>
+              <select class="form-select form-select-sm" id="filtreStatut">
+                <option value="">Tous les statuts</option>
+                <option value="Ouvert">Ouvert</option>
+                <option value="En cours">En cours</option>
+                <option value="Clôturé">Clôturé</option>
+              </select>
+            </div>
+          </div>
+          <div class="row mt-2">
+            <div class="col-md-12">
+              <button type="button" class="btn btn-sm btn-primary" id="appliquerFiltres">
+                <i class="fa fa-check"></i> Appliquer les filtres
+              </button>
+              <button type="button" class="btn btn-sm btn-secondary" id="effacerFiltres">
+                <i class="fa fa-times"></i> Effacer tous les filtres
+              </button>
+              <span class="ms-3 small text-muted" id="compteurResultats"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% if form.errors %}
+      <div class="alert alert-danger">
+        <ul>
+          {% for field in form %}
+          {% for error in field.errors %}
+          <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+          {% endfor %}
+          {% endfor %}
+          {% for error in form.non_field_errors %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      {% endif %}
+      <div class="row">
+        <div class="col-12">
+          <div class="box">
+            <div class="box-body">
+              <div class="table-responsive rounded card-table">
+                <table class="table border-no" id="example1">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Date Ouverture</th>
+                      <th>Client</th>
+                      <th>Référence</th>
+                      <th>Type d’affaire</th>
+                      <th>Secteur Foncier</th>
+                      <th>Statut</th>
+
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for d in dossiers %}
+                    <tr class="hover-primary">
+                      <td>{{ d.id }}</td>
+                      <td>{{ d.date_ouverture|date:"d/m/Y" }}</td>
+                      <td>{{ d.client.nom }} {{ d.client.prenom }}</td>
+                      <td>{{ d.numero_reference_dossier }}</td>
+                      <td>{{ d.type_affaire.nom_type }}</td>
+                      <td>{{ d.secteur_foncier.nom }}</td>
+                      <td>
+                        {% if d.statut_dossier == 'Clôturé' %}
+                        <span class="badge bg-primary">{{ d.statut_dossier }}</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ d.statut_dossier }}</span>
+                        {% endif %}
+                      </td>
+
+
+                      <td>
+                        <div class="btn-group">
+                          
+                          
+                            <a href="{% url 'dossier_details' dossier_id=d.id %}">
+                              <i class="fa fa-eye me-2"></i>
+                            </a>
+                        
+                        </div>
+                      </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                      <td colspan="8" class="text-center text-muted">Aucun dossier trouvé.</td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              
+              <!-- Contrôles de pagination -->
+              <div class="d-flex justify-content-between align-items-center mt-3 px-3"></div>
+                <div class="d-flex align-items-center">
+                  <label class="form-label me-2 mb-0">Afficher:</label>
+                  <select class="form-select form-select-sm" id="itemsPerPage" style="width: auto;">
+                    <option value="10" selected>10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                  </select>
+                  <span class="ms-2 text-muted small">éléments par page</span>
+                </div>
+                
+                <div class="d-flex align-items-center">
+                  <span class="me-3 text-muted small" id="paginationInfo">Affichage de 1 à 10 sur 100 entrées</span>
+                  
+                  <nav aria-label="Pagination des dossiers">
+                    <ul class="pagination pagination-sm mb-0" id="paginationControls">
+                      <li class="page-item disabled" id="prevPage">
+                        <a class="page-link" href="#" tabindex="-1">
+                          <i class="fa fa-chevron-left"></i>
+                        </a>
+                      </li>
+                      <!-- Les numéros de page seront générés dynamiquement -->
+                      <li class="page-item disabled" id="nextPage">
+                        <a class="page-link" href="#">
+                          <i class="fa fa-chevron-right"></i>
+                        </a>
+                      </li>
+                    </ul>
+                  </nav>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div></span></select>""
+    </section>
+  </div>
+</div>
+
+<!-- MODALE AJOUT DOSSIER -->
+<div class="modal fade" id="ajoutDossierModal" tabindex="-1" aria-labelledby="ajoutDossierLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <form method="POST" action=" {%url 'Dossier_interfaces'%}" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="ajoutDossierLabel">
+            <i class="fa fa-folder-plus"></i> Ajouter un dossier
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fermer"></button>
+        </div>
+
+        <div class="mb-3">
+          <h5>N° de dossier: <strong>{{ numero_temp }}</strong></h5>
+        </div>
+
+        <div class="modal-body">
+          <div class="box p-1 shadow-sm">
+            <div class="box-body">
+              <h4 class="box-title text-info mb-1 mt-2">
+                <i class="fa fa-info-circle me-2"></i> Informations du dossier
+              </h4>
+              <hr class="my-15">
+
+              <!-- LIGNE 1 -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Client <span class="text-danger">*</span></label>
+                  <!-- Zone cliquable pour sélectionner un client -->
+                  <div class="client-selector-zone" data-bs-toggle="modal" data-bs-target="#modalSelectionClient">
+                    <div class="form-control d-flex justify-content-between align-items-center" style="cursor: pointer;">
+                      <span id="selectedClientText" class="text-muted">Cliquer pour choisir un client...</span>
+                      <i class="fa fa-chevron-down"></i>
+                    </div>
+                  </div>
+                  <!-- Input caché pour stocker l'ID du client sélectionné -->
+                  <input type="hidden" name="client" id="selectedClientId" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Intitulé du dossier <span class="text-danger">*</span></label>
+                  <input type="text" name="titre" class="form-control" placeholder="Nom du dossier" required>
+                </div>
+              </div>
+
+              <!-- LIGNE 2 -->
+              <div class="row">
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Type du dossier <span class="text-danger">*</span></label>
+                  <select name="type_affaire" class="form-select select2">
+                    <option value="">Choisir un type du dossier ...</option>
+                    {% for t in types_affaire %}
+                    <option value="{{ t.id }}">{{ t.nom_type }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Secteur foncier <span class="text-danger">*</span></label>
+                  <select name="secteur_foncier" class="form-select select2" required>
+                    <option value="">Choisir le secteur foncier...</option>
+                    {% for t in secteurs %}
+                    <option value="{{ t.id }}">{{ t.nom}}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+
+              </div>
+
+              <!-- LIGNE 3 -->
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Nom de la partie adverse <span class="text-danger">*</span></label>
+                  <input type="text" name="partie_adverse_nom" class="form-control"
+                    placeholder="Nom de la partie adverse" required>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                  <label class="form-label">Juridiction <span class="text-danger">*</span></label>
+                  <div class="input-group">
+                    <select name="juridiction" id="juridictionSelect" class="form-select select2" required>
+                      <option value="">Sélectionnez une juridiction...</option>
+                      {% for j in juridictions %}
+                      <option value="{{ j.id }}">{{ j.nom }} {% if j.lieu %}- {{ j.lieu.nom }}{% endif %}</option>
+                      {% endfor %}
+                    </select>
+                    <button class="btn btn-outline-primary" type="button" data-bs-toggle="modal"
+                      data-bs-target="#modalJuridiction">
+                      + Ajouter
+                    </button>
+                  </div>
+                </div>
+
+
+
+              </div>
+
+              <!-- DESCRIPTION
+              <div class="row">
+                <div class="col-md-12 mb-2">
+                  <label class="form-label">Description</label>
+                  <textarea name="description" class="form-control" rows="3"></textarea>
+                </div>
+              </div>-->
+
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="ti-close"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="ti-save"></i> Enregistrer le dossier
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de sélection de client -->
+<div class="modal fade" id="modalSelectionClient" tabindex="-1" aria-labelledby="modalSelectionClientLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="modalSelectionClientLabel">
+          <i class="fa fa-users me-2"></i>Sélectionner un Client
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Barre de recherche -->
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <div class="input-group">
+              <span class="input-group-text"><i class="fa fa-search"></i></span>
+              <input type="text" class="form-control" id="searchClientModal"
+                placeholder="Rechercher par nom, prénom, email...">
+            </div>
+          </div>
+          <div class="col-md-6">
+            <button type="button" class="btn btn-outline-secondary" id="clearSearchModal">
+              <i class="fa fa-times me-1"></i>Effacer
+            </button>
+          </div>
+        </div>
+
+        <!-- Tableau des clients -->
+        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+          <table class="table table-hover table-striped" id="tableClients">
+            <thead class="table-dark sticky-top">
+              <tr>
+                <th>Photo</th>
+                <th>Nom</th>
+                <th>Prénom</th>
+                <th>Email</th>
+                <th>Téléphone</th>
+                <th>Date Naissance</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for client in clients %}
+              <tr class="client-row" data-client-id="{{ client.id }}" data-client-nom="{{ client.nom }}"
+                data-client-prenom="{{ client.prenom }}">
+                <td>
+                  {% if client.photo %}
+                  <img src="{{ client.photo.url }}" alt="{{ client.nom }}" class="rounded-circle" width="40" height="40"
+                    style="object-fit: cover;">
+                  {% else %}
+                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                    style="width: 40px; height: 40px; font-size: 14px;">
+                    {{ client.nom|first }}{{ client.prenom|first }}
+                  </div>
+                  {% endif %}
+                </td>
+                <td class="fw-bold">{{ client.nom }}</td>
+                <td>{{ client.prenom }}</td>
+                <td>
+                  <small class="text-muted">{{ client.email|default:"Non renseigné" }}</small>
+                </td>
+                <td>
+                  <small class="text-muted">{{ client.telephone|default:"Non renseigné" }}</small>
+                </td>
+                <td>
+                  <small class="text-muted">
+                    {% if client.date_naissance %}
+                    {{ client.date_naissance|date:"d/m/Y" }}
+                    {% else %}
+                    Non renseigné
+                    {% endif %}
+                  </small>
+                </td>
+                <td>
+                  <button type="button" class="btn btn-sm btn-primary select-client-btn"
+                    data-client-id="{{ client.id }}" data-client-nom="{{ client.nom }}"
+                    data-client-prenom="{{ client.prenom }}">
+                    <i class="fa fa-check me-1"></i>Choisir
+                  </button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                  <i class="fa fa-users fa-3x mb-3 d-block"></i>
+                  Aucun client disponible
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fa fa-times me-1"></i>Annuler
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Configuration Select2 pour le modal -->
+<script>
+  $(document).ready(function () {
+    // Configuration Select2 à l'ouverture du modal
+    $('#ajoutDossierModal').on('shown.bs.modal', function () {
+      // Détruire les instances existantes et reconfigurer
+      $(this).find('.select2').select2('destroy').select2({
+        dropdownParent: $('#ajoutDossierModal'),
+        width: '100%',
+        placeholder: "Choisissez une option...",
+        allowClear: true,
+        language: {
+          noResults: function () {
+            return "Aucun résultat trouvé";
+          }
+        }
+      });
+    });
+
+    // ==================== GESTION MODAL SELECTION CLIENT ====================
+    
+    // Fonction de recherche dans le modal client
+    $('#searchClientModal').on('keyup', function () {
+      const searchTerm = $(this).val().toLowerCase();
+      
+      $('.client-row').each(function () {
+        const clientNom = $(this).data('client-nom').toLowerCase();
+        const clientPrenom = $(this).data('client-prenom').toLowerCase();
+        const clientEmail = $(this).find('td:nth-child(4)').text().toLowerCase();
+        const clientTel = $(this).find('td:nth-child(5)').text().toLowerCase();
+        
+        if (clientNom.includes(searchTerm) || 
+            clientPrenom.includes(searchTerm) || 
+            clientEmail.includes(searchTerm) || 
+            clientTel.includes(searchTerm)) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    });
+
+    // Effacer la recherche
+    $('#clearSearchModal').on('click', function () {
+      $('#searchClientModal').val('');
+      $('.client-row').show();
+    });
+
+    // Sélectionner un client
+    $(document).on('click', '.select-client-btn', function () {
+      const clientId = $(this).data('client-id');
+      const clientNom = $(this).data('client-nom');
+      const clientPrenom = $(this).data('client-prenom');
+      
+      // Mettre à jour la zone de sélection
+      $('#selectedClientText').text(clientNom + ' ' + clientPrenom)
+        .removeClass('text-muted')
+        .addClass('text-dark fw-bold');
+      $('#selectedClientId').val(clientId);
+      
+      // Fermer le modal
+      $('#modalSelectionClient').modal('hide');
+      
+      // Notification (si toastr est disponible)
+      if (typeof toastr !== 'undefined') {
+        toastr.success(`Client sélectionné: ${clientNom} ${clientPrenom}`, 'Succès');
+      }
+    });
+
+    // Réinitialiser la recherche à l'ouverture du modal
+    $('#modalSelectionClient').on('shown.bs.modal', function () {
+      $('#searchClientModal').val('');
+      $('.client-row').show();
+      $('#searchClientModal').focus();
+    });
+
+    // Clic sur une ligne pour sélectionner (optionnel)
+    $(document).on('click', '.client-row', function () {
+      $(this).find('.select-client-btn').click();
+    });
+
+    // ==================== SYSTÈME DE FILTRAGE TABLEAU DOSSIERS ====================
+    
+    // Fonction pour filtrer le tableau
+    function filtrerTableau() {
+      const filtreId = $('#filtreId').val().toLowerCase();
+      const filtreDateDebut = $('#filtreDateDebut').val();
+      const filtreDateFin = $('#filtreDateFin').val();
+      const filtreClient = $('#filtreClient').val().toLowerCase();
+      const filtreReference = $('#filtreReference').val().toLowerCase();
+      const filtreStatut = $('#filtreStatut').val();
+      
+      let lignesVisibles = 0;
+      
+      $('#example1 tbody tr').each(function() {
+        const ligne = $(this);
+        
+        // Ignorer la ligne "Aucun dossier trouvé"
+        if (ligne.find('td').length === 1 && ligne.find('td').attr('colspan')) {
+          return;
+        }
+        
+        const id = ligne.find('td:nth-child(1)').text().toLowerCase();
+        const dateOuverture = ligne.find('td:nth-child(2)').text();
+        const client = ligne.find('td:nth-child(3)').text().toLowerCase();
+        const reference = ligne.find('td:nth-child(4)').text().toLowerCase();
+        const statut = ligne.find('td:nth-child(7) .badge').text();
+        
+        let afficher = true;
+        
+        // Filtre par ID
+        if (filtreId && !id.includes(filtreId)) {
+          afficher = false;
+        }
+        
+        // Filtre par client
+        if (filtreClient && !client.includes(filtreClient)) {
+          afficher = false;
+        }
+        
+        // Filtre par référence
+        if (filtreReference && !reference.includes(filtreReference)) {
+          afficher = false;
+        }
+        
+        // Filtre par statut
+        if (filtreStatut && statut !== filtreStatut) {
+          afficher = false;
+        }
+        
+        // Filtre par date
+        if (filtreDateDebut || filtreDateFin) {
+          // Convertir la date d'ouverture (format dd/mm/yyyy vers yyyy-mm-dd)
+          const dateParts = dateOuverture.split('/');
+          if (dateParts.length === 3) {
+            const dateFormatee = `${dateParts[2]}-${dateParts[1].padStart(2, '0')}-${dateParts[0].padStart(2, '0')}`;
+            
+            if (filtreDateDebut && dateFormatee < filtreDateDebut) {
+              afficher = false;
+            }
+            
+            if (filtreDateFin && dateFormatee > filtreDateFin) {
+              afficher = false;
+            }
+          }
+        }
+        
+        if (afficher) {
+          ligne.show();
+          lignesVisibles++;
+        } else {
+          ligne.hide();
+        }
+      });
+      
+      // Mettre à jour le compteur
+      $('#compteurResultats').text(`${lignesVisibles} dossier(s) trouvé(s)`);
+      
+      // Mettre à jour la pagination avec les résultats filtrés
+      updateFilteredItems();
+      
+      // Afficher/masquer le message "Aucun dossier trouvé"
+      if (lignesVisibles === 0) {
+        if ($('#example1 tbody .no-results').length === 0) {
+          $('#example1 tbody').append(`
+            <tr class="no-results">
+              <td colspan="8" class="text-center text-muted py-4">
+                <i class="fa fa-search fa-2x mb-2 d-block"></i>
+                Aucun dossier ne correspond aux critères de recherche
+              </td>
+            </tr>
+          `);
+        }
+      } else {
+        $('#example1 tbody .no-results').remove();
+      }
+    }
+    
+    // Appliquer les filtres
+    $('#appliquerFiltres').on('click', function() {
+      filtrerTableau();
+    });
+    
+    // Filtrage en temps réel sur les champs texte
+    $('#filtreId, #filtreClient, #filtreReference').on('keyup', function() {
+      filtrerTableau();
+    });
+    
+    // Filtrage en temps réel sur les champs date et select
+    $('#filtreDateDebut, #filtreDateFin, #filtreStatut').on('change', function() {
+      filtrerTableau();
+    });
+    
+    // Effacer tous les filtres
+    $('#effacerFiltres').on('click', function() {
+      $('#filtreId, #filtreDateDebut, #filtreDateFin, #filtreClient, #filtreReference').val('');
+      $('#filtreStatut').val('');
+      $('#example1 tbody tr').show();
+      $('#example1 tbody .no-results').remove();
+      $('#compteurResultats').text('');
+      
+      // Réinitialiser la pagination
+      initPagination();
+    });
+    
+    // ==================== SYSTÈME DE PAGINATION ====================
+    
+    let currentPage = 1;
+    let itemsPerPage = 10;
+    let totalItems = 0;
+    let filteredItems = [];
+    
+    // Initialiser la pagination
+    function initPagination() {
+      // Récupérer toutes les lignes du tableau (sauf les messages)
+      const allRows = $('#example1 tbody tr').not('.no-results');
+      totalItems = allRows.length;
+      filteredItems = allRows.toArray();
+      
+      // Mettre à jour l'affichage
+      updatePagination();
+      showPage(1);
+      
+      // Initialiser le compteur
+      if (totalItems > 0) {
+        $('#compteurResultats').text(`${totalItems} dossier(s) au total`);
+      }
+    }
+    
+    // Mettre à jour la pagination
+    function updatePagination() {
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+      
+      // Mettre à jour les informations de pagination
+      const startItem = filteredItems.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+      const endItem = Math.min(currentPage * itemsPerPage, filteredItems.length);
+      
+      $('#paginationInfo').text(`Affichage de ${startItem} à ${endItem} sur ${filteredItems.length} entrées`);
+      
+      // Générer les contrôles de pagination
+      generatePaginationControls(totalPages);
+      
+      // Activer/désactiver les boutons précédent/suivant
+      $('#prevPage').toggleClass('disabled', currentPage === 1);
+      $('#nextPage').toggleClass('disabled', currentPage === totalPages || totalPages === 0);
+    }
+    
+    // Générer les contrôles de pagination
+    function generatePaginationControls(totalPages) {
+      const paginationControls = $('#paginationControls');
+      
+      // Supprimer les anciens numéros de page
+      paginationControls.find('.page-number').remove();
+      
+      if (totalPages <= 1) {
+        return;
+      }
+      
+      // Calculer les pages à afficher
+      let startPage = Math.max(1, currentPage - 2);
+      let endPage = Math.min(totalPages, currentPage + 2);
+      
+      // Ajuster si on est près du début ou de la fin
+      if (endPage - startPage < 4) {
+        if (startPage === 1) {
+          endPage = Math.min(totalPages, startPage + 4);
+        } else if (endPage === totalPages) {
+          startPage = Math.max(1, endPage - 4);
+        }
+      }
+      
+      // Ajouter la première page si nécessaire
+      if (startPage > 1) {
+        const firstPageItem = $(`
+          <li class="page-item page-number">
+            <a class="page-link" href="#" data-page="1">1</a>
+          </li>
+        `);
+        $('#nextPage').before(firstPageItem);
+        
+        if (startPage > 2) {
+          const ellipsisItem = $(`
+            <li class="page-item disabled page-number">
+              <span class="page-link">...</span>
+            </li>
+          `);
+          $('#nextPage').before(ellipsisItem);
+        }
+      }
+      
+      // Ajouter les pages du milieu
+      for (let i = startPage; i <= endPage; i++) {
+        const isActive = i === currentPage ? 'active' : '';
+        const pageItem = $(`
+          <li class="page-item page-number ${isActive}">
+            <a class="page-link" href="#" data-page="${i}">${i}</a>
+          </li>
+        `);
+        $('#nextPage').before(pageItem);
+      }
+      
+      // Ajouter la dernière page si nécessaire
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) {
+          const ellipsisItem = $(`
+            <li class="page-item disabled page-number">
+              <span class="page-link">...</span>
+            </li>
+          `);
+          $('#nextPage').before(ellipsisItem);
+        }
+        
+        const lastPageItem = $(`
+          <li class="page-item page-number">
+            <a class="page-link" href="#" data-page="${totalPages}">${totalPages}</a>
+          </li>
+        `);
+        $('#nextPage').before(lastPageItem);
+      }
+    }
+    
+    // Afficher une page spécifique
+    function showPage(page) {
+      currentPage = page;
+      
+      // Masquer toutes les lignes
+      $('#example1 tbody tr').hide();
+      
+      // Calculer les indices de début et fin
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const endIndex = startIndex + itemsPerPage;
+      
+      // Afficher les lignes de la page courante
+      for (let i = startIndex; i < endIndex && i < filteredItems.length; i++) {
+        $(filteredItems[i]).show();
+      }
+      
+      // Mettre à jour la pagination
+      updatePagination();
+    }
+    
+    // Mettre à jour les éléments filtrés
+    function updateFilteredItems() {
+      filteredItems = $('#example1 tbody tr').not('.no-results').filter(':visible').toArray();
+      currentPage = 1;
+      showPage(1);
+    }
+    
+    // Gestionnaires d'événements pour la pagination
+    $(document).on('click', '#prevPage:not(.disabled) a', function(e) {
+      e.preventDefault();
+      if (currentPage > 1) {
+        showPage(currentPage - 1);
+      }
+    });
+    
+    $(document).on('click', '#nextPage:not(.disabled) a', function(e) {
+      e.preventDefault();
+      const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+      if (currentPage < totalPages) {
+        showPage(currentPage + 1);
+      }
+    });
+    
+    $(document).on('click', '.page-number:not(.disabled) a', function(e) {
+      e.preventDefault();
+      const page = parseInt($(this).data('page'));
+      showPage(page);
+    });
+    
+    // Changer le nombre d'éléments par page
+    $('#itemsPerPage').on('change', function() {
+      itemsPerPage = parseInt($(this).val());
+      currentPage = 1;
+      showPage(1);
+    });
+    
+    // Initialiser au chargement de la page
+    $(document).ready(function() {
+      initPagination();
+    });
+
+    // ==================== RECHERCHE RAPIDE ====================
+    
+    // Recherche rapide dans toutes les colonnes
+    $('input[name="q"]').on('keyup', function() {
+      const searchTerm = $(this).val().toLowerCase();
+      
+      if (searchTerm === '') {
+        $('#example1 tbody tr').show();
+        $('#example1 tbody .no-results').remove();
+        return;
+      }
+      
+      let lignesVisibles = 0;
+      
+      $('#example1 tbody tr').each(function() {
+        const ligne = $(this);
+        
+        // Ignorer les lignes de message
+        if (ligne.find('td').length === 1 && ligne.find('td').attr('colspan')) {
+          return;
+        }
+        
+        const texteComplet = ligne.text().toLowerCase();
+        
+        if (texteComplet.includes(searchTerm)) {
+          ligne.show();
+          lignesVisibles++;
+        } else {
+          ligne.hide();
+        }
+      });
+      
+      // Mettre à jour la pagination avec les résultats de recherche
+      updateFilteredItems();
+      
+      // Gérer le message "aucun résultat"
+      if (lignesVisibles === 0) {
+        if ($('#example1 tbody .no-results').length === 0) {
+          $('#example1 tbody').append(`
+            <tr class="no-results">
+              <td colspan="8" class="text-center text-muted py-4">
+                <i class="fa fa-search fa-2x mb-2 d-block"></i>
+                Aucun dossier ne correspond à "${searchTerm}"
+              </td>
+            </tr>
+          `);
+        }
+      } else {
+        $('#example1 tbody .no-results').remove();
+      }
+    });
+  });
+</script>
+
+
+<!-- Styles pour le modal de sélection client -->
+<style>
+  /* Zone cliquable pour sélectionner un client */
+  .client-selector-zone:hover {
+    background-color: #f8f9fa;
+  }
+
+  .client-selector-zone .form-control {
+    border: 1px solid #ced4da;
+    transition: all 0.3s ease;
+  }
+
+  .client-selector-zone:hover .form-control {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  /* Styles pour le tableau des clients */
+  .table-responsive {
+    border: 1px solid #dee2e6;
+    border-radius: 0.375rem;
+  }
+
+  .client-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .client-row:hover {
+    background-color: #f8f9fa !important;
+  }
+
+  .sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  /* Styles pour la barre de recherche */
+  #searchClientModal:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  /* Styles pour les filtres avancés */
+  #filtresAvances .card-body {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+  }
+
+  #filtresAvances .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 4px;
+  }
+
+  #filtresAvances .form-control:focus,
+  #filtresAvances .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+
+  /* Animation pour l'ouverture des filtres */
+  #filtresAvances.collapsing,
+  #filtresAvances.collapse.show {
+    animation: slideDown 0.3s ease-out;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Style pour le compteur de résultats */
+  #compteurResultats {
+    font-weight: 500;
+    color: #007bff;
+  }
+
+  /* Amélioration du bouton filtres */
+  .btn-outline-info:hover {
+    background-color: #17a2b8;
+    border-color: #17a2b8;
+    color: white;
+  }
+
+  /* Style pour les lignes filtrées */
+  #example1 tbody tr {
+    transition: opacity 0.2s ease;
+  }
+
+  #example1 tbody tr:hidden {
+    opacity: 0;
+  }
+
+  /* Styles pour la pagination */
+  .pagination {
+    margin-bottom: 0;
+  }
+
+  .pagination .page-link {
+    color: #007bff;
+    border: 1px solid #dee2e6;
+    padding: 0.375rem 0.75rem;
+    margin: 0 2px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .pagination .page-link:hover {
+    color: #0056b3;
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+  }
+
+  .pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+
+  .pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+    cursor: not-allowed;
+  }
+
+  /* Style pour les contrôles de pagination */
+  #itemsPerPage {
+    min-width: 80px;
+  }
+
+  #paginationInfo {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  /* Responsive pour la pagination */
+  @media (max-width: 768px) {
+    .pagination .page-link {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    #paginationInfo {
+      font-size: 0.75rem;
+    }
+    
+    .d-flex.justify-content-between {
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  /* Select2 custom styles for scrollable dropdown */
+  .select2-container--default .select2-results>.select2-results__options {
+    max-height: 200px;
+    /* Hauteur pour environ 5-6 éléments */
+    overflow-y: auto;
+  }
+
+  /* Optionnel : Si vous voulez aussi styliser la barre de défilement (scrollbar) */
+  .select2-results__options::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .select2-results__options::-webkit-scrollbar-thumb {
+    background-color: #71b6f9;
+    /* Couleur de votre thème */
+    border-radius: 10px;
+  }
+</style>
+
+{%endblock%}</div>

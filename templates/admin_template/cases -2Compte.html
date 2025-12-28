@@ -1,0 +1,145 @@
+﻿{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+	<div class="container-full">
+		<!-- Content Header (Page header) -->
+		<div class="content-header">
+			<div class="d-flex align-items-center">
+				<div class="me-auto">
+					<h4 class="page-title">Comptes</h4>
+					<div class="d-inline-block align-items-center">
+						<nav>
+							<ol class="breadcrumb">
+								<li class="breadcrumb-item"><a href="#"><i class="mdi mdi-home-outline"></i></a>
+								</li>
+								<li class="breadcrumb-item active" aria-current="page">utilisateurs</li>
+							</ol>
+						</nav>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Main content -->
+		<section class="content">
+			<div class="col-lg-12 col-12">
+				<div class="box">
+					<div class="box-header with-border">
+						<h4 class="box-title">Ajouter un utilisateur</h4>
+					</div>
+
+					<form method="POST" action="{% url 'creer_utilisateur_agent' %}" enctype="multipart/form-data"
+						class="form">
+						{% csrf_token %}
+						<div class="box-body">
+							<div class="row">
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="form-label"> Agent à lier au compte</label>
+										{{ form.agent }}
+									</div>
+								</div>
+
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="form-label">Nom utilisateur</label>
+										{{ form.username }}
+									</div>
+								</div>
+								<div class="col-md-6">
+									<div class="form-group">
+										<label class="form-label">Mot de passe</label>
+										{{ form.password }}
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div class="box-footer">
+							<button type="button" class="btn btn-warning me-1">
+								<i class="ti-trash"></i> Annuler
+							</button>
+							<button type="submit" class="btn btn-primary">
+								<i class="ti-save-alt"></i> Ajouter
+							</button>
+						</div>
+					</form>
+				</div>
+
+				<!-- /.box -->
+			</div>
+			<div class="row">
+				<div class="col-12">
+					<div class="box">
+						<div class="box-body">
+							<h4 class="box-title mb-1">Liste des utilisateurs
+							</h4>
+							<hr class="my-15">
+							<div class="table-responsive rounded card-table">
+								<table class="table border-no" id="example1">
+									<thead class="bg-primary">
+										<tr>
+											<th>Id</th>
+											<th>Nom utilisateur</th>
+											<th>Téléphone</th>
+											<th>Email</th>
+											<th>Agent</th>
+											<th>Role</th>
+											<th>Date création</th>
+											<th>Statut</th> <!-- 🟢 Nouvelle colonne -->
+											
+											<th></th>
+										</tr>
+									</thead>
+									<tbody>
+										{%for c in compte%}
+										<tr class="hover-primary">
+											<td>{{c.id}}</td>
+											<td>{{c.username}} </td>
+											<td>{% if c.agent %}{{ c.agent.telephone }}{% else %}-{% endif %}</td>
+											<td>{% if c.agent %}{{ c.agent.email }}{% else %}-{% endif %}</td>
+											<td>{% if c.agent %}{{ c.agent.nom }} {{ c.agent.prenom }}{% else%}Vous{%endif%}</td>
+											<td>{% if c.agent %}{{c.agent.poste}}{% else %}Administrateur{% endif %}</td>
+											<td>{{c.date_joined|date:"d F Y à h:m"}}</td>
+											<td>
+												{% if c.statut == "actif" %}
+												<span class="badge bg-success">Actif</span>
+												{% else %}
+												<span class="badge bg-danger">Désactivé</span>
+												{% endif %}
+											</td>
+											<td>
+												<div class="btn-group">
+													<a class="hover-primary dropdown-toggle no-caret"
+														data-bs-toggle="dropdown"><i class="fa fa-ellipsis-h"></i></a>
+													<div class="dropdown-menu">
+														{% if c.agent %}
+														<a class="dropdown-item"
+															href="{% url 'agent_details' agent_id=c.agent.id %}">
+															Voir détails
+														</a>
+														{% else %}
+														<span class="dropdown-item text-muted">Aucun agent lié</span>
+														{% endif %}
+														<a class="dropdown-item text-danger" href="#">Supprimer</a>
+													</div>
+											</td>
+										</tr>
+										{% endfor %}
+
+									</tbody>
+								</table>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</section>
+		<!-- /.content -->
+	</div>
+</div>
+{%endblock%}

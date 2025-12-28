@@ -1,0 +1,21 @@
+# Configuration Nixpacks pour Railway
+[phases.setup]
+nixPkgs = ["python311", "gcc", "pkg-config"]
+
+[phases.install]
+cmds = [
+    "python -m venv --copies /opt/venv",
+    ". /opt/venv/bin/activate && pip install --upgrade pip",
+    ". /opt/venv/bin/activate && pip install -r requirements.txt"
+]
+
+[phases.build]
+cmds = [
+    "echo '🔧 Build phase - Collection sécurisée des fichiers statiques'",
+    "export RAILWAY_STATIC_BUILD=true",
+    "export DJANGO_SETTINGS_MODULE=CabinetAvocat.settings_production",
+    ". /opt/venv/bin/activate && python collectstatic_safe.py"
+]
+
+[start]
+cmd = ". /opt/venv/bin/activate && chmod +x start.sh && ./start.sh"

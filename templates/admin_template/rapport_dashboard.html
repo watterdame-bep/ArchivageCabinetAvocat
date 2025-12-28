@@ -1,0 +1,469 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard Rapports{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">📊 Dashboard Rapports</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Rapports</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Statistiques rapides -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3 id="total-clients">{{ total_clients }}</h3>
+                            <p>Clients</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-account-group"></i>
+                        </div>
+                        <a href="{% url 'rapport_client' %}" class="small-box-footer">
+                            Voir rapports clients <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3 id="total-agents">{{ total_agents }}</h3>
+                            <p>Agents</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-account-multiple"></i>
+                        </div>
+                        <a href="{% url 'rapport_agent' %}" class="small-box-footer">
+                            Voir rapports agents <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3 id="total-dossiers">{{ total_dossiers }}</h3>
+                            <p>Dossiers</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-folder-multiple"></i>
+                        </div>
+                        <a href="{% url 'rapport_dossier' %}" class="small-box-footer">
+                            Rapport dossiers <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3 id="total-juridictions">{{ total_juridictions }}</h3>
+                            <p>Juridictions</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-bank"></i>
+                        </div>
+                        <a href="{% url 'rapport_juridiction' %}" class="small-box-footer">
+                            Voir rapports juridictions <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deuxième ligne de statistiques -->
+            <div class="row">
+                <div class="col-lg-4 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3 id="total-communes">{{ total_communes }}</h3>
+                            <p>Communes/Districts</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-map"></i>
+                        </div>
+                        <a href="{% url 'rapport_commune' %}" class="small-box-footer">
+                            Voir rapports communes <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-6">
+                    <div class="small-box bg-light text-dark">
+                        <div class="inner">
+                            <h3 id="rapports-generes">0</h3>
+                            <p>Rapports générés</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-file-document-multiple"></i>
+                        </div>
+                        <a href="#" class="small-box-footer text-dark">
+                            Historique <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-6">
+                    <div class="small-box bg-primary">
+                        <div class="inner">
+                            <h3 id="total-activites">0</h3>
+                            <p>Activités récentes</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-chart-line"></i>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            Voir activités <i class="mdi mdi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Types de rapports disponibles -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-file-document text-primary"></i> 
+                                Types de Rapports Disponibles
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <!-- Rapport Client -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-account-group fa-3x text-info"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Client</h5>
+                                            <p class="card-text">Générez des rapports détaillés pour vos clients incluant leurs dossiers, statistiques et informations financières.</p>
+                                            <div class="mt-auto">
+                                                <a href="{% url 'rapport_client' %}" class="btn btn-info btn-block">
+                                                    <i class="mdi mdi-file-document"></i> Générer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Agent -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-account-multiple fa-3x text-success"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Agent</h5>
+                                            <p class="card-text">Créez des rapports de performance pour vos agents avec leurs dossiers assignés et activités récentes.</p>
+                                            <div class="mt-auto">
+                                                <a href="{% url 'rapport_agent' %}" class="btn btn-success btn-block">
+                                                    <i class="mdi mdi-file-document"></i> Générer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Financier -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-cash-multiple fa-3x text-warning"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Financier</h5>
+                                            <p class="card-text">Analysez les performances financières du cabinet avec les paiements et honoraires.</p>
+                                            <div class="mt-auto">
+                                                <button class="btn btn-warning btn-block" onclick="alert('À implémenter')">
+                                                    <i class="mdi mdi-file-document"></i> Bientôt disponible
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Dossiers -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-folder-multiple fa-3x text-primary"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Activités Dossiers</h5>
+                                            <p class="card-text">Suivez les activités détaillées de vos dossiers avec un historique complet des actions.</p>
+                                            <div class="mt-auto">
+                                                <a href="{% url 'rapport_dossier' %}" class="btn btn-primary btn-block">
+                                                    <i class="mdi mdi-file-document"></i> Générer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Juridictions -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-bank fa-3x text-info"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Juridictions</h5>
+                                            <p class="card-text">Générez des rapports détaillés pour vos juridictions avec leurs informations et statistiques.</p>
+                                            <div class="mt-auto">
+                                                <a href="{% url 'rapport_juridiction' %}" class="btn btn-info btn-block">
+                                                    <i class="mdi mdi-file-document"></i> Générer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Communes -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-map fa-3x text-secondary"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Communes/Districts</h5>
+                                            <p class="card-text">Créez des rapports pour vos communes et districts avec leurs informations et dates d'ouverture.</p>
+                                            <div class="mt-auto">
+                                                <a href="{% url 'rapport_commune' %}" class="btn btn-secondary btn-block">
+                                                    <i class="mdi mdi-file-document"></i> Générer
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Activités -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-chart-line fa-3x text-secondary"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Activités</h5>
+                                            <p class="card-text">Suivez les activités et la productivité du cabinet avec des métriques détaillées.</p>
+                                            <div class="mt-auto">
+                                                <button class="btn btn-secondary btn-block" onclick="alert('À implémenter')">
+                                                    <i class="mdi mdi-file-document"></i> Bientôt disponible
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Rapport Personnalisé -->
+                                <div class="col-md-6 col-lg-4 mb-4">
+                                    <div class="card h-100 rapport-card">
+                                        <div class="card-body text-center">
+                                            <div class="mb-3">
+                                                <i class="mdi mdi-cog fa-3x text-dark"></i>
+                                            </div>
+                                            <h5 class="card-title">Rapport Personnalisé</h5>
+                                            <p class="card-text">Créez des rapports sur mesure selon vos besoins spécifiques.</p>
+                                            <div class="mt-auto">
+                                                <button class="btn btn-dark btn-block" onclick="alert('À implémenter')">
+                                                    <i class="mdi mdi-file-document"></i> Bientôt disponible
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rapports récents -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-history text-primary"></i> 
+                                Rapports Récents
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="bg-light">
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Sujet</th>
+                                            <th>Généré par</th>
+                                            <th>Format</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="rapports-recents">
+                                        <tr>
+                                            <td colspan="6" class="text-center text-muted">
+                                                <i class="mdi mdi-information"></i> Aucun rapport récent
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box > .small-box-footer {
+    position: relative;
+    text-align: center;
+    padding: 3px 0;
+    color: #fff;
+    color: rgba(255,255,255,0.8);
+    display: block;
+    z-index: 10;
+    background: rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.small-box > .small-box-footer:hover {
+    color: #fff;
+    background: rgba(0,0,0,0.15);
+}
+
+.small-box .icon {
+    -webkit-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    transition: all .3s linear;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.small-box:hover {
+    text-decoration: none;
+    color: #f9f9f9;
+}
+
+.small-box:hover .icon {
+    font-size: 95px;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+    color: white;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+    color: white;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: white;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+.rapport-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.rapport-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.fa-3x {
+    font-size: 3em;
+}
+</style>
+
+<script>
+$(document).ready(function() {
+    // Initialiser le compteur de rapports générés depuis le localStorage
+    let rapportsGeneres = localStorage.getItem('rapports_generes') || 0;
+    $('#rapports-generes').text(rapportsGeneres);
+    
+    // Écouter les événements de génération de rapports
+    $(document).on('rapport_genere', function() {
+        rapportsGeneres++;
+        localStorage.setItem('rapports_generes', rapportsGeneres);
+        $('#rapports-generes').text(rapportsGeneres);
+        
+        // Ajouter à l'historique
+        ajouterRapportRecent();
+    });
+});
+
+function ajouterRapportRecent() {
+    const maintenant = new Date();
+    const dateStr = maintenant.toLocaleDateString('fr-FR');
+    const heureStr = maintenant.toLocaleTimeString('fr-FR', {hour: '2-digit', minute: '2-digit'});
+    
+    const nouvelleRow = `
+        <tr>
+            <td>${dateStr} ${heureStr}</td>
+            <td><span class="badge badge-info">Client</span></td>
+            <td>Rapport généré</td>
+            <td>{{ request.user.username }}</td>
+            <td><span class="badge badge-success">PDF</span></td>
+            <td>
+                <button class="btn btn-sm btn-primary" title="Télécharger">
+                    <i class="mdi mdi-download"></i>
+                </button>
+            </td>
+        </tr>
+    `;
+    
+    const tbody = $('#rapports-recents');
+    if (tbody.find('td[colspan="6"]').length > 0) {
+        tbody.empty();
+    }
+    tbody.prepend(nouvelleRow);
+}
+</script>
+
+{% endblock %}

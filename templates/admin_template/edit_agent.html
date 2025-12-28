@@ -1,0 +1,269 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Modifier l'agent - {{ agent.nom }} {{ agent.prenom }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Modifier l'agent</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'Agent_Liste' %}">Agents</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'agent_details' agent.id %}">{{ agent.nom }} {{ agent.prenom }}</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <a href="{% url 'agent_details' agent.id %}" class="btn btn-outline-secondary">
+                        <i class="mdi mdi-arrow-left me-1"></i>Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">
+                                <i class="mdi mdi-account-edit me-2"></i>
+                                Modification des informations de {{ agent.nom|title }} {{ agent.prenom|title }}
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                
+                                <div class="row">
+                                    <!-- Photo actuelle -->
+                                    <div class="col-md-3 text-center mb-4">
+                                        <div class="mb-3">
+                                            {% if agent.photo %}
+                                                <img src="{{ agent.photo.url }}" alt="Photo actuelle" 
+                                                     class="rounded-circle" width="150" height="150" 
+                                                     style="object-fit: cover; border: 4px solid #e9ecef;">
+                                            {% else %}
+                                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center mx-auto" 
+                                                     style="width: 150px; height: 150px; border: 4px solid #e9ecef;">
+                                                    <i class="mdi mdi-account text-muted" style="font-size: 48px;"></i>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="{{ agent_form.photo.id_for_label }}" class="form-label">Nouvelle photo</label>
+                                            {{ agent_form.photo }}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Informations personnelles -->
+                                    <div class="col-md-9">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.nom.id_for_label }}" class="form-label">Nom *</label>
+                                                    {{ agent_form.nom }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.prenom.id_for_label }}" class="form-label">Prénom *</label>
+                                                    {{ agent_form.prenom }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.email.id_for_label }}" class="form-label">Email *</label>
+                                                    {{ agent_form.email }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.telephone.id_for_label }}" class="form-label">Téléphone *</label>
+                                                    {{ agent_form.telephone }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.numero_identification.id_for_label }}" class="form-label">N° Identification *</label>
+                                                    {{ agent_form.numero_identification }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.date_naissance.id_for_label }}" class="form-label">Date de naissance</label>
+                                                    {{ agent_form.date_naissance }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.sexe.id_for_label }}" class="form-label">Sexe</label>
+                                                    {{ agent_form.sexe }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="{{ agent_form.annee_experience.id_for_label }}" class="form-label">Années d'expérience</label>
+                                                    {{ agent_form.annee_experience }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <!-- Informations professionnelles -->
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-briefcase me-2"></i>Informations professionnelles
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ agent_form.poste.id_for_label }}" class="form-label">Poste</label>
+                                            {{ agent_form.poste }}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group mb-3">
+                                            <label for="{{ agent_form.specialite.id_for_label }}" class="form-label">Spécialité</label>
+                                            {{ agent_form.specialite }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- À propos -->
+                                <div class="form-group mb-4">
+                                    <label for="{{ agent_form.a_propos.id_for_label }}" class="form-label">À propos</label>
+                                    {{ agent_form.a_propos }}
+                                    <small class="form-text text-muted">Décrivez brièvement l'agent, ses compétences, son parcours...</small>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <!-- Adresse -->
+                                <h5 class="mb-3">
+                                    <i class="mdi mdi-map-marker me-2"></i>Adresse
+                                </h5>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Numéro</label>
+                                            <input type="text" name="numero" class="form-control" 
+                                                   value="{{ agent.adresse.numero|default:'' }}" placeholder="Ex: 123">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Avenue</label>
+                                            <input type="text" name="avenue" class="form-control" 
+                                                   value="{{ agent.adresse.avenue|default:'' }}" placeholder="Ex: Avenue de la Paix">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Quartier</label>
+                                            <input type="text" name="quartier" class="form-control" 
+                                                   value="{{ agent.adresse.quartier|default:'' }}" placeholder="Ex: Gombe">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Commune</label>
+                                            <select name="commune" class="form-control">
+                                                <option value="">Sélectionner une commune</option>
+                                                {% for commune in communes %}
+                                                    <option value="{{ commune.id }}" 
+                                                            {% if agent.adresse.commune == commune.nom %}selected{% endif %}>
+                                                        {{ commune.nom }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group mb-3">
+                                            <label class="form-label">Ville</label>
+                                            <select name="ville" class="form-control">
+                                                <option value="">Sélectionner une ville</option>
+                                                {% for ville in villes %}
+                                                    <option value="{{ ville.id }}" 
+                                                            {% if agent.adresse.ville == ville.nom_ville %}selected{% endif %}>
+                                                        {{ ville.nom_ville }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="text-end mt-4">
+                                    <a href="{% url 'agent_details' agent.id %}" class="btn btn-secondary me-2">
+                                        <i class="mdi mdi-close me-1"></i>Annuler
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="mdi mdi-content-save me-1"></i>Enregistrer les modifications
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+/* Styles pour les champs de formulaire */
+.form-control, .form-select {
+    border-radius: 8px;
+    border: 1px solid #e0e6ed;
+    padding: 10px 15px;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 8px;
+}
+
+.card {
+    border-radius: 15px;
+    box-shadow: 0 4px 25px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+/* Style pour le champ textarea */
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+}
+
+/* Style pour les champs de fichier */
+input[type="file"] {
+    padding: 8px;
+}
+</style>
+{% endblock %}

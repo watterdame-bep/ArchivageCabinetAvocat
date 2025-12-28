@@ -1,0 +1,389 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+<div class="content-wrapper">
+	<div class="container-full">
+		<div class="content-header">
+			<div class="d-flex align-items-center">
+				<div class="me-auto">
+					<h4 class="page-title">Agents</h4>
+					<div class="d-inline-block align-items-center">
+						<nav>
+							<ol class="breadcrumb">
+								<li class="breadcrumb-item"><a href="#"><i class="mdi mdi-home-outline"></i></a></li>
+								<li class="breadcrumb-item active" aria-current="page">Agents</li>
+							</ol>
+						</nav>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<section class="content">
+
+			<div class="row mb-3 align-items-center">
+				<div class="col-md-6">
+					<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#ajoutAgentModal">
+						<i class="fa fa-plus"></i> Ajouter un agent
+					</button>
+				</div>
+				<div class="col-md-6">
+					<form method="get" action="" class="d-flex">
+						<input type="text" name="q" class="form-control me-2" placeholder="Rechercher un agent...">
+						<button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
+					</form>
+				</div>
+			</div>
+
+			{% if messages %}
+			<div class="alert-container">
+				{% for message in messages %}
+				<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+					{{ message }}
+					<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>
+				{% endfor %}
+			</div>
+			{% endif %}
+
+			<h4 class="mb-4">Aperçu de tous les agents</h4>
+
+			<div class="row">
+				{% if agents %}
+				{% for a in agents %}
+				<div class="col-12 col-lg-4">
+					<div class="box ribbon-box">
+						<div class="box-header no-border p-0">
+							<a href="#">
+								<div class="agent-photo-box">
+									{% if a.photo %}
+									<img src="{{ a.photo.url }}" alt="{{ a.nom }}">
+									{% else %}
+									<img src="{% static 'images/avatar/375x200/1.jpg' %}" alt="Avatar">
+									{% endif %}
+								</div>
+							</a>
+						</div>
+
+						<div class="box-body">
+							<div class="user-contact list-inline text-center">
+								<a href="#" class="btn btn-circle mb-5 btn-facebook"><i class="fa fa-facebook"></i></a>
+								<a href="#" class="btn btn-circle mb-5 btn-warning"><i class="fa fa-envelope"></i></a>
+							</div>
+							<div class="text-center">
+								<h3 class="my-10"><a href="{%url 'agent_details' agent_id=a.pk %}">{{ a.nom }} {{ a.prenom }}</a></h3>
+								<h6 class="user-info mt-0 mb-10 text-fade">
+									{% if a.poste %}{{ a.poste }}{% else %}Agent{% endif %}
+								</h6>
+							</div>
+						</div>
+					</div>
+				</div>
+				{% endfor %}
+				{%else%}
+				<div class="col-12">
+					<div class="alert alert-info">Aucun agent enregistré dans le cabinet.</div>
+				</div>
+				{%endif%}
+
+		</section>
+	</div>
+</div>
+
+<div class="modal fade" id="ajoutAgentModal" tabindex="-1" aria-labelledby="ajoutAgentLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl">
+		<div class="modal-content">
+			<form method="POST" action="{%url 'Enregistrer_un_nouvel_agent'%}" enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title" id="ajoutAgentLabel">
+						<i class="fa fa-user-plus"></i> Ajouter un agent du cabinet
+					</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+						aria-label="Fermer"></button>
+				</div>
+
+				<div class="modal-body">
+					<div class="box p-3 shadow-sm">
+						<div class="box-body">
+
+							<h4 class="box-title text-info mb-3">
+								<i class="ti-user me-2"></i> Informations personnelles
+							</h4>
+							<hr class="my-15">
+
+							{% if agent_form.errors %}
+							<div class="alert alert-danger">
+								Veuillez corriger les erreurs suivantes:
+								<ul>
+									{% for field, errors in agent_form.errors.items %}
+									{% for error in errors %}
+									<li>{{ field|title }} : {{ error }}</li>
+									{% endfor %}
+									{% endfor %}
+								</ul>
+							</div>
+							{% endif %}
+
+
+							<div class="row">
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Prénom</label>
+									<input type="text" name="prenom" class="form-control" placeholder="Prénom" required
+										value="{{ agent_form.prenom.value|default_if_none:'' }}">
+								</div>
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Nom</label>
+									<input type="text" name="nom" class="form-control" placeholder="Nom" required
+										value="{{ agent_form.nom.value|default_if_none:'' }}">
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Sexe</label>
+									<select name="sexe" class="form-select" required>
+										<option value="">Choisir...</option>
+										<option value="Homme" {% if agent_form.sexe.value|stringformat:"s" == 'Homme' %}selected{% endif %}>Masculin</option>
+										<option value="Femme" {% if agent_form.sexe.value|stringformat:"s" == 'Femme' %}selected{% endif %}>Féminin</option>
+									</select>
+								</div>
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Date de naissance</label>
+									<input type="date" name="date_naissance" class="form-control"
+										value="{{ agent_form.date_naissance.value|default_if_none:'' }}">
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-6 mb-3">
+									<label class="form-label">E-mail</label>
+									<input type="email" name="email" class="form-control" placeholder="exemple@mail.com"
+										value="{{ agent_form.email.value|default_if_none:'' }}">
+								</div>
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Téléphone</label>
+									<input type="text" name="telephone" class="form-control"
+										placeholder="Numéro de téléphone"
+										value="{{ agent_form.telephone.value|default_if_none:'' }}">
+								</div>
+							</div>
+
+							<h5 class="text-info mt-4"><i class="ti-location-pin me-2"></i> Adresse complète</h5>
+							<hr class="my-10">
+							<div class="row">
+								<div class="col-md-1 mb-3">
+									<label class="form-label">Numéro</label>
+									<input type="text" name="numero" class="form-control" placeholder="N° 2">
+								</div>
+								<div class="col-md-3 mb-3">
+									<label class="form-label">Avenue</label>
+									<input type="text" name="avenue" class="form-control" placeholder="Avenue / Rue">
+								</div>
+								<div class="col-md-3 mb-3">
+									<label class="form-label">Quartier</label>
+									<input type="text" name="quartier" class="form-control" placeholder="Quartier">
+								</div>
+<div class="col-md-2 mb-3">
+    <label class="form-label">Commune</label>
+    <select name="commune" class="form-select" required>
+        <option value="">Sélectionnez une commune</option>
+        {% for c in communes %}
+            <option value="{{ c.id }}" {% if agent_form.commune.value == c.id %}selected{% endif %}>
+                {{ c.nom }}
+            </option>
+        {% endfor %}
+    </select>
+</div>
+								<div class="col-md-3 mb-3">
+    <label class="form-label">Ville</label>
+    <select name="ville" class="form-select" required>
+        <option value="">Sélectionnez une ville</option>
+        {% for v in villes %}
+            <option value="{{ v.id }}" {% if agent_form.ville.value == v.id %}selected{% endif %}>
+                {{ v.nom_ville }} ({{ v.province }})
+            </option>
+        {% endfor %}
+    </select>
+</div>
+							</div>
+
+							<h4 class="box-title text-info mb-3 mt-4">
+								<i class="ti-id-badge me-2"></i> Identification professionnelle
+							</h4>
+							<hr class="my-15">
+
+							<div class="row">
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Numéro d’identification</label>
+									<input type="text" name="numero_identification" class="form-control"
+										placeholder="Numéro CNFJ / Barreau"
+										value="{{ agent_form.numero_identification.value|default_if_none:'' }}">
+								</div>
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Fonction au cabinet</label>
+									<select name="poste" class="form-select" required>
+										<option value="Avocat" {% if agent_form.poste.value|stringformat:"s" == 'Avocat' %}selected{% endif %}>Avocat</option>
+										<option value="Secretaire" {% if agent_form.poste.value|stringformat:"s" == 'Secretaire' %}selected{% endif %}>Secrétaire</option>
+										<option value="Stagiaire" {% if agent_form.poste.value|stringformat:"s" == 'Stagiaire' %}selected{% endif %}>Stagiaire</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="row">
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Spécialité juridique</label>
+									<select name="specialite" class="form-select">
+										{% for s in specialites %}
+										<option value="{{ s.id }}" {% if agent_form.specialite.value|stringformat:"s" == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nom }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="col-md-6 mb-3">
+									<label class="form-label">Années d’expérience</label>
+									<input type="number" name="annee_experience" class="form-control" min="0"
+										placeholder="Ex: 5"
+										value="{{ agent_form.annee_experience.value|default_if_none:'' }}">
+								</div>
+							</div>
+
+							<div class="form-group mb-3">
+								<label class="form-label">Photo de profil</label>
+								<input type="file" name="photo" class="form-control">
+							</div>
+
+							<div class="form-group mb-3">
+								<label class="form-label">Brève biographie / parcours</label>
+								<textarea name="a_propos" rows="4" class="form-control"
+									placeholder="Écrivez quelques lignes sur le parcours professionnel de l’agent...">{{ agent_form.a_propos.value|default_if_none:'' }}</textarea>
+							</div>
+
+							<h4 class="box-title text-info mb-3 mt-4">
+	<i class="ti-clip me-2"></i> Pièces justificatives
+</h4>
+<hr class="my-15">
+
+<div id="piecesContainer">
+	<div class="row piece-item mb-4">
+		<!-- Type de pièce -->
+		<div class="col-md-3">
+			<label class="form-label">Type de pièce</label>
+			<select name="type_piece" class="form-select" required>
+				<option value="">Sélectionnez un type</option>
+				{% for t in type_pieces %}
+				<option value="{{ t.id }}">{{ t.nom_type }}</option>
+				{% endfor %}
+			</select>
+		</div>
+
+		<!-- Numéro de pièce -->
+		<div class="col-md-3">
+			<label class="form-label">Numéro de la pièce</label>
+			<input type="text" name="numero_piece" class="form-control" placeholder="Ex: 0123456789">
+		</div>
+
+		<!-- Fichier -->
+		<div class="col-sm-3">
+			<label class="form-label">Fichier</label>
+			<input type="file" name="fichier" class="form-control" required>
+		</div>
+
+		<div class="col-md-1 d-flex align-items-end">
+			<button type="button" class="btn btn-danger btn-sm remove-piece">
+				<i class="fa fa-trash"></i>
+			</button>
+		</div>
+	</div>
+</div>
+<button type="button" id="addPiece" class="btn btn-outline-primary btn-sm">
+	<i class="fa fa-plus"></i> Ajouter un autre document
+</button>
+
+
+						</div>
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						<i class="ti-close"></i> Annuler
+					</button>
+					<button type="submit" class="btn btn-primary">
+						<i class="ti-save"></i> Enregistrer
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const addBtn = document.getElementById('addPiece');
+		const container = document.getElementById('piecesContainer');
+
+		// Réouvrir la modale en cas d'erreur de validation (si le flag est passé par la vue)
+		{% if is_modal_active %}
+		var modal = new bootstrap.Modal(document.getElementById('ajoutAgentModal'));
+		modal.show();
+		{% endif %}
+
+		// La gestion des pièces justificatives avec JS est correcte pour l'approche manuelle.
+		addBtn.addEventListener('click', () => {
+			const newPiece = document.createElement('div');
+			newPiece.classList.add('row', 'piece-item', 'mb-3');
+			newPiece.innerHTML = `
+                <div class="col-md-5">
+                    <label class="form-label">Titre du document</label>
+                    <input type="text" name="titre[]" class="form-control" placeholder="Ex : Certificat, Carte du barreau..." required>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Fichier</label>
+                    <input type="file" name="fichier[]" class="form-control" required>
+                </div>
+                <div class="col-md-1 d-flex align-items-end">
+                    <button type="button" class="btn btn-danger btn-sm remove-piece">
+                        <i class="fa fa-trash"></i>
+                    </button>
+                </div>
+            `;
+			container.appendChild(newPiece);
+		});
+
+		container.addEventListener('click', (e) => {
+			if (e.target.closest('.remove-piece')) {
+				// S'assurer de ne pas supprimer le dernier élément s'il est requis
+				if (container.querySelectorAll('.piece-item').length > 1) {
+					e.target.closest('.piece-item').remove();
+				} else {
+					alert("Vous devez laisser au moins un document justificatif.");
+				}
+			}
+		});
+	});
+</script>
+
+<style>
+.agent-photo-box {
+    /* Définit un conteneur qui fixe l'espace pris par la photo */
+    width: 100%;
+    /* Ratio 4:3 (75% de la largeur) ou 1:1 pour un carré (100%) */
+    padding-top: 75%; 
+    /* Vous pouvez utiliser padding-top: 100%; pour un carré parfait */
+    position: relative;
+    overflow: hidden; /* Cache toute partie de l'image qui dépasse */
+}
+
+.agent-photo-box img {
+    /* Positionne l'image pour couvrir le conteneur */
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* Ceci est la clé : redimensionne l'image pour couvrir toute la zone 
+       sans déformer le conteneur. Cela peut couper les bords de l'image. */
+    object-fit: cover; 
+}
+</style>
+{% endblock %}

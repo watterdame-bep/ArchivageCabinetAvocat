@@ -1,0 +1,811 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Rapport Activités Internes{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">⚙️ Rapport Activités Internes</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dashboard' %}">Rapport</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Activités Internes</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
+                        <i class="mdi mdi-printer"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Statistiques générales -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ total_activites }}</h3>
+                            <p>Activités Configurées</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-cog"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ total_utilisations }}</h3>
+                            <p>Total Utilisations</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-chart-line"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ total_heures|floatformat:0 }}</h3>
+                            <p>Heures Totales</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-timer"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ total_revenus|floatformat:0 }}</h3>
+                            <p>Revenus Générés (USD)</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-cash"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des activités internes -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-cog text-primary"></i> 
+                                Activités Internes Configurées ({{ total_activites }})
+                            </h4>
+                            <div class="box-tools">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="mdi mdi-filter"></i> Filtrer
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#" onclick="filtrerParUtilisation('populaire')">
+                                            <i class="mdi mdi-trending-up"></i> Plus utilisées
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="#" onclick="filtrerParUtilisation('rentable')">
+                                            <i class="mdi mdi-cash"></i> Plus rentables
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="#" onclick="reinitialiserFiltres()">
+                                            <i class="mdi mdi-refresh"></i> Réinitialiser
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="box-body">
+                            <!-- Filtres -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Rechercher une activité:</label>
+                                        <input type="text" id="recherche-activite" class="form-control" placeholder="Nom de l'activité...">
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Trier par:</label>
+                                        <select id="tri-activites" class="form-control">
+                                            <option value="nom">Nom</option>
+                                            <option value="utilisations">Utilisations</option>
+                                            <option value="heures">Heures</option>
+                                            <option value="revenus">Revenus</option>
+                                            <option value="date">Date création</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Ordre:</label>
+                                        <select id="ordre-tri" class="form-control">
+                                            <option value="asc">Croissant</option>
+                                            <option value="desc">Décroissant</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <button type="button" class="btn btn-secondary btn-block" onclick="reinitialiserFiltres()">
+                                            <i class="mdi mdi-refresh"></i> Reset
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tableau des activités -->
+                            <div class="table-responsive">
+                                <table id="tableau-activites" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Nom de l'Activité</th>
+                                            <th>Date Création</th>
+                                            <th class="text-center">Utilisations</th>
+                                            <th class="text-center">Heures Totales</th>
+                                            <th class="text-center">Revenus Générés</th>
+                                            <th class="text-center">Dernière Utilisation</th>
+                                            <th width="150">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in activites_data %}
+                                        <tr data-activite-id="{{ item.activite.id }}" 
+                                            data-utilisations="{{ item.utilisations }}"
+                                            data-heures="{{ item.heures_totales }}"
+                                            data-revenus="{{ item.revenus_potentiels }}">
+                                            <td class="text-center">
+                                                <strong>{{ item.activite.id }}</strong>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong>{{ item.activite.nom_activite }}</strong>
+                                                    <small class="text-muted">
+                                                        <i class="mdi mdi-calendar"></i> Créée le {{ item.activite.date_activite|date:"d/m/Y" }}
+                                                    </small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="text-muted">
+                                                    {{ item.activite.date_activite|date:"d/m/Y H:i" }}
+                                                </span>
+                                                <br><small class="text-info">
+                                                    {{ item.activite.date_activite|timesince }} ago
+                                                </small>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex flex-column">
+                                                    <strong class="text-primary">{{ item.utilisations }}</strong>
+                                                    {% if item.utilisations > 0 %}
+                                                        <small class="text-success">
+                                                            <i class="mdi mdi-trending-up"></i> Utilisée
+                                                        </small>
+                                                    {% else %}
+                                                        <small class="text-muted">Jamais utilisée</small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex flex-column">
+                                                    <strong class="text-info">{{ item.heures_totales|floatformat:1 }}h</strong>
+                                                    {% if item.heures_totales > 0 %}
+                                                        <small class="text-success">
+                                                            <i class="mdi mdi-timer"></i> Temps travaillé
+                                                        </small>
+                                                    {% else %}
+                                                        <small class="text-muted">Aucune heure</small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="d-flex flex-column">
+                                                    <strong class="text-success">{{ item.revenus_potentiels|floatformat:2 }} USD</strong>
+                                                    {% if item.revenus_potentiels > 0 %}
+                                                        <small class="text-success">
+                                                            <i class="mdi mdi-cash"></i> Rentable
+                                                        </small>
+                                                    {% else %}
+                                                        <small class="text-muted">Pas de revenus</small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if item.derniere_utilisation %}
+                                                    <div class="d-flex flex-column">
+                                                        <small class="text-muted">
+                                                            {{ item.derniere_utilisation.date_activite|date:"d/m/Y" }}
+                                                        </small>
+                                                        <small class="text-info">
+                                                            {{ item.derniere_utilisation.dossier.titre|truncatechars:20 }}
+                                                        </small>
+                                                    </div>
+                                                {% else %}
+                                                    <small class="text-muted">Jamais utilisée</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-info" 
+                                                            onclick="voirDetailsActivite({{ item.activite.id }})"
+                                                            title="Voir détails">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-primary" 
+                                                            onclick="genererRapportActivite({{ item.activite.id }})"
+                                                            title="Générer rapport">
+                                                        <i class="mdi mdi-file-document"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-success" 
+                                                            onclick="imprimerRapportActivite({{ item.activite.id }})"
+                                                            title="Imprimer rapport">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="8" class="text-center text-muted py-4">
+                                                <i class="mdi mdi-information mdi-48px"></i>
+                                                <br>Aucune activité interne configurée
+                                                <br><small>Ajoutez des activités dans les paramètres du cabinet</small>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top activités -->
+            <div class="row">
+                <!-- Activités les plus utilisées -->
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-trending-up text-success"></i> 
+                                Top 5 Activités les Plus Utilisées
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            {% if activites_populaires %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Rang</th>
+                                                <th>Activité</th>
+                                                <th class="text-center">Utilisations</th>
+                                                <th class="text-center">Heures</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in activites_populaires %}
+                                            <tr>
+                                                <td class="text-center">
+                                                    {% if forloop.counter <= 3 %}
+                                                        <span class="badge badge-warning">
+                                                            <i class="mdi mdi-trophy"></i> {{ forloop.counter }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">{{ forloop.counter }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <strong>{{ item.activite.nom_activite|truncatechars:30 }}</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-primary">{{ item.utilisations }}</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-info">{{ item.heures_totales|floatformat:1 }}h</span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="mdi mdi-information mdi-48px"></i>
+                                    <br>Aucune donnée disponible
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activités les plus rentables -->
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-cash text-success"></i> 
+                                Top 5 Activités les Plus Rentables
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            {% if activites_rentables %}
+                                <div class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Rang</th>
+                                                <th>Activité</th>
+                                                <th class="text-center">Revenus</th>
+                                                <th class="text-center">Heures</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in activites_rentables %}
+                                            <tr>
+                                                <td class="text-center">
+                                                    {% if forloop.counter <= 3 %}
+                                                        <span class="badge badge-warning">
+                                                            <i class="mdi mdi-trophy"></i> {{ forloop.counter }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">{{ forloop.counter }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <strong>{{ item.activite.nom_activite|truncatechars:30 }}</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-success">{{ item.revenus_potentiels|floatformat:0 }} USD</span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-info">{{ item.heures_totales|floatformat:1 }}h</span>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="mdi mdi-information mdi-48px"></i>
+                                    <br>Aucune donnée disponible
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Modal Détails Activité -->
+<div class="modal fade" id="modalDetailsActivite" tabindex="-1" aria-labelledby="modalDetailsActiviteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetailsActiviteLabel">
+                    <i class="mdi mdi-cog"></i> Détails de l'Activité Interne
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenu-details-activite">
+                <div class="text-center">
+                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des détails...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="genererRapportActiviteModal()">
+                    <i class="mdi mdi-file-document"></i> Générer Rapport
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variables globales
+let activiteSelectionnee = null;
+
+// Imprimer rapport avec filtres appliqués (même logique que les autres rapports)
+function imprimerRapportFiltre(typeRapport = 'complet') {
+    // Récupérer les activités visibles (après filtrage)
+    const lignesVisibles = document.querySelectorAll('#tableau-activites tbody tr[data-activite-id]:not([style*="display: none"])');
+    
+    if (lignesVisibles.length === 0) {
+        alert('Aucune activité visible à imprimer. Vérifiez vos filtres.');
+        return;
+    }
+    
+    // Extraire les IDs des activités visibles
+    const activitesIds = Array.from(lignesVisibles).map(ligne => 
+        ligne.getAttribute('data-activite-id')
+    );
+    
+    // Récupérer les filtres appliqués
+    const recherche = document.getElementById('recherche-activite').value;
+    const tri = document.getElementById('tri-activites').value;
+    const ordre = document.getElementById('ordre-tri').value;
+    
+    // Créer un formulaire pour envoyer les données en POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/activites-internes/imprimer-filtre/';
+    form.target = '_blank'; // Ouvrir dans un nouvel onglet
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    const csrfInput = document.createElement('input');
+    csrfInput.type = 'hidden';
+    csrfInput.name = 'csrfmiddlewaretoken';
+    csrfInput.value = csrfToken;
+    form.appendChild(csrfInput);
+    
+    // Ajouter les IDs des activités
+    activitesIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'activites_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
+    
+    // Ajouter les filtres
+    const filtres = [
+        { name: 'recherche', value: recherche },
+        { name: 'tri', value: tri },
+        { name: 'ordre', value: ordre }
+    ];
+    
+    filtres.forEach(filtre => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = filtre.name;
+        input.value = filtre.value;
+        form.appendChild(input);
+    });
+    
+    // Ajouter le formulaire au DOM et le soumettre
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    initialiserFiltres();
+});
+
+// Initialiser les filtres
+function initialiserFiltres() {
+    const rechercheActivite = document.getElementById('recherche-activite');
+    const triActivites = document.getElementById('tri-activites');
+    const ordreTri = document.getElementById('ordre-tri');
+    
+    [rechercheActivite, triActivites, ordreTri].forEach(element => {
+        element.addEventListener('change', appliquerFiltres);
+        element.addEventListener('keyup', appliquerFiltres);
+    });
+}
+
+// Appliquer les filtres
+function appliquerFiltres() {
+    const recherche = document.getElementById('recherche-activite').value.toLowerCase();
+    const tri = document.getElementById('tri-activites').value;
+    const ordre = document.getElementById('ordre-tri').value;
+    
+    const lignes = Array.from(document.querySelectorAll('#tableau-activites tbody tr[data-activite-id]'));
+    
+    // Filtrer par recherche
+    lignes.forEach(ligne => {
+        const texte = ligne.textContent.toLowerCase();
+        if (!recherche || texte.includes(recherche)) {
+            ligne.style.display = '';
+        } else {
+            ligne.style.display = 'none';
+        }
+    });
+    
+    // Trier
+    const lignesVisibles = lignes.filter(ligne => ligne.style.display !== 'none');
+    lignesVisibles.sort((a, b) => {
+        let valA, valB;
+        
+        switch(tri) {
+            case 'nom':
+                valA = a.querySelector('td:nth-child(2) strong').textContent;
+                valB = b.querySelector('td:nth-child(2) strong').textContent;
+                break;
+            case 'utilisations':
+                valA = parseInt(a.getAttribute('data-utilisations'));
+                valB = parseInt(b.getAttribute('data-utilisations'));
+                break;
+            case 'heures':
+                valA = parseFloat(a.getAttribute('data-heures'));
+                valB = parseFloat(b.getAttribute('data-heures'));
+                break;
+            case 'revenus':
+                valA = parseFloat(a.getAttribute('data-revenus'));
+                valB = parseFloat(b.getAttribute('data-revenus'));
+                break;
+            case 'date':
+                valA = new Date(a.querySelector('td:nth-child(3)').textContent);
+                valB = new Date(b.querySelector('td:nth-child(3)').textContent);
+                break;
+            default:
+                return 0;
+        }
+        
+        if (typeof valA === 'string') {
+            return ordre === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+        } else {
+            return ordre === 'asc' ? valA - valB : valB - valA;
+        }
+    });
+    
+    // Réorganiser les lignes
+    const tbody = document.querySelector('#tableau-activites tbody');
+    lignesVisibles.forEach(ligne => tbody.appendChild(ligne));
+}
+
+// Réinitialiser les filtres
+function reinitialiserFiltres() {
+    document.getElementById('recherche-activite').value = '';
+    document.getElementById('tri-activites').value = 'nom';
+    document.getElementById('ordre-tri').value = 'asc';
+    appliquerFiltres();
+}
+
+// Filtrer par utilisation
+function filtrerParUtilisation(type) {
+    if (type === 'populaire') {
+        document.getElementById('tri-activites').value = 'utilisations';
+        document.getElementById('ordre-tri').value = 'desc';
+    } else if (type === 'rentable') {
+        document.getElementById('tri-activites').value = 'revenus';
+        document.getElementById('ordre-tri').value = 'desc';
+    }
+    appliquerFiltres();
+}
+
+// Voir les détails d'une activité
+function voirDetailsActivite(activiteId) {
+    activiteSelectionnee = activiteId;
+    
+    // Afficher le modal
+    const modal = new bootstrap.Modal(document.getElementById('modalDetailsActivite'));
+    modal.show();
+    
+    // Charger les détails via AJAX
+    fetch(`/rapport/activites-internes/details-ajax/${activiteId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                afficherDetailsActivite(data);
+            } else {
+                document.getElementById('contenu-details-activite').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="mdi mdi-alert"></i> Erreur: ${data.error}
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            document.getElementById('contenu-details-activite').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="mdi mdi-alert"></i> Erreur de chargement: ${error.message}
+                </div>
+            `;
+        });
+}
+
+// Afficher les détails de l'activité
+function afficherDetailsActivite(data) {
+    const activite = data.activite;
+    const stats = data.statistiques;
+    const utilisations = data.utilisations;
+    
+    let html = `
+        <div class="row mb-4">
+            <div class="col-md-4 text-center">
+                <div class="avatar avatar-xl bg-primary rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center">
+                    <i class="mdi mdi-cog fs-1 text-white"></i>
+                </div>
+                <h5>${activite.nom}</h5>
+                <p class="text-muted">Activité #${activite.id}</p>
+                <small class="text-info">Créée le ${activite.date_creation}</small>
+            </div>
+            <div class="col-md-8">
+                <h6><i class="mdi mdi-chart-bar"></i> Statistiques d'utilisation</h6>
+                <div class="row">
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-primary">${stats.total_utilisations}</h4>
+                        <small>Utilisations</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-info">${stats.total_heures.toFixed(1)}h</h4>
+                        <small>Heures totales</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-success">${stats.total_revenus.toFixed(2)} USD</h4>
+                        <small>Revenus générés</small>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <h4 class="text-warning">${stats.taux_facturation.toFixed(1)}%</h4>
+                        <small>Taux facturation</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <h6><i class="mdi mdi-history"></i> Dernières utilisations</h6>
+    `;
+    
+    if (utilisations.length === 0) {
+        html += `
+            <div class="text-center text-muted py-4">
+                <i class="mdi mdi-information mdi-48px"></i>
+                <br>Cette activité n'a jamais été utilisée
+            </div>
+        `;
+    } else {
+        html += '<div class="table-responsive"><table class="table table-sm table-striped">';
+        html += `
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Dossier</th>
+                    <th>Client</th>
+                    <th>Avocat</th>
+                    <th>Heures</th>
+                    <th>Statut</th>
+                    <th>Coût</th>
+                </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        utilisations.forEach(utilisation => {
+            const statutClass = utilisation.facturee ? 'success' : 'warning';
+            const statutText = utilisation.facturee ? 'Facturée' : 'Non facturée';
+            
+            html += `
+                <tr>
+                    <td>${utilisation.date_activite}</td>
+                    <td>
+                        <strong>${utilisation.dossier_titre}</strong>
+                        <br><small class="text-muted">${utilisation.dossier_numero}</small>
+                    </td>
+                    <td>${utilisation.client_nom}</td>
+                    <td>${utilisation.avocat}</td>
+                    <td><span class="badge badge-info">${utilisation.duree_heures}h</span></td>
+                    <td><span class="badge badge-${statutClass}">${statutText}</span></td>
+                    <td><strong>${utilisation.cout_estime.toFixed(2)} USD</strong></td>
+                </tr>
+            `;
+        });
+        
+        html += '</tbody></table></div>';
+    }
+    
+    document.getElementById('contenu-details-activite').innerHTML = html;
+}
+
+// Générer rapport d'activité
+function genererRapportActivite(activiteId) {
+    // Créer un formulaire pour envoyer la requête POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/activites-internes/generer/';
+    form.target = '_blank';
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
+    }
+    
+    // Ajouter l'ID de l'activité
+    const activiteInput = document.createElement('input');
+    activiteInput.type = 'hidden';
+    activiteInput.name = 'activite_id';
+    activiteInput.value = activiteId;
+    form.appendChild(activiteInput);
+    
+    // Ajouter le format
+    const formatInput = document.createElement('input');
+    formatInput.type = 'hidden';
+    formatInput.name = 'format';
+    formatInput.value = 'html';
+    form.appendChild(formatInput);
+    
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+}
+
+// Générer rapport depuis le modal
+function genererRapportActiviteModal() {
+    if (activiteSelectionnee) {
+        genererRapportActivite(activiteSelectionnee);
+    }
+}
+
+// Imprimer rapport d'activité
+function imprimerRapportActivite(activiteId) {
+    genererRapportActivite(activiteId);
+}
+</script>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.avatar {
+    width: 2rem;
+    height: 2rem;
+}
+
+.avatar-xl {
+    width: 4rem;
+    height: 4rem;
+}
+
+@media print {
+    .btn, .box-tools, .content-header .text-end {
+        display: none !important;
+    }
+    
+    .content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .box {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
+</style>
+
+{% endblock %}

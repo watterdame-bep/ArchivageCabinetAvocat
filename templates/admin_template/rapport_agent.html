@@ -1,0 +1,532 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Rapport Agent{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Rapport Agent</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item">Rapport</li>
+                                <li class="breadcrumb-item active" aria-current="page">Agent</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-account-multiple text-primary"></i> 
+                                Liste des Agents ({{ total_agents }})
+                            </h4>
+                            {% csrf_token %}
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
+                                    <i class="mdi mdi-printer"></i> Imprimer
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="box-body">
+                            <!-- Statistiques rapides -->
+                            <div class="row mb-4">
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-info">
+                                        <div class="inner">
+                                            <h3>{{ total_agents }}</h3>
+                                            <p>Total Agents</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-account-multiple"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-success">
+                                        <div class="inner">
+                                            <h3 id="agents-actifs">0</h3>
+                                            <p>Agents Actifs</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-account-check"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-warning">
+                                        <div class="inner">
+                                            <h3 id="avocats-count">0</h3>
+                                            <p>Avocats</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-briefcase-account"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-danger">
+                                        <div class="inner">
+                                            <h3 id="secretaires-count">0</h3>
+                                            <p>Secrétaires</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-account-tie"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtres -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filtrer par poste:</label>
+                                        <select id="filtre-poste" class="form-control">
+                                            <option value="">Tous les postes</option>
+                                            <option value="Avocat">Avocat</option>
+                                            <option value="Secrétaire">Secrétaire</option>
+                                            <option value="Assistant">Assistant</option>
+                                            <option value="Stagiaire">Stagiaire</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filtrer par statut:</label>
+                                        <select id="filtre-statut" class="form-control">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="Actif">Actif</option>
+                                            <option value="Inactif">Inactif</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Rechercher:</label>
+                                        <input type="text" id="recherche-agent" class="form-control" placeholder="Nom, prénom, email...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tableau des agents -->
+                            <div class="table-responsive">
+                                <table id="tableau-agents" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <th>Photo</th>
+                                            <th>Nom & Prénom</th>
+                                            <th>Poste</th>
+                                            <th>Email</th>
+                                            <th>Téléphone</th>
+                                            <th>Statut</th>
+                                            <th>Dossiers</th>
+                                            <th>Activités (30j)</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in agents_data %}
+                                        <tr data-poste="{{ item.agent.poste }}" data-statut="{{ item.statut_display }}">
+                                            <td class="text-center">
+                                                {% if item.agent.photo %}
+                                                    <img src="{{ item.agent.photo.url }}" alt="Photo" class="avatar avatar-sm rounded-circle">
+                                                {% else %}
+                                                    <div class="avatar avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                                        <i class="mdi mdi-account text-white"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong>{{ item.agent.nom }} {{ item.agent.prenom }}</strong>
+                                                    <small class="text-muted">ID: {{ item.agent.id }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ item.agent.poste }}</span>
+                                            </td>
+                                            <td>{{ item.agent.email|default:"-" }}</td>
+                                            <td>{{ item.agent.telephone|default:"-" }}</td>
+                                            <td>
+                                                {% if item.statut_display == 'Actif' %}
+                                                    <span class="badge badge-success">
+                                                        <i class="mdi mdi-check-circle"></i> Actif
+                                                    </span>
+                                                {% else %}
+                                                    <span class="badge badge-danger">
+                                                        <i class="mdi mdi-close-circle"></i> Inactif
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <small><strong>{{ item.dossiers_principaux }}</strong> Principal(aux)</small>
+                                                    <small><strong>{{ item.dossiers_assignes }}</strong> Total</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-warning">{{ item.activites_recentes }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-info" 
+                                                            onclick="voirDetailsAgent({{ item.agent.id }})"
+                                                            title="Voir détails">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-primary" 
+                                                            onclick="genererRapportAgent({{ item.agent.id }})"
+                                                            title="Générer rapport">
+                                                        <i class="mdi mdi-file-document"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-success" 
+                                                            onclick="imprimerRapportAgent({{ item.agent.id }})"
+                                                            title="Imprimer rapport">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted">
+                                                <i class="mdi mdi-information"></i> Aucun agent trouvé
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Modal Détails Agent -->
+<div class="modal fade" id="modalDetailsAgent" tabindex="-1" aria-labelledby="modalDetailsAgentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetailsAgentLabel">
+                    <i class="mdi mdi-account-details"></i> Détails de l'Agent
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenu-details-agent">
+                <div class="text-center">
+                    <i class="mdi mdi-loading mdi-spin"></i> Chargement...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="genererRapportAgentModal()">
+                    <i class="mdi mdi-file-document"></i> Générer Rapport
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variables globales
+let agentSelectionne = null;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    calculerStatistiques();
+    initialiserFiltres();
+});
+
+// Calculer les statistiques
+function calculerStatistiques() {
+    const lignes = document.querySelectorAll('#tableau-agents tbody tr[data-poste]');
+    let agentsActifs = 0;
+    let avocats = 0;
+    let secretaires = 0;
+    
+    lignes.forEach(ligne => {
+        const statut = ligne.getAttribute('data-statut');
+        const poste = ligne.getAttribute('data-poste');
+        
+        if (statut === 'Actif') {
+            agentsActifs++;
+        }
+        
+        if (poste === 'Avocat') {
+            avocats++;
+        } else if (poste === 'Secrétaire') {
+            secretaires++;
+        }
+    });
+    
+    document.getElementById('agents-actifs').textContent = agentsActifs;
+    document.getElementById('avocats-count').textContent = avocats;
+    document.getElementById('secretaires-count').textContent = secretaires;
+}
+
+// Initialiser les filtres
+function initialiserFiltres() {
+    const filtrePoste = document.getElementById('filtre-poste');
+    const filtreStatut = document.getElementById('filtre-statut');
+    const rechercheAgent = document.getElementById('recherche-agent');
+    
+    [filtrePoste, filtreStatut, rechercheAgent].forEach(element => {
+        element.addEventListener('change', appliquerFiltres);
+        element.addEventListener('keyup', appliquerFiltres);
+    });
+}
+
+// Appliquer les filtres
+function appliquerFiltres() {
+    const filtrePoste = document.getElementById('filtre-poste').value.toLowerCase();
+    const filtreStatut = document.getElementById('filtre-statut').value.toLowerCase();
+    const recherche = document.getElementById('recherche-agent').value.toLowerCase();
+    
+    const lignes = document.querySelectorAll('#tableau-agents tbody tr[data-poste]');
+    
+    lignes.forEach(ligne => {
+        const poste = ligne.getAttribute('data-poste').toLowerCase();
+        const statut = ligne.getAttribute('data-statut').toLowerCase();
+        const texte = ligne.textContent.toLowerCase();
+        
+        const correspondPoste = !filtrePoste || poste.includes(filtrePoste);
+        const correspondStatut = !filtreStatut || statut.includes(filtreStatut);
+        const correspondRecherche = !recherche || texte.includes(recherche);
+        
+        if (correspondPoste && correspondStatut && correspondRecherche) {
+            ligne.style.display = '';
+        } else {
+            ligne.style.display = 'none';
+        }
+    });
+}
+
+// Voir détails d'un agent
+function voirDetailsAgent(agentId) {
+    agentSelectionne = agentId;
+    
+    // Simuler le chargement des détails (à implémenter avec AJAX)
+    document.getElementById('contenu-details-agent').innerHTML = `
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="avatar avatar-xl bg-primary rounded-circle mx-auto mb-3">
+                    <i class="mdi mdi-account fs-1 text-white"></i>
+                </div>
+                <h5>Agent #${agentId}</h5>
+            </div>
+            <div class="col-md-8">
+                <h6>Informations générales</h6>
+                <p><strong>Poste:</strong> Avocat</p>
+                <p><strong>Email:</strong> agent@cabinet.com</p>
+                <p><strong>Téléphone:</strong> +243 XXX XXX XXX</p>
+                
+                <h6 class="mt-3">Statistiques</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <strong>5</strong><br>
+                            <small>Dossiers Principaux</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <strong>12</strong><br>
+                            <small>Total Dossiers</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDetailsAgent'));
+    modal.show();
+}
+
+// Générer rapport d'un agent
+function genererRapportAgent(agentId) {
+    // Ouvrir directement le PDF comme pour les factures
+    const typeRapport = 'complet'; // Par défaut
+    const urlImpression = `/rapport/agent/imprimer/${agentId}/?type=${typeRapport}`;
+    
+    // Ouvrir le PDF dans un nouvel onglet
+    window.open(urlImpression, '_blank');
+}
+
+// Générer rapport depuis le modal
+function genererRapportAgentModal() {
+    if (agentSelectionne) {
+        genererRapportAgent(agentSelectionne);
+    }
+}
+
+// Imprimer rapport d'un agent
+function imprimerRapportAgent(agentId) {
+    // Même fonction que générer rapport (impression directe)
+    genererRapportAgent(agentId);
+}
+
+// Imprimer rapport avec filtres appliqués
+function imprimerRapportFiltre(typeRapport = 'complet') {
+    // Récupérer les agents visibles (après filtrage)
+    const lignesVisibles = document.querySelectorAll('#tableau-agents tbody tr[data-poste]:not([style*="display: none"])');
+    
+    if (lignesVisibles.length === 0) {
+        alert('Aucun agent à imprimer avec les filtres actuels');
+        return;
+    }
+    
+    // Extraire les IDs des agents visibles
+    const agentsIds = [];
+    lignesVisibles.forEach(ligne => {
+        // Récupérer l'ID depuis le bouton "Voir détails" ou autre élément
+        const btnDetails = ligne.querySelector('button[onclick*="voirDetailsAgent"]');
+        if (btnDetails) {
+            const onclick = btnDetails.getAttribute('onclick');
+            const match = onclick.match(/voirDetailsAgent\((\d+)\)/);
+            if (match) {
+                agentsIds.push(parseInt(match[1]));
+            }
+        }
+    });
+    
+    if (agentsIds.length === 0) {
+        alert('Impossible de récupérer les IDs des agents');
+        return;
+    }
+    
+    // Récupérer les filtres actuels
+    const filtres = {
+        poste: document.getElementById('filtre-poste').value,
+        statut: document.getElementById('filtre-statut').value,
+        recherche: document.getElementById('recherche-agent').value
+    };
+    
+    // Construire l'URL avec les paramètres (comme pour les autres rapports)
+    const params = new URLSearchParams();
+    params.append('agents_ids', JSON.stringify(agentsIds));
+    params.append('filtres', JSON.stringify(filtres));
+    params.append('type_rapport', typeRapport);
+    
+    const urlImpression = `/rapport/agent/imprimer-filtre/?${params.toString()}`;
+    
+    // Ouvrir le PDF dans un nouvel onglet (même logique que les autres rapports)
+    window.open(urlImpression, '_blank');
+}
+
+// Exporter le tableau (fonction conservée pour compatibilité)
+function exporterTableau(format) {
+    // Rediriger vers la nouvelle fonction d'impression
+    if (format === 'pdf') {
+        imprimerRapportFiltre('complet');
+    } else {
+        alert('Export Excel à implémenter');
+    }
+}
+</script>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box > .small-box-footer {
+    position: relative;
+    text-align: center;
+    padding: 3px 0;
+    color: #fff;
+    color: rgba(255,255,255,0.8);
+    display: block;
+    z-index: 10;
+    background: rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.small-box > .small-box-footer:hover {
+    color: #fff;
+    background: rgba(0,0,0,0.15);
+}
+
+.small-box .icon {
+    -webkit-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    transition: all .3s linear;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.small-box:hover {
+    text-decoration: none;
+    color: #f9f9f9;
+}
+
+.small-box:hover .icon {
+    font-size: 95px;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+    color: white;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+    color: white;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: white;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.avatar-xl {
+    width: 80px;
+    height: 80px;
+}
+</style>
+{% endblock %}""

@@ -1,0 +1,391 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h4 class="page-title">Référentiel de la Caisse</h4>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item">Caisse</li>
+                                <li class="breadcrumb-item active" aria-current="page">Référentiel de la caisse</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Statistiques générales -->
+            <div class="row">
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-15 bg-primary-light h-50 w-50 l-h-60 rounded text-center">
+                                    <span class="icon-Briefcase fs-24"><span class="path1"></span><span class="path2"></span></span>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-500">{{ total_services }}</h5>
+                                    <p class="text-fade mb-0">Total Services</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-15 bg-success-light h-50 w-50 l-h-60 rounded text-center">
+                                    <span class="icon-Add-user fs-24"><span class="path1"></span><span class="path2"></span></span>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-500">{{ services_recents }}</h5>
+                                    <p class="text-fade mb-0">Ajoutés ce mois</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-15 bg-warning-light h-50 w-50 l-h-60 rounded text-center">
+                                    <span class="icon-Building fs-24"></span>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0 fw-500">{{ cabinet.nom|truncatechars:15 }}</h5>
+                                    <p class="text-fade mb-0">Cabinet</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-15 bg-info-light h-50 w-50 l-h-60 rounded text-center">
+                                    <span class="icon-Download fs-24"></span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-sm btn-primary" onclick="genererRapport()">
+                                        <i class="fa fa-download me-2"></i>Exporter PDF
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des services -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">Liste des Services du Cabinet</h4>
+                            <div class="box-controls pull-right">
+                                <button class="btn btn-sm btn-success" data-bs-toggle="modal" data-bs-target="#modalAjouterService">
+                                    <i class="fa fa-plus me-2"></i>Ajouter Service
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body">
+                            {% if services_cabinet %}
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped" id="servicesTable">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Nom du Service</th>
+                                            <th>Date d'Ajout</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for service in services_cabinet %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>
+                                                <strong>{{ service.nom_service }}</strong>
+                                            </td>
+                                            <td>
+                                                {% if service.date_ajouter %}
+                                                    {{ service.date_ajouter|date:"d/m/Y à H:i" }}
+                                                {% else %}
+                                                    <span class="text-muted">Non définie</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-info" onclick="voirDetails({{ service.id }})" title="Voir détails">
+                                                    <i class="fa fa-eye"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% else %}
+                            <div class="text-center py-5">
+                                <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Aucun service trouvé</h5>
+                                <p class="text-muted">Commencez par ajouter des services à votre cabinet.</p>
+                                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAjouterService">
+                                    <i class="fa fa-plus me-2"></i>Ajouter le premier service
+                                </button>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Services récents -->
+            {% if services_top %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">Services Récents</h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                {% for service in services_top %}
+                                <div class="col-md-4 col-sm-6 mb-3">
+                                    <div class="card border-primary">
+                                        <div class="card-body">
+                                            <h6 class="card-title">{{ service.nom_service }}</h6>
+                                            <p class="card-text text-muted small">
+                                                Ajouté le {{ service.date_ajouter|date:"d/m/Y" }}
+                                            </p>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="voirDetails({{ service.id }})">
+                                                Détails
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<!-- Modal Détails Service -->
+<div class="modal fade" id="modalDetailsService" tabindex="-1" aria-labelledby="modalDetailsServiceLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDetailsServiceLabel">Détails du Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="detailsServiceContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Chargement...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajouter Service -->
+<div class="modal fade" id="modalAjouterService" tabindex="-1" aria-labelledby="modalAjouterServiceLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalAjouterServiceLabel">Ajouter un Service</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="text-info">
+                    <i class="fa fa-info-circle me-2"></i>
+                    Pour ajouter de nouveaux services, utilisez le panneau de paramétrage dans la barre latérale droite.
+                </p>
+                <p class="text-muted">
+                    Cliquez sur l'icône de paramètres en haut à droite, puis naviguez vers 
+                    <strong>Ressources internes > Motif dépense</strong>.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" data-toggle="control-sidebar">
+                    Ouvrir Paramètres
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Fonction pour voir les détails d'un service
+function voirDetails(serviceId) {
+    const modal = new bootstrap.Modal(document.getElementById('modalDetailsService'));
+    const content = document.getElementById('detailsServiceContent');
+    
+    // Afficher le spinner
+    content.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+        </div>
+    `;
+    
+    modal.show();
+    
+    // Récupérer les détails via AJAX
+    fetch(`/rapport/referentiel-caisse/details/${serviceId}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                content.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fa fa-exclamation-triangle me-2"></i>
+                        Erreur: ${data.error}
+                    </div>
+                `;
+            } else {
+                content.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Informations générales</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <td><strong>ID:</strong></td>
+                                    <td>${data.id}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Nom du service:</strong></td>
+                                    <td>${data.nom_service}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Date d'ajout:</strong></td>
+                                    <td>${data.date_ajouter}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Cabinet:</strong></td>
+                                    <td>${data.cabinet}</td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Statistiques</h6>
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle me-2"></i>
+                                Les statistiques d'utilisation seront disponibles prochainement.
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fa fa-exclamation-triangle me-2"></i>
+                    Erreur lors du chargement des détails.
+                </div>
+            `;
+        });
+}
+
+// Fonction pour générer le rapport PDF
+function genererRapport() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    // Désactiver le bouton et afficher le spinner
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i>Génération...';
+    
+    fetch('/rapport/referentiel-caisse/generer/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Créer un lien de téléchargement temporaire
+                const link = document.createElement('a');
+                link.href = data.download_url;
+                link.download = '';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                // Afficher un message de succès
+                showAlert('success', data.message);
+            } else {
+                showAlert('danger', data.error || 'Erreur lors de la génération du rapport');
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            showAlert('danger', 'Erreur lors de la génération du rapport');
+        })
+        .finally(() => {
+            // Réactiver le bouton
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+        });
+}
+
+// Fonction utilitaire pour afficher les alertes
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Insérer l'alerte au début du contenu
+    const contentWrapper = document.querySelector('.content-wrapper .container-full');
+    contentWrapper.insertBefore(alertDiv, contentWrapper.firstChild);
+    
+    // Supprimer automatiquement après 5 secondes
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Initialiser DataTable si disponible
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof $.fn.DataTable !== 'undefined' && document.getElementById('servicesTable')) {
+        $('#servicesTable').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            },
+            "pageLength": 25,
+            "order": [[2, "desc"]] // Trier par date d'ajout décroissante
+        });
+    }
+});
+</script>
+{% endblock %}

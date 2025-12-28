@@ -1,0 +1,684 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h4 class="page-title">Rapport de Caisse</h4>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item">Caisse</li>
+                                <li class="breadcrumb-item active" aria-current="page">Rapport de caisse</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Statistiques générales -->
+            <div class="row">
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-auto">
+                                    <h4 class="text-success mb-0">{{ total_entrees|floatformat:2 }} USD</h4>
+                                    <p class="text-fade mb-0">Total Entrées</p>
+                                    <small class="text-muted">{{ total_entrees_fc|floatformat:0 }} FC</small>
+                                </div>
+                                <div class="text-end">
+                                    <i class="mdi mdi-arrow-down-bold text-success fs-40"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-auto">
+                                    <h4 class="text-danger mb-0">{{ total_sorties|floatformat:2 }} USD</h4>
+                                    <p class="text-fade mb-0">Total Sorties</p>
+                                    <small class="text-muted">{{ total_sorties_fc|floatformat:0 }} FC</small>
+                                </div>
+                                <div class="text-end">
+                                    <i class="mdi mdi-arrow-up-bold text-danger fs-40"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-auto">
+                                    <h4 class="{% if solde_actuel >= 0 %}text-success{% else %}text-danger{% endif %} mb-0">
+                                        {{ solde_actuel|floatformat:2 }} USD
+                                    </h4>
+                                    <p class="text-fade mb-0">Solde Actuel</p>
+                                    <small class="text-muted">{{ solde_actuel_fc|floatformat:0 }} FC</small>
+                                </div>
+                                <div class="text-end">
+                                    <i class="mdi mdi-wallet {% if solde_actuel >= 0 %}text-success{% else %}text-danger{% endif %} fs-40"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-xl-3 col-md-6 col-12">
+                    <div class="box">
+                        <div class="box-body">
+                            <div class="d-flex align-items-center">
+                                <div class="me-auto">
+                                    <h4 class="text-info mb-0">{{ taux_change|floatformat:0 }}</h4>
+                                    <p class="text-fade mb-0">Taux USD/FC</p>
+                                    <small class="text-muted">Taux actuel</small>
+                                </div>
+                                <div class="text-end">
+                                    <i class="mdi mdi-currency-usd text-info fs-40"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de sélection de période -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-calendar-range me-2"></i>
+                                Générer un rapport par période
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <form id="rapportForm">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="date_debut">Date de début</label>
+                                            <input type="date" class="form-control" id="date_debut" name="date_debut" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label for="date_fin">Date de fin</label>
+                                            <input type="date" class="form-control" id="date_fin" name="date_fin" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <div class="d-block">
+                                                <button type="submit" class="btn btn-primary" id="btnGenerer">
+                                                    <i class="mdi mdi-file-chart me-2"></i>
+                                                    Générer le rapport
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Zone d'affichage du rapport -->
+            <div class="row" id="rapportContainer" style="display: none;">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title" id="rapportTitle">
+                                <i class="mdi mdi-chart-line me-2"></i>
+                                Rapport de caisse
+                            </h4>
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-success btn-sm" id="btnExportPDF">
+                                    <i class="mdi mdi-file-pdf me-1"></i>
+                                    Exporter PDF
+                                </button>
+                                <button type="button" class="btn btn-info btn-sm" id="btnImprimer">
+                                    <i class="mdi mdi-printer me-1"></i>
+                                    Imprimer
+                                </button>
+                            </div>
+                        </div>
+                        <div class="box-body" id="rapportContent">
+                            <!-- Le contenu du rapport sera inséré ici -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Template pour le rapport -->
+<script type="text/template" id="rapportTemplate">
+    <div class="rapport-header mb-4">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Période: <span class="text-primary">{periode}</span></h5>
+                <p class="text-muted mb-0">Cabinet: {cabinet}</p>
+                <small class="text-muted">Généré le: {date_generation}</small>
+            </div>
+            <div class="col-md-6 text-end">
+                <h6>Total mouvements: <span class="badge badge-info">{total_mouvements}</span></h6>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résumé financier -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-left-primary">
+                <div class="card-body">
+                    <h6 class="text-primary">Solde initial</h6>
+                    <h5>{solde_initial} USD</h5>
+                    <small class="text-muted">{solde_initial_fc} FC</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-success">
+                <div class="card-body">
+                    <h6 class="text-success">Entrées période</h6>
+                    <h5>{entrees_periode} USD</h5>
+                    <small class="text-muted">{entrees_periode_fc} FC</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-danger">
+                <div class="card-body">
+                    <h6 class="text-danger">Sorties période</h6>
+                    <h5>{sorties_periode} USD</h5>
+                    <small class="text-muted">{sorties_periode_fc} FC</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-left-info">
+                <div class="card-body">
+                    <h6 class="text-info">Solde final</h6>
+                    <h5>{solde_final} USD</h5>
+                    <small class="text-muted">{solde_final_fc} FC</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau des mouvements avec pagination JavaScript -->
+    <div class="table-responsive">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center">
+                <label for="itemsPerPage" class="me-2">Afficher:</label>
+                <select id="itemsPerPage" class="form-select form-select-sm" style="width: auto;" onchange="updatePagination()">
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+                <span class="ms-2">éléments par page</span>
+            </div>
+            <div class="d-flex align-items-center">
+                <label for="searchTable" class="me-2">Rechercher:</label>
+                <input type="text" id="searchTable" class="form-control form-control-sm" style="width: 200px;" placeholder="Rechercher..." onkeyup="filterTable()">
+            </div>
+        </div>
+        
+        <table class="table table-bordered table-striped" id="mouvementsTable">
+            <thead class="table-dark">
+                <tr>
+                    <th onclick="sortTable(0)">Date <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(1)">Type <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(2)">Motif <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(3)">Montant USD <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(4)">Montant FC <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(5)">Personne <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(6)">Dossier <i class="mdi mdi-sort"></i></th>
+                    <th onclick="sortTable(7)">Agent <i class="mdi mdi-sort"></i></th>
+                </tr>
+            </thead>
+            <tbody id="mouvementsTableBody">
+                {mouvements_rows}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="row mt-3">
+        <div class="col-md-6">
+            <div id="paginationInfo" class="text-muted">
+                <!-- Info pagination sera injectée ici -->
+            </div>
+        </div>
+        <div class="col-md-6">
+            <nav aria-label="Pagination des mouvements">
+                <ul class="pagination justify-content-end mb-0" id="paginationControls">
+                    <!-- Contrôles pagination seront injectés ici -->
+                </ul>
+            </nav>
+        </div>
+    </div>
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('rapportForm');
+    const btnGenerer = document.getElementById('btnGenerer');
+    const rapportContainer = document.getElementById('rapportContainer');
+    const rapportContent = document.getElementById('rapportContent');
+    const rapportTitle = document.getElementById('rapportTitle');
+    
+    // Définir les dates par défaut (mois en cours)
+    const today = new Date();
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    
+    document.getElementById('date_debut').value = firstDay.toISOString().split('T')[0];
+    document.getElementById('date_fin').value = lastDay.toISOString().split('T')[0];
+    
+    // Variables globales pour la pagination
+    window.currentReportData = null;
+    window.allMovements = [];
+    window.filteredMovements = [];
+    window.currentPage = 1;
+    window.itemsPerPage = 20;
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        genererRapport();
+    });
+    
+    function genererRapport() {
+        const dateDebut = document.getElementById('date_debut').value;
+        const dateFin = document.getElementById('date_fin').value;
+        
+        if (!dateDebut || !dateFin) {
+            alert('Veuillez sélectionner les dates de début et fin');
+            return;
+        }
+        
+        if (new Date(dateDebut) > new Date(dateFin)) {
+            alert('La date de début doit être antérieure à la date de fin');
+            return;
+        }
+        
+        // Afficher le loader
+        btnGenerer.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i>Génération...';
+        btnGenerer.disabled = true;
+        
+        // Appel AJAX
+        fetch('{% url "generer_rapport_caisse" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                date_debut: dateDebut,
+                date_fin: dateFin
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.currentReportData = data;
+                window.allMovements = data.mouvements;
+                window.filteredMovements = [...window.allMovements];
+                window.currentPage = 1;
+                afficherRapport(data);
+                initializePagination();
+            } else {
+                alert('Erreur: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de la génération du rapport');
+        })
+        .finally(() => {
+            btnGenerer.innerHTML = '<i class="mdi mdi-file-chart me-2"></i>Générer le rapport';
+            btnGenerer.disabled = false;
+        });
+    }
+    
+    function afficherRapport(data) {
+        const template = document.getElementById('rapportTemplate').innerHTML;
+        
+        // Remplacer les placeholders du résumé (sans les mouvements pour l'instant)
+        let html = template
+            .replace('{periode}', `${data.periode.date_debut} - ${data.periode.date_fin}`)
+            .replace('{cabinet}', data.cabinet)
+            .replace('{date_generation}', data.date_generation)
+            .replace('{total_mouvements}', data.total_mouvements)
+            .replace('{solde_initial}', data.resume.solde_initial.toFixed(2))
+            .replace('{solde_initial_fc}', data.resume.solde_initial_fc.toFixed(0))
+            .replace('{entrees_periode}', data.resume.entrees_periode.toFixed(2))
+            .replace('{entrees_periode_fc}', data.resume.entrees_periode_fc.toFixed(0))
+            .replace('{sorties_periode}', data.resume.sorties_periode.toFixed(2))
+            .replace('{sorties_periode_fc}', data.resume.sorties_periode_fc.toFixed(0))
+            .replace('{solde_final}', data.resume.solde_final.toFixed(2))
+            .replace('{solde_final_fc}', data.resume.solde_final_fc.toFixed(0))
+            .replace('{mouvements_rows}', ''); // Sera rempli par la pagination
+        
+        rapportContent.innerHTML = html;
+        rapportTitle.innerHTML = `<i class="mdi mdi-chart-line me-2"></i>Rapport de caisse - ${data.periode.date_debut} au ${data.periode.date_fin}`;
+        rapportContainer.style.display = 'block';
+        
+        // Scroll vers le rapport
+        rapportContainer.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    function initializePagination() {
+        window.itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
+        updatePagination();
+    }
+    
+    // Fonctions globales pour la pagination
+    window.updatePagination = function() {
+        window.itemsPerPage = parseInt(document.getElementById('itemsPerPage').value);
+        window.currentPage = 1;
+        displayPage();
+    }
+    
+    window.goToPage = function(page) {
+        window.currentPage = page;
+        displayPage();
+    }
+    
+    window.filterTable = function() {
+        const searchTerm = document.getElementById('searchTable').value.toLowerCase();
+        
+        if (searchTerm === '') {
+            window.filteredMovements = [...window.allMovements];
+        } else {
+            window.filteredMovements = window.allMovements.filter(mouvement => {
+                return mouvement.date.toLowerCase().includes(searchTerm) ||
+                       mouvement.type_operation.toLowerCase().includes(searchTerm) ||
+                       mouvement.motif.toLowerCase().includes(searchTerm) ||
+                       mouvement.personne.toLowerCase().includes(searchTerm) ||
+                       mouvement.dossier.toLowerCase().includes(searchTerm) ||
+                       mouvement.agent.toLowerCase().includes(searchTerm) ||
+                       mouvement.montant_usd.toString().includes(searchTerm);
+            });
+        }
+        
+        window.currentPage = 1;
+        displayPage();
+    }
+    
+    window.sortTable = function(columnIndex) {
+        const columns = ['date', 'type_operation', 'motif', 'montant_usd', 'montant_fc', 'personne', 'dossier', 'agent'];
+        const column = columns[columnIndex];
+        
+        // Déterminer l'ordre de tri
+        const isCurrentlySorted = window.filteredMovements.length > 1 && 
+            window.filteredMovements[0][column] <= window.filteredMovements[1][column];
+        
+        window.filteredMovements.sort((a, b) => {
+            let aVal = a[column];
+            let bVal = b[column];
+            
+            // Traitement spécial pour les dates
+            if (column === 'date') {
+                aVal = new Date(a[column].split('/').reverse().join('-'));
+                bVal = new Date(b[column].split('/').reverse().join('-'));
+            }
+            
+            // Traitement spécial pour les nombres
+            if (column === 'montant_usd' || column === 'montant_fc') {
+                aVal = parseFloat(aVal);
+                bVal = parseFloat(bVal);
+            }
+            
+            if (isCurrentlySorted) {
+                return bVal > aVal ? 1 : -1;
+            } else {
+                return aVal > bVal ? 1 : -1;
+            }
+        });
+        
+        displayPage();
+    }
+    
+    function displayPage() {
+        const startIndex = (window.currentPage - 1) * window.itemsPerPage;
+        const endIndex = startIndex + window.itemsPerPage;
+        const pageMovements = window.filteredMovements.slice(startIndex, endIndex);
+        
+        // Générer les lignes du tableau pour la page actuelle
+        let mouvementsRows = '';
+        pageMovements.forEach(mouvement => {
+            const typeClass = mouvement.type_operation === 'Entrée' ? 'badge-success' : 'badge-danger';
+            mouvementsRows += `
+                <tr>
+                    <td>${mouvement.date}</td>
+                    <td><span class="badge ${typeClass}">${mouvement.type_operation}</span></td>
+                    <td>${mouvement.motif}</td>
+                    <td>${mouvement.montant_usd.toFixed(2)}</td>
+                    <td>${mouvement.montant_fc.toFixed(0)}</td>
+                    <td>${mouvement.personne}</td>
+                    <td>${mouvement.dossier}</td>
+                    <td>${mouvement.agent}</td>
+                </tr>
+            `;
+        });
+        
+        // Mettre à jour le tableau
+        const tableBody = document.getElementById('mouvementsTableBody');
+        if (tableBody) {
+            tableBody.innerHTML = mouvementsRows;
+        }
+        
+        // Mettre à jour les informations de pagination
+        updatePaginationInfo();
+        updatePaginationControls();
+    }
+    
+    function updatePaginationInfo() {
+        const totalItems = window.filteredMovements.length;
+        const startItem = totalItems > 0 ? (window.currentPage - 1) * window.itemsPerPage + 1 : 0;
+        const endItem = Math.min(window.currentPage * window.itemsPerPage, totalItems);
+        
+        const paginationInfo = document.getElementById('paginationInfo');
+        if (paginationInfo) {
+            paginationInfo.innerHTML = `Affichage de ${startItem} à ${endItem} sur ${totalItems} mouvements`;
+        }
+    }
+    
+    function updatePaginationControls() {
+        const totalItems = window.filteredMovements.length;
+        const totalPages = Math.ceil(totalItems / window.itemsPerPage);
+        
+        let controls = '';
+        
+        // Bouton Précédent
+        if (window.currentPage > 1) {
+            controls += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage(${window.currentPage - 1}); return false;">
+                        <i class="mdi mdi-chevron-left"></i> Précédent
+                    </a>
+                </li>
+            `;
+        } else {
+            controls += `
+                <li class="page-item disabled">
+                    <span class="page-link"><i class="mdi mdi-chevron-left"></i> Précédent</span>
+                </li>
+            `;
+        }
+        
+        // Numéros de pages
+        const startPage = Math.max(1, window.currentPage - 2);
+        const endPage = Math.min(totalPages, window.currentPage + 2);
+        
+        if (startPage > 1) {
+            controls += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(1); return false;">1</a></li>`;
+            if (startPage > 2) {
+                controls += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+        }
+        
+        for (let i = startPage; i <= endPage; i++) {
+            if (i === window.currentPage) {
+                controls += `<li class="page-item active"><span class="page-link">${i}</span></li>`;
+            } else {
+                controls += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${i}); return false;">${i}</a></li>`;
+            }
+        }
+        
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                controls += `<li class="page-item disabled"><span class="page-link">...</span></li>`;
+            }
+            controls += `<li class="page-item"><a class="page-link" href="#" onclick="goToPage(${totalPages}); return false;">${totalPages}</a></li>`;
+        }
+        
+        // Bouton Suivant
+        if (window.currentPage < totalPages) {
+            controls += `
+                <li class="page-item">
+                    <a class="page-link" href="#" onclick="goToPage(${window.currentPage + 1}); return false;">
+                        Suivant <i class="mdi mdi-chevron-right"></i>
+                    </a>
+                </li>
+            `;
+        } else {
+            controls += `
+                <li class="page-item disabled">
+                    <span class="page-link">Suivant <i class="mdi mdi-chevron-right"></i></span>
+                </li>
+            `;
+        }
+        
+        const paginationControls = document.getElementById('paginationControls');
+        if (paginationControls) {
+            paginationControls.innerHTML = controls;
+        }
+    }
+    
+    // Bouton imprimer
+    document.getElementById('btnImprimer').addEventListener('click', function() {
+        window.print();
+    });
+    
+    // Bouton export PDF (placeholder)
+    document.getElementById('btnExportPDF').addEventListener('click', function() {
+        alert('Fonctionnalité d\'export PDF à implémenter');
+    });
+});
+</script>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.border-left-primary {
+    border-left: 4px solid #007bff !important;
+}
+
+.border-left-success {
+    border-left: 4px solid #28a745 !important;
+}
+
+.border-left-danger {
+    border-left: 4px solid #dc3545 !important;
+}
+
+.border-left-info {
+    border-left: 4px solid #17a2b8 !important;
+}
+
+.rapport-header {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.pagination-info {
+    padding: 8px 0;
+    font-size: 14px;
+}
+
+.pagination .page-link {
+    color: #007bff;
+    border-color: #dee2e6;
+}
+
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    background-color: #fff;
+    border-color: #dee2e6;
+}
+
+/* Style pour les en-têtes de colonnes triables */
+th[onclick] {
+    cursor: pointer;
+    user-select: none;
+}
+
+th[onclick]:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Style pour la recherche */
+#searchTable:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Style pour le sélecteur d'éléments par page */
+#itemsPerPage:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+@media print {
+    .box-tools,
+    .content-header,
+    .btn,
+    #paginationContainer,
+    .d-flex.justify-content-between.align-items-center.mb-3 {
+        display: none !important;
+    }
+    
+    .rapport-header {
+        background: white !important;
+    }
+    
+    /* Afficher tous les mouvements lors de l'impression */
+    #mouvementsTableBody tr {
+        display: table-row !important;
+    }
+}
+</style>
+{% endblock %}

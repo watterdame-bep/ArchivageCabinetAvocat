@@ -1,0 +1,541 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Rapport Client{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Rapport Client</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item">Rapport</li>
+                                <li class="breadcrumb-item active" aria-current="page">Client</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-account-group text-primary"></i> 
+                                Liste des Clients ({{ total_clients }})
+                            </h4>
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
+                                    <i class="mdi mdi-printer"></i> Imprimer
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="box-body">
+                            <!-- Statistiques rapides -->
+                            <div class="row mb-4">
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-info">
+                                        <div class="inner">
+                                            <h3>{{ total_clients }}</h3>
+                                            <p>Total Clients</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-account-group"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-success">
+                                        <div class="inner">
+                                            <h3 id="clients-actifs">0</h3>
+                                            <p>Clients Actifs</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-account-check"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-warning">
+                                        <div class="inner">
+                                            <h3 id="dossiers-ouverts">0</h3>
+                                            <p>Dossiers Ouverts</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-folder-open"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-6">
+                                    <div class="small-box bg-danger">
+                                        <div class="inner">
+                                            <h3 id="dossiers-clotures">0</h3>
+                                            <p>Dossiers Clôturés</p>
+                                        </div>
+                                        <div class="icon">
+                                            <i class="mdi mdi-folder-lock"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtres -->
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filtrer par type:</label>
+                                        <select id="filtre-type" class="form-control">
+                                            <option value="">Tous les types</option>
+                                            <option value="Physique">Physique</option>
+                                            <option value="Morale">Morale</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Filtrer par statut:</label>
+                                        <select id="filtre-statut" class="form-control">
+                                            <option value="">Tous les statuts</option>
+                                            <option value="Actif">Actif</option>
+                                            <option value="Inactif">Inactif</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label>Rechercher:</label>
+                                        <input type="text" id="recherche-client" class="form-control" placeholder="Nom, prénom, email...">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Tableau des clients -->
+                            <div class="table-responsive">
+                                <table id="tableau-clients" class="table table-bordered table-striped">
+                                    <thead class="bg-primary text-white">
+                                        <tr>
+                                            <th>Photo</th>
+                                            <th>Nom & Prénom</th>
+                                            <th>Type</th>
+                                            <th>Email</th>
+                                            <th>Téléphone</th>
+                                            <th>Dossiers</th>
+                                            <th>Montants</th>
+                                            <th>Dernière Activité</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in clients_data %}
+                                        <tr data-type="{{ item.client.type_client }}" data-statut="Actif">
+                                            <td class="text-center">
+                                                {% if item.client.photo %}
+                                                    <img src="{{ item.client.photo.url }}" alt="Photo" class="avatar avatar-sm rounded-circle">
+                                                {% else %}
+                                                    <div class="avatar avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center">
+                                                        <i class="mdi mdi-account text-white"></i>
+                                                    </div>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <strong>{{ item.client.nom }} {{ item.client.prenom }}</strong>
+                                                    <small class="text-muted">ID: {{ item.client.id }}</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-info">{{ item.client.type_client }}</span>
+                                            </td>
+                                            <td>{{ item.client.email|default:"-" }}</td>
+                                            <td>{{ item.client.telephone|default:"-" }}</td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <small><strong>{{ item.total_dossiers }}</strong> Total</small>
+                                                    <small><strong>{{ item.dossiers_ouverts }}</strong> Ouverts</small>
+                                                    <small><strong>{{ item.dossiers_gagnes }}</strong> Gagnés</small>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    {% if item.montant_total_usd > 0 %}
+                                                    <small class="text-success"><strong>${{ item.montant_total_usd|floatformat:2 }}</strong></small>
+                                                    {% endif %}
+                                                    {% if item.montant_total_fc > 0 %}
+                                                    <small class="text-info"><strong>{{ item.montant_total_fc|floatformat:0 }} FC</strong></small>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if item.derniere_activite %}
+                                                <small>{{ item.derniere_activite|date:"d/m/Y" }}</small>
+                                                {% else %}
+                                                <small class="text-muted">Aucune</small>
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <button type="button" class="btn btn-sm btn-info" 
+                                                            onclick="voirDetailsClient({{ item.client.id }})"
+                                                            title="Voir détails">
+                                                        <i class="mdi mdi-eye"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-primary" 
+                                                            onclick="genererRapportClient({{ item.client.id }})"
+                                                            title="Générer rapport">
+                                                        <i class="mdi mdi-file-document"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-sm btn-success" 
+                                                            onclick="imprimerRapportClient({{ item.client.id }})"
+                                                            title="Imprimer rapport">
+                                                        <i class="mdi mdi-printer"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="9" class="text-center text-muted">
+                                                <i class="mdi mdi-information"></i> Aucun client trouvé
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<!-- Modal Détails Client -->
+<div class="modal fade" id="modalDetailsClient" tabindex="-1" aria-labelledby="modalDetailsClientLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="modalDetailsClientLabel">
+                    <i class="mdi mdi-account-details"></i> Détails du Client
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="contenu-details-client">
+                <div class="text-center">
+                    <i class="mdi mdi-loading mdi-spin"></i> Chargement...
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="button" class="btn btn-primary" onclick="genererRapportClientModal()">
+                    <i class="mdi mdi-file-document"></i> Générer Rapport
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variables globales
+let clientSelectionne = null;
+
+// Initialisation
+document.addEventListener('DOMContentLoaded', function() {
+    calculerStatistiques();
+    initialiserFiltres();
+});
+
+// Calculer les statistiques
+function calculerStatistiques() {
+    const lignes = document.querySelectorAll('#tableau-clients tbody tr[data-type]');
+    let clientsActifs = 0;
+    let dossiersOuverts = 0;
+    let dossiersClotures = 0;
+    
+    lignes.forEach(ligne => {
+        const statut = ligne.getAttribute('data-statut');
+        
+        if (statut === 'Actif') {
+            clientsActifs++;
+        }
+        
+        // Compter les dossiers depuis les cellules du tableau
+        const celluleDossiers = ligne.cells[5].textContent;
+        const ouvertsMatch = celluleDossiers.match(/(\d+) Ouverts/);
+        
+        if (ouvertsMatch) {
+            dossiersOuverts += parseInt(ouvertsMatch[1]);
+        }
+    });
+    
+    document.getElementById('clients-actifs').textContent = clientsActifs;
+    document.getElementById('dossiers-ouverts').textContent = dossiersOuverts;
+    
+    // Calculer les dossiers clôturés (approximation)
+    const totalClients = lignes.length;
+    dossiersClotures = Math.max(0, totalClients * 2 - dossiersOuverts); // Estimation
+    document.getElementById('dossiers-clotures').textContent = dossiersClotures;
+}
+
+// Initialiser les filtres
+function initialiserFiltres() {
+    const filtreType = document.getElementById('filtre-type');
+    const filtreStatut = document.getElementById('filtre-statut');
+    const rechercheClient = document.getElementById('recherche-client');
+    
+    [filtreType, filtreStatut, rechercheClient].forEach(element => {
+        element.addEventListener('change', appliquerFiltres);
+        element.addEventListener('keyup', appliquerFiltres);
+    });
+}
+
+// Appliquer les filtres
+function appliquerFiltres() {
+    const filtreType = document.getElementById('filtre-type').value.toLowerCase();
+    const filtreStatut = document.getElementById('filtre-statut').value.toLowerCase();
+    const recherche = document.getElementById('recherche-client').value.toLowerCase();
+    
+    const lignes = document.querySelectorAll('#tableau-clients tbody tr[data-type]');
+    
+    lignes.forEach(ligne => {
+        const type = ligne.getAttribute('data-type').toLowerCase();
+        const statut = ligne.getAttribute('data-statut').toLowerCase();
+        const texte = ligne.textContent.toLowerCase();
+        
+        const correspondType = !filtreType || type.includes(filtreType);
+        const correspondStatut = !filtreStatut || statut.includes(filtreStatut);
+        const correspondRecherche = !recherche || texte.includes(recherche);
+        
+        if (correspondType && correspondStatut && correspondRecherche) {
+            ligne.style.display = '';
+        } else {
+            ligne.style.display = 'none';
+        }
+    });
+}
+
+// Voir détails d'un client
+function voirDetailsClient(clientId) {
+    clientSelectionne = clientId;
+    
+    // Simuler le chargement des détails (à implémenter avec AJAX)
+    document.getElementById('contenu-details-client').innerHTML = `
+        <div class="row">
+            <div class="col-md-4 text-center">
+                <div class="avatar avatar-xl bg-primary rounded-circle mx-auto mb-3">
+                    <i class="mdi mdi-account fs-1 text-white"></i>
+                </div>
+                <h5>Client #${clientId}</h5>
+            </div>
+            <div class="col-md-8">
+                <h6>Informations générales</h6>
+                <p><strong>Type:</strong> Physique</p>
+                <p><strong>Email:</strong> client@email.com</p>
+                <p><strong>Téléphone:</strong> +243 XXX XXX XXX</p>
+                
+                <h6 class="mt-3">Statistiques</h6>
+                <div class="row">
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <strong>5</strong><br>
+                            <small>Total Dossiers</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-2 bg-light rounded">
+                            <strong>3</strong><br>
+                            <small>Dossiers Gagnés</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('modalDetailsClient'));
+    modal.show();
+}
+
+// Générer rapport d'un client
+function genererRapportClient(clientId) {
+    // Ouvrir directement le PDF comme pour les agents
+    const typeRapport = 'complet'; // Par défaut
+    const urlImpression = `/rapport/client/imprimer/${clientId}/?type=${typeRapport}`;
+    
+    // Ouvrir le PDF dans un nouvel onglet
+    window.open(urlImpression, '_blank');
+    
+    // Notification
+    toastr.success('Rapport généré avec succès !', 'Succès');
+}
+
+// Générer rapport depuis le modal
+function genererRapportClientModal() {
+    if (clientSelectionne) {
+        genererRapportClient(clientSelectionne);
+    }
+}
+
+// Imprimer rapport d'un client
+function imprimerRapportClient(clientId) {
+    // Même fonction que générer rapport (impression directe)
+    genererRapportClient(clientId);
+}
+
+// Exporter le tableau
+function exporterTableau(format) {
+    // Rediriger vers la nouvelle fonction d'impression
+    if (format === 'pdf') {
+        imprimerRapportFiltre('complet');
+    } else {
+        alert('Export Excel à implémenter');
+    }
+}
+
+// Imprimer rapport avec filtres appliqués (même logique que les agents)
+function imprimerRapportFiltre(typeRapport = 'complet') {
+    // Récupérer les clients visibles (après filtrage)
+    const lignesVisibles = document.querySelectorAll('#tableau-clients tbody tr[data-type]:not([style*="display: none"])');
+    
+    if (lignesVisibles.length === 0) {
+        alert('Aucun client à imprimer avec les filtres actuels');
+        return;
+    }
+    
+    // Extraire les IDs des clients visibles
+    const clientsIds = [];
+    lignesVisibles.forEach(ligne => {
+        // Récupérer l'ID depuis le bouton "Voir détails" ou autre élément
+        const btnDetails = ligne.querySelector('button[onclick*="voirDetailsClient"]');
+        if (btnDetails) {
+            const onclick = btnDetails.getAttribute('onclick');
+            const match = onclick.match(/voirDetailsClient\((\d+)\)/);
+            if (match) {
+                clientsIds.push(parseInt(match[1]));
+            }
+        }
+    });
+    
+    if (clientsIds.length === 0) {
+        alert('Impossible de récupérer les IDs des clients');
+        return;
+    }
+    
+    // Récupérer les filtres actuels
+    const filtres = {
+        type: document.getElementById('filtre-type').value,
+        statut: document.getElementById('filtre-statut').value,
+        recherche: document.getElementById('recherche-client').value
+    };
+    
+    // Construire l'URL avec les paramètres
+    const params = new URLSearchParams();
+    params.append('clients_ids', JSON.stringify(clientsIds));
+    params.append('filtres', JSON.stringify(filtres));
+    params.append('type_rapport', typeRapport);
+    
+    const urlImpression = `/rapport/client/imprimer-filtre/?${params.toString()}`;
+    
+    // Ouvrir le PDF dans un nouvel onglet
+    window.open(urlImpression, '_blank');
+}
+</script>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box > .small-box-footer {
+    position: relative;
+    text-align: center;
+    padding: 3px 0;
+    color: #fff;
+    color: rgba(255,255,255,0.8);
+    display: block;
+    z-index: 10;
+    background: rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.small-box > .small-box-footer:hover {
+    color: #fff;
+    background: rgba(0,0,0,0.15);
+}
+
+.small-box .icon {
+    -webkit-transition: all .3s linear;
+    -o-transition: all .3s linear;
+    transition: all .3s linear;
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.small-box:hover {
+    text-decoration: none;
+    color: #f9f9f9;
+}
+
+.small-box:hover .icon {
+    font-size: 95px;
+}
+
+.bg-info {
+    background-color: #17a2b8 !important;
+    color: white;
+}
+
+.bg-success {
+    background-color: #28a745 !important;
+    color: white;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: white;
+}
+
+.bg-danger {
+    background-color: #dc3545 !important;
+    color: white;
+}
+
+.avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-sm {
+    width: 32px;
+    height: 32px;
+}
+
+.avatar-xl {
+    width: 80px;
+    height: 80px;
+}
+</style>
+{% endblock %}

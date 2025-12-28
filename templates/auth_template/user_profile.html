@@ -1,0 +1,424 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block content %}
+<style>
+/* Styles pour la timeline des activités */
+.timeline {
+    position: relative;
+    padding-left: 0;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 50px;
+    margin-bottom: 20px;
+}
+
+.timeline-item:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 32px;
+    bottom: -20px;
+    width: 2px;
+    background-color: #e9ecef;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.timeline-content {
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    padding: 15px;
+    border-left: 3px solid #dee2e6;
+}
+
+.timeline-content:hover {
+    background-color: #e9ecef;
+    transition: background-color 0.2s;
+}
+
+/* Responsive pour mobile */
+@media (max-width: 768px) {
+    .timeline-item {
+        padding-left: 40px;
+    }
+    
+    .timeline-marker div {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
+</style>
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Mon Profil</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item" aria-current="page">Paramètres</li>
+                                <li class="breadcrumb-item active" aria-current="page">Mon Profil</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row">
+                <!-- Carte de profil principal -->
+                <div class="col-xl-4 col-lg-5">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="text-center">
+                                <!-- Photo de profil -->
+                                <div class="mb-3">
+                                    {% if user.photo %}
+                                        <img src="{{ user.photo.url }}" alt="Photo de profil" 
+                                             class="rounded-circle" width="120" height="120" 
+                                             style="object-fit: cover; border: 4px solid #e9ecef;">
+                                    {% elif agent_info.photo %}
+                                        <img src="{{ agent_info.photo.url }}" alt="Photo de profil" 
+                                             class="rounded-circle" width="120" height="120" 
+                                             style="object-fit: cover; border: 4px solid #e9ecef;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center mx-auto" 
+                                             style="width: 120px; height: 120px; border: 4px solid #e9ecef;">
+                                            <i class="mdi mdi-account text-white" style="font-size: 48px;"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Nom et titre -->
+                                <h4 class="mb-1">
+                                    {% if user.first_name or user.last_name %}
+                                        {{ user.first_name }} {{ user.last_name }}
+                                    {% else %}
+                                        {{ user.username }}
+                                    {% endif %}
+                                </h4>
+                                
+                                {% if agent_info %}
+                                    <p class="text-muted mb-1">{{ agent_info.poste|default:"Agent" }}</p>
+                                    {% if agent_info.specialite %}
+                                        <p class="text-muted small">{{ agent_info.specialite.nom_specialite }}</p>
+                                    {% endif %}
+                                {% endif %}
+
+                                <!-- Statut du compte -->
+                                <div class="mt-3">
+                                    {% if user.is_active %}
+                                        <span class="badge bg-success">Compte Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Compte Inactif</span>
+                                    {% endif %}
+                                    
+                                    {% if user.type_compte == 'admin' %}
+                                        <span class="badge bg-primary ms-1">Administrateur</span>
+                                    {% elif user.type_compte == 'user' %}
+                                        <span class="badge bg-info ms-1">Utilisateur</span>
+                                    {% endif %}
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="mt-4">
+                                    <a href="{% url 'edit_profile' %}" class="btn btn-primary me-2">
+                                        <i class="mdi mdi-pencil me-1"></i>Modifier le profil
+                                    </a>
+                                    <a href="{% url 'change_password' %}" class="btn btn-outline-secondary">
+                                        <i class="mdi mdi-lock-reset me-1"></i>Changer mot de passe
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations du cabinet -->
+                    {% if cabinet_info %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-office-building me-2"></i>Cabinet
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                {% if cabinet_info.logo %}
+                                    <img src="{{ cabinet_info.logo.url }}" alt="Logo cabinet" 
+                                         class="rounded me-3" width="50" height="50" style="object-fit: cover;">
+                                {% endif %}
+                                <div>
+                                    <h6 class="mb-0">{{ cabinet_info.nom }}</h6>
+                                    <small class="text-muted">{{ cabinet_info.type_cabinet|default:"Cabinet d'avocats" }}</small>
+                                </div>
+                            </div>
+                            
+                            {% if cabinet_info.telephone %}
+                                <p class="mb-2">
+                                    <i class="mdi mdi-phone me-2 text-muted"></i>
+                                    {{ cabinet_info.telephone }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if cabinet_info.email %}
+                                <p class="mb-2">
+                                    <i class="mdi mdi-email me-2 text-muted"></i>
+                                    {{ cabinet_info.email }}
+                                </p>
+                            {% endif %}
+                            
+                            {% if cabinet_info.adresse %}
+                                <p class="mb-0">
+                                    <i class="mdi mdi-map-marker me-2 text-muted"></i>
+                                    {{ cabinet_info.adresse.numero }} {{ cabinet_info.adresse.avenue }}, 
+                                    {{ cabinet_info.adresse.quartier }}, {{ cabinet_info.adresse.commune }}
+                                </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Informations détaillées -->
+                <div class="col-xl-8 col-lg-7">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-account-details me-2"></i>Informations du compte
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Nom d'utilisateur</label>
+                                        <p class="fw-bold">{{ user.username }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Adresse email</label>
+                                        <p class="fw-bold">{{ user.email|default:"Non renseigné" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Prénom</label>
+                                        <p class="fw-bold">{{ user.first_name|default:"Non renseigné" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Nom de famille</label>
+                                        <p class="fw-bold">{{ user.last_name|default:"Non renseigné" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Date de création</label>
+                                        <p class="fw-bold">{{ user.date_joined|date:"d/m/Y à H:i" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Dernière connexion</label>
+                                        <p class="fw-bold">
+                                            {% if user.last_login %}
+                                                {{ user.last_login|date:"d/m/Y à H:i" }}
+                                            {% else %}
+                                                Jamais connecté
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations de l'agent -->
+                    {% if agent_info %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-badge-account me-2"></i>Informations professionnelles
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Poste</label>
+                                        <p class="fw-bold">{{ agent_info.poste|default:"Non renseigné" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Spécialité</label>
+                                        <p class="fw-bold">
+                                            {% if agent_info.specialite %}
+                                                {{ agent_info.specialite.nom_specialite }}
+                                            {% else %}
+                                                Non renseigné
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Téléphone</label>
+                                        <p class="fw-bold">{{ agent_info.telephone|default:"Non renseigné" }}</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Email professionnel</label>
+                                        <p class="fw-bold">{{ agent_info.email|default:"Non renseigné" }}</p>
+                                    </div>
+                                </div>
+                                {% if agent_info.adresse %}
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label text-muted">Adresse</label>
+                                        <p class="fw-bold">
+                                            {{ agent_info.adresse.numero }} {{ agent_info.adresse.avenue }}, 
+                                            {{ agent_info.adresse.quartier }}, {{ agent_info.adresse.commune }}
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Statistiques rapides -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-chart-line me-2"></i>Statistiques d'activité
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4">
+                                    <div class="border-end">
+                                        <h4 class="text-primary mb-1">{{ statistiques.dossiers_assignes }}</h4>
+                                        <p class="text-muted mb-0">Dossiers assignés</p>
+                                        <small class="text-success">{{ statistiques.dossiers_actifs }} actifs</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="border-end">
+                                        <h4 class="text-success mb-1">{{ statistiques.paiements_traites }}</h4>
+                                        <p class="text-muted mb-0">Paiements traités</p>
+                                        <small class="text-info">{{ statistiques.paiements_recents }} ce mois</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h4 class="text-info mb-1">{{ statistiques.documents_ajoutes }}</h4>
+                                    <p class="text-muted mb-0">Documents ajoutés</p>
+                                    <small class="text-warning">{{ statistiques.documents_recents }} récents</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Statistiques supplémentaires -->
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-light rounded p-2">
+                                                <i class="mdi mdi-file-document text-primary"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">{{ statistiques.declarations_ajoutees }}</h6>
+                                            <p class="text-muted mb-0 small">Déclarations rédigées</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-light rounded p-2">
+                                                <i class="mdi mdi-currency-usd text-success"></i>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">${{ statistiques.montant_paiements_usd|floatformat:0 }}</h6>
+                                            <p class="text-muted mb-0 small">Montant traité (30j)</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Activités récentes -->
+                    {% if activites_recentes %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-history me-2"></i>Activités récentes
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="timeline">
+                                {% for activite in activites_recentes %}
+                                <div class="timeline-item">
+                                    <div class="timeline-marker">
+                                        <div class="bg-{{ activite.color }} rounded-circle d-flex align-items-center justify-content-center" 
+                                             style="width: 32px; height: 32px;">
+                                            <i class="{{ activite.icon }} text-white" style="font-size: 14px;"></i>
+                                        </div>
+                                    </div>
+                                    <div class="timeline-content">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">{{ activite.titre }}</h6>
+                                                <p class="text-muted mb-1 small">{{ activite.description }}</p>
+                                                <small class="text-muted">
+                                                    <i class="mdi mdi-clock-outline me-1"></i>
+                                                    {{ activite.date|timesince }} ago
+                                                </small>
+                                            </div>
+                                            {% if activite.url %}
+                                            <a href="{{ activite.url }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="mdi mdi-eye"></i>
+                                            </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Lien vers plus d'activités -->
+                            <div class="text-center mt-3">
+                                <a href="#" class="btn btn-outline-secondary btn-sm">
+                                    <i class="mdi mdi-history me-1"></i>Voir toutes les activités
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,271 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Modifier mon profil{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">Modifier mon profil</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'user_profile' %}">Mon Profil</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Modifier</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <div class="row justify-content-center">
+                <div class="col-xl-8 col-lg-10">
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">
+                                <i class="mdi mdi-account-edit me-2"></i>Modifier les informations du profil
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <!-- Messages -->
+                            {% if messages %}
+                                {% for message in messages %}
+                                    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+                                        {{ message }}
+                                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+
+                            <form method="post" class="needs-validation" novalidate>
+                                {% csrf_token %}
+                                
+                                <div class="row">
+                                    <!-- Nom d'utilisateur -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.username.id_for_label }}" class="form-label">
+                                                <i class="mdi mdi-account me-1"></i>{{ form.username.label }}
+                                                <span class="text-danger">*</span>
+                                            </label>
+                                            {{ form.username }}
+                                            {% if form.username.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.username.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            <div class="form-text">
+                                                <i class="mdi mdi-information-outline me-1"></i>
+                                                Utilisé pour vous connecter à l'application
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Email -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.email.id_for_label }}" class="form-label">
+                                                <i class="mdi mdi-email me-1"></i>{{ form.email.label }}
+                                            </label>
+                                            {{ form.email }}
+                                            {% if form.email.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.email.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            <div class="form-text">
+                                                <i class="mdi mdi-information-outline me-1"></i>
+                                                Adresse email pour les notifications
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Prénom -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                                <i class="mdi mdi-account-outline me-1"></i>{{ form.first_name.label }}
+                                            </label>
+                                            {{ form.first_name }}
+                                            {% if form.first_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.first_name.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Nom de famille -->
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                                <i class="mdi mdi-account-outline me-1"></i>{{ form.last_name.label }}
+                                            </label>
+                                            {{ form.last_name }}
+                                            {% if form.last_name.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.last_name.errors %}
+                                                        {{ error }}
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Informations actuelles (lecture seule) -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h6 class="text-muted border-bottom pb-2">
+                                            <i class="mdi mdi-information me-1"></i>Informations du compte
+                                        </h6>
+                                    </div>
+                                    
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Type de compte</label>
+                                            <div class="form-control-plaintext">
+                                                {% if user.type_compte == 'admin' %}
+                                                    <span class="badge bg-primary">Administrateur</span>
+                                                {% elif user.type_compte == 'user' %}
+                                                    <span class="badge bg-info">Utilisateur</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Statut</label>
+                                            <div class="form-control-plaintext">
+                                                {% if user.is_active %}
+                                                    <span class="badge bg-success">Actif</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Inactif</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Membre depuis</label>
+                                            <div class="form-control-plaintext">
+                                                {{ user.date_joined|date:"d/m/Y" }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label text-muted">Dernière connexion</label>
+                                            <div class="form-control-plaintext">
+                                                {% if user.last_login %}
+                                                    {{ user.last_login|date:"d/m/Y à H:i" }}
+                                                {% else %}
+                                                    Jamais connecté
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Boutons d'action -->
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <div class="d-flex justify-content-between">
+                                            <div>
+                                                <button type="submit" class="btn btn-primary me-2">
+                                                    <i class="mdi mdi-content-save me-1"></i>Enregistrer les modifications
+                                                </button>
+                                                <a href="{% url 'user_profile' %}" class="btn btn-outline-secondary">
+                                                    <i class="mdi mdi-arrow-left me-1"></i>Retour au profil
+                                                </a>
+                                            </div>
+                                            <div>
+                                                <a href="{% url 'change_password' %}" class="btn btn-outline-warning">
+                                                    <i class="mdi mdi-lock-reset me-1"></i>Changer le mot de passe
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Conseils de sécurité -->
+                    <div class="card mt-4">
+                        <div class="card-header bg-light">
+                            <h6 class="card-title mb-0">
+                                <i class="mdi mdi-shield-check text-success me-2"></i>Conseils de sécurité
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                                            Utilisez un nom d'utilisateur unique
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                                            Renseignez une adresse email valide
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2">
+                                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                                            Changez régulièrement votre mot de passe
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="mdi mdi-check-circle text-success me-2"></i>
+                                            Gardez vos informations à jour
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+// Validation du formulaire
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

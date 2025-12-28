@@ -1,0 +1,244 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container-full">
+        <div class="content-header mb-3">
+            <h4 class="page-title">Profil du client</h4>
+            <nav>
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'Client_client'%}"><i class="mdi mdi-home-outline"></i></a></li>
+                    <li class="breadcrumb-item active">Client</li>
+                </ol>
+            </nav>
+        </div>
+
+        <section class="content">
+            <div class="row">
+                <div class="col-12">
+
+                    <div class="box p-4 shadow-sm rounded bg-white">
+
+                        <!-- En-tête: photo + info client + bouton éditer -->
+                        <div class="d-flex align-items-center mb-4">
+                            <div class="me-3 text-center position-relative">
+                                {% if client.photo %}
+                                <form id="photoForm" method="POST" enctype="multipart/form-data" action="{% url 'update_client_photo' client.id %}">
+                                   {% csrf_token %}
+    
+                                   <img id="profileImage" src="{{ client.photo.url }}" class="rounded-circle w-120 h-120 img-thumbnail cursor-pointer" title="Cliquez pour changer la photo">
+                                   <input type="file" name="photo" id="photoInput" accept="image/*" class="d-none">
+                                </form>
+
+                                {% else %}
+                                <img id="profileImage" src="{% static 'images/default-avatar.png' %}"
+                                    class="rounded-circle w-120 h-120 img-thumbnail cursor-pointer"
+                                    title="Cliquez pour changer la photo">
+                                {% endif %}
+                                <input type="file" name="photo" id="photoInput" accept="image/*" class="d-none">
+                            </div>
+
+                            <div class="flex-grow-1">
+                                <h4 class="fw-600 mb-1">{{ client.nom.capitalize }} {{ client.prenom.capitalize }}</h4>
+                                <p class="text-muted mb-0">
+                                    <i class="fa fa-clock-o me-1"></i>
+                                    Enregistré le {{ client.date_enregistrement|date:"d F Y à H:i" }}
+                                </p>
+                            </div>
+                            <div class="ms-auto">
+                                <button id="btnEdit" type="button" class="btn btn-primary">
+                                    <i class="fa fa-edit"></i> Éditer
+                                </button>
+                            </div>
+                        </div>
+                        {% if messages %}
+                        {% for message in messages %}
+                        {% if message.tags == 'success' %}
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fa fa-check-circle me-2"></i> {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                        {% endif %}
+
+                        <!-- Formulaire -->
+                        <form method="POST" action="{% url 'client_details_mise_a_jour' client.id %}"
+                            enctype="multipart/form-data" id="clientForm">
+                            {% csrf_token %}
+                            <div class="row g-3">
+
+                                <!-- Colonne 1 -->
+                                <div class="col-md-6">
+                                    <label class="form-label">Nom</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                                        <input type="text" name="nom" class="form-control" value="{{ client.nom }}"
+                                            disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Prénom</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-user"></i></span>
+                                        <input type="text" name="prenom" class="form-control"
+                                            value="{{ client.prenom }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Sexe</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-venus-mars"></i></span>
+                                        <select name="sexe" class="form-select" disabled>
+                                            <option value="Homme" {% if client.sexe == "Homme" %}selected{% endif %}>Masculin</option>
+                                            <option value="Femme" {% if client.sexe == "Femme" %}selected{% endif %}>Féminin</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Date de naissance</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-calendar"></i></span>
+                                        <input type="date" name="date_naissance" class="form-control" value="{% if client.date_naissance %}{{ client.date_naissance|date:'Y-m-d' }}{% endif %}">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Type de client</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-id-card"></i></span>
+                                        <select name="type_client" class="form-select" disabled>
+                                            <option value="Physique" {% if client.type_client == "Physique" %}selected {%endif %}>Physique</option>
+                                            <option value="Morale" {% if client.type_client == "Morale" %}selected{% endif %}>Morale</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Représentant légal</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-user-tie"></i></span>
+                                        {% if client.representant_legal %}
+                                        <input type="text" name="representant_legal" class="form-control" value="{{ client.representant_legal }}"disabled>
+                                        {% else %}
+                                         <input type="text" name="representant_legal" class="form-control" value="Aucune">
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-envelope"></i></span>
+                                        <input type="email" name="email" class="form-control" value="{{ client.email }}"
+                                            disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Téléphone</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-phone"></i></span>
+                                        <input type="text" name="telephone" class="form-control"
+                                            value="{{ client.telephone }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Nationalité</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-globe"></i></span>
+                                        <input type="text" name="nationalite" class="form-control"
+                                            value="{{ client.nationalite }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Profession</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-briefcase"></i></span>
+                                        <input type="text" name="profession" class="form-control"
+                                            value="{{ client.profession }}" disabled>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Commune</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-map-marker"></i></span>
+                                        <select name="commune" class="form-select" disabled>
+                                            {% for com in communes %}
+                                            <option value="{{ com.nom }}" {% if client.adresse.commune == com.nom %}selected{% endif %}>{{ com.nom }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label class="form-label">Ville</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text"><i class="fa fa-city"></i></span>
+                                        <select name="ville" class="form-select" disabled>
+                                            {% for v in villes %}
+                                            <option value="{{ v.nom_ville }}" {% if client.adresse.ville == v.nom_ville %}selected{% endif %}>{{ v.nom_ville }} ({{ v.province }})</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <!-- Footer -->
+                                <div class="col-12 text-end mt-3">
+                                    <button type="submit" id="btnUpdate" class="btn btn-success" disabled>
+                                        <i class="ti-save-alt"></i> Mettre à jour
+                                    </button>
+                                </div>
+
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    // Activer le formulaire
+    document.getElementById("btnEdit").addEventListener("click", function () {
+        document.querySelectorAll("#clientForm input, #clientForm select").forEach(input => input.disabled = false);
+        document.getElementById("btnUpdate").disabled = false;
+    });
+</script>
+
+<script>
+    const profileImage = document.getElementById("profileImage");
+    const photoInput = document.getElementById("photoInput");
+    const photoForm = document.getElementById("photoForm");
+
+    profileImage.addEventListener("click", function () {
+        photoInput.click();
+    });
+
+    photoInput.addEventListener("change", function () {
+        const file = this.files[0];
+        if (file) {
+            // Prévisualisation immédiate
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                profileImage.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+
+            // Envoi automatique du formulaire
+            photoForm.submit();
+        }
+    });
+</script>
+
+
+{% endblock %}

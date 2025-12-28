@@ -1,0 +1,2352 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+{% if messages %}
+{% for message in messages %}
+<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+	{{ message }}
+	<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+{% endfor %}
+{% endif %}
+
+<div class="content-wrapper">
+	<div class="container-full">
+		<!-- Content Header (Page header) -->
+		<div class="content-header">
+			<div class="d-flex align-items-center">
+				<div class="me-auto">
+					<h4 class="page-title">Dossiers</h4>
+					<div class="d-inline-block align-items-center">
+						<nav>
+							<ol class="breadcrumb">
+								<li class="breadcrumb-item"><a href="{%url 'Dossier_interfaces' %}"><i
+											class="mdi mdi-home-outline"></i></a>
+								</li>
+								<li class="breadcrumb-item active" aria-current="page"> Details du dossier
+								</li>
+							</ol>
+						</nav>
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- Main content -->
+		<section class="content">
+
+			<div class="row">
+				<div class="box">
+					<div class="box-body text-end min-h-150"
+						style="background-image:url({% static 'images/gallery/landscape14.jpg'%}); background-repeat: no-repeat; background-position: center;background-size: cover;">
+					</div>
+
+					<div class="box-body wed-up position-relative">
+						<div class="d-md-flex align-items-center">
+							<div class="me-20 text-center text-md-start">
+								<img src="{{dossier.client.photo.url}}"
+									class="bg-success-light rounded10 me-20 w-150 h-150"
+									alt="{{ dossier.client.nom }} {{ dossier.client.prenom }}" />
+								<div class="text-center my-10">
+									<p class="mb-0">Type du dossier</p>
+									<h4>{{dossier.type_affaire.nom_type}}</h4>
+
+								</div>
+							</div>
+							<div class="mt-4">
+								<!-- Client -->
+								<h4 class="fw-600 mb-2">
+									{% if dossier.client %}
+									<a href="{% url 'client_details' client_id=dossier.client.id %}">
+										{{ dossier.client.nom }} {{ dossier.client.prenom }}
+									</a>
+									{% else %}
+									<span>Client non associé</span>
+									{% endif %}
+								</h4>
+
+								<!-- Dossier et statut -->
+								<h5 class="d-flex align-items-center mb-2">
+									<span class="me-2">Dossier: {{ dossier.titre }}</span>
+
+									{% if dossier.statut_dossier == 'Clôturé' %}
+									<span class="badge bg-primary text-white rounded-pill px-2 py-1">
+										{{ dossier.statut_dossier }}
+									</span>
+									{% elif dossier.statut_dossier == 'Ouvert' %}
+									<span class="badge bg-success text-white rounded-pill px-2 py-1">
+										{{ dossier.statut_dossier }}
+									</span>
+									{% elif dossier.statut_dossier == 'En Cours' %}
+									<span class="badge bg-warning text-dark rounded-pill px-2 py-1">
+										{{ dossier.statut_dossier }}
+									</span>
+									{% elif dossier.statut_dossier == 'Suspendu' %}
+									<span class="badge bg-secondary text-white rounded-pill px-2 py-1">
+										{{ dossier.statut_dossier }}
+									</span>
+									{% else %}
+									<span class="badge bg-light text-dark rounded-pill px-2 py-1">
+										{{ dossier.statut_dossier }}
+									</span>
+									{% endif %}
+								</h5>
+
+								<!-- Référence et date -->
+								<h5 class="fw-500 mb-2">#ref: {{ dossier.numero_reference_dossier }}</h5>
+								<p><i class="fa fa-clock-o me-1"></i> {{ dossier.date_ouverture|date:"d F Y à H:i" }}
+								</p>
+							</div>
+
+						</div>
+					</div>
+					<div class="py-2 px-3" style="background:white; border-bottom:1px solid #dee2e6;">
+						<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+							<!-- 🔹 Boutons à gauche -->
+							<div class="d-flex gap-2 flex-wrap">
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionHonoraire" title="Mode d'honoraire">
+									<i class="fa fa-balance-scale text-success fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionPaiements" title="Paiements">
+									<i class="fa fa-credit-card text-primary fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionPieces" title="Pièces jointes">
+									<i class="fa fa-file-text text-warning fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionAvocats" title="Avocats">
+									<i class="fa fa-gavel text-info fa-2x"></i>
+								</button>
+
+								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
+									data-bs-target="#sectionDeclaration" title="Déclaration">
+									<i class="fa fa-clipboard text-secondary fa-2x"></i>
+								</button>
+							</div>
+
+							<!-- 🔴 Bouton clôturer à droite -->
+							{% if dossier.statut_dossier != 'Clôturé' %}
+							<button class="btn btn-danger btn-sm d-flex align-items-center gap-2 px-3"
+								data-bs-toggle="modal" data-bs-target="#modalClotureDossier">
+								<i class="fa fa-lock"></i>
+								<strong>Clôturer le dossier</strong>
+							</button>
+							{%endif%}
+
+						</div>
+					</div>
+
+
+					<style>
+						.sticky-top .btn:hover {
+							background-color: #f8f9fa;
+						}
+					</style>
+
+					<!-- ==== FIN BOUTONS ==== -->
+					<!-- ==================== SECTION MODE D’HONORAIRE (COLLAPSIBLE) ==================== -->
+					<div class="collapse mt-3" id="sectionHonoraire">
+						<div class="box">
+
+							<!-- HEADER -->
+							<div class="box-header d-flex justify-content-between align-items-center">
+								<h4 class="box-title mb-0">
+									<i class="fa fa-money-bill-wave text-success"></i> Mode d'honoraire
+								</h4>
+
+								{% if user.is_authenticated and not user.agent.poste == 'Avocat' %}
+								{% if not dossier.mode_defini %}
+								<button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal"
+									data-bs-target="#modalModeHonoraire">
+									<i class="fa fa-edit"></i> Modifier
+								</button>
+								{% endif %}
+								{% endif %}
+							</div>
+
+							<!-- BODY -->
+							<div class="box-body pt-0">
+
+								{% if dossier.mode_honoraire %}
+
+								<!-- MODE ACTUEL -->
+								<p class="mb-2">
+									<strong>Mode actuel :</strong>
+									<span
+										class="badge bg-success-light text-success px-3 py-2 rounded-pill fs-5 fw-bold shadow-sm">
+										<i class="fa fa-check-circle me-1"></i> {{ dossier.mode_honoraire }}
+									</span>
+								</p>
+
+								<!-- MONTANT A PAYER -->
+								<p class="mb-2"><strong>Montant à payer :</strong></p>
+
+								<div class="d-flex gap-2 flex-wrap mb-4">
+
+									<!-- USD -->
+									<span
+										class="badge bg-primary text-white px-4 py-3 fs-5 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-dollar-sign me-1"></i>
+										{% if forfait_defini %}
+										${{ total_dollars|floatformat:2|intcomma }}
+										{% else %}
+										${{ dossier.montant_dollars_enreg|floatformat:2|intcomma }}
+										{% endif %}
+									</span>
+
+									<!-- FC -->
+									<span
+										class="badge bg-warning text-dark px-4 py-3 fs-5 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-coins me-1"></i>
+										{% if forfait_defini %}
+										Fc {{ total_fc|floatformat:2|intcomma }}
+										{% else %}
+										Fc {{ dossier.montant_fc_enreg|floatformat:2|intcomma }}
+										{% endif %}
+									</span>
+
+									<span
+										class="badge bg-secondary text-white px-3 py-2 fs-6 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-exchange-alt me-1"></i>
+										Taux : {{ dossier.taux_enreg|floatformat:2 }}
+									</span>
+								</div>
+
+
+
+								<!-- MONTANT DÉJÀ PAYÉ -->
+								<p class="mb-2"><strong>Montant déjà payé :</strong></p>
+
+								<div class="d-flex gap-2 flex-wrap mb-4">
+									<span
+										class="badge bg-success text-white px-4 py-3 fs-5 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-hand-holding-dollar me-1"></i>
+										{% if montant_deja_paye %}
+										${{ montant_deja_paye|floatformat:2|intcomma }}
+										{% else %}
+										0 $
+										{% endif %}
+									</span>
+									<span
+										class="badge bg-success text-white px-4 py-3 fs-5 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-hand-holding-dollar me-1"></i>
+										{% if montant_deja_paye_fc %}
+										Fc{{ montant_deja_paye_fc|floatformat:2|intcomma }}
+										{% else %}
+										0 Fc
+										{% endif %}
+									</span>
+								</div>
+
+								<!-- RESTE À PAYER -->
+								<p class="mb-2 mt-3"><strong>Reste à payer :</strong></p>
+
+								<div class="d-flex flex-wrap gap-3 mb-4">
+
+									<!-- RESTE USD -->
+									<span
+										class="badge bg-danger text-white px-4 py-3 fs-6 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-exclamation-circle me-1"></i>
+										USD restant : ${{ reste_a_payer|floatformat:2|intcomma }}
+									</span>
+
+									<!-- RESTE FC (si tu veux, tu peux décommenter)-->
+									<span
+										class="badge bg-danger text-white px-4 py-3 fs-6 fw-bold shadow-sm rounded-pill">
+										<i class="fa fa-exclamation-circle me-1"></i>
+										FC restant : {{ reste_a_payer_fc|floatformat:2|intcomma }}
+									</span>
+								</div>
+
+								{% else %}
+								<p class="text-muted">Aucun mode d’honoraire n’a encore été défini pour ce dossier.</p>
+								{% endif %}
+							</div>
+
+							<!-- DETAILS ACTIVITÉS -->
+							<button type="button" class="btn btn-info btn-sm mb-3" data-bs-toggle="modal"
+								data-bs-target="#modalActivites{{ dossier.id }}">
+								<i class="fa fa-eye"></i> Voir détails activités
+							</button>
+
+						</div>
+					</div>
+					<!-- ==================== FIN SECTION MODE D’HONORAIRE ==================== -->
+
+
+					<!-- ==================== DEBUT SECTION GESTION PAIEMENT ==================== -->
+					<div class="collapse mt-3" id="sectionPaiements">
+						<div class="col-12">
+							<div class="box-header d-flex justify-content-between align-items-center">
+								<h4 class="box-title">💸 Gestion des Paiements</h4>
+								<!-- Bouton Imprimer placé à droite -->
+								<button class="btn btn-primary"
+									onclick="window.open('{% url 'extrait_compte_date_form' dossier.id %}');">
+									<i class="fa fa-print me-1"></i> Imprimer extrait de compte client
+								</button>
+
+							</div>
+							<div class="box-body">
+
+								<!-- NAVIGATION -->
+								<div class="d-flex justify-content-between align-items-center mb-2">
+									<ul class="nav nav-tabs tabs-lawfirm" role="tablist">
+										<li class="nav-item">
+											<a class="nav-link active" data-bs-toggle="tab"
+												href="#tab_historique_paiements" role="tab">
+												<i class="fa fa-history me-1"></i> Historique des Paiements
+											</a>
+										</li>
+
+										{% if dossier.statut_dossier != 'Clôturé' %}
+										<li class="nav-item">
+											<a class="nav-link" data-bs-toggle="tab" href="#tab_enregistrer_paiement"
+												role="tab">
+												<i class="fa fa-plus-circle me-1"></i> Ajouter un Paiement
+											</a>
+										</li>
+										{% endif %}
+									</ul>
+								</div>
+
+								<div class="tab-content tabcontent-border pt-3">
+
+									<!-- ==========================HISTORIQUE PAIEMENTS ===========================-->
+									<div class="tab-pane active" id="tab_historique_paiements" role="tabpanel">
+
+										<!-- CARD HISTORIQUE -->
+										<div id="print-history-content">
+
+											<ul class="widget-timeline-icon">
+
+												{% for p in paiements %}
+												<li class="payment-row" onclick="showPaymentDetails(this)"
+													data-id="{{ p.id }}"
+													data-montant="{{ p.montant_payer_dollars }} {{ p.devise }}"
+													data-method="{{ p.type_paiement }}"
+													data-date="{{ p.date_paiement|date:'d M Y' }}"
+													data-client="{{ p.client.nom }}"
+													data-personne="{{ p.personne_qui_paie|default:'Client' }}"
+													data-notes="{{ p.notes|default:'-' }}"
+													data-agent="{{ p.agent.nom }} {{ p.agent.prenom }}"
+													data-reference="{{ p.reference_transaction|default:'-' }}"
+													data-status="{{ p.statut }}">
+
+													<!-- Icône selon le mode de paiement -->
+													{% if p.type_paiement == "Cash" %}
+													<div
+														class="icon bg-warning-light text-warning fa fa-money-bill-wave">
+													</div>
+													{% elif p.type_paiement == "Mobile Money" %}
+													<div class="icon bg-info-light text-info fa fa-mobile-alt"></div>
+													{% elif p.type_paiement == "Virement Bancaire" %}
+													<div class="icon bg-primary-light text-primary fa fa-university">
+													</div>
+													{% elif p.type_paiement == "Chèque" %}
+													<div
+														class="icon bg-secondary-light text-secondary fa fa-file-invoice-dollar">
+													</div>
+													{% else %}
+													<div class="icon bg-dark-light text-dark fa fa-credit-card"></div>
+													{% endif %}
+
+													<div class="timeline-panel">
+														<div class="d-flex justify-content-between">
+															<div>
+																<h4 class="fw-bold mb-1">
+																	{%if p.devise == 'USD' %}
+																	{{ p.montant_payer_dollars }} {{ p.devise }}
+																	{%else%}
+																	{{ p.montant_payer_fc }} {{ p.devise }}
+																	{%endif%}
+																	<!-- Badge statut circulaire -->
+																	<span
+																		class="badge bg-success rounded-circle px-2 py-1">
+																		<i class="fa fa-check-circle me-1"></i>
+																	</span>
+																</h4>
+																<p class="text-dark mb-0"><i
+																		class="fa fa-wallet me-1"></i>
+																	{{p.type_paiement }}</p>
+																<p class="text-muted mb-0"><i
+																		class="fa fa-user-tie me-1"></i>
+
+																</p>
+															</div>
+
+															<div class="text-end">
+																<small><i class="fa fa-calendar me-1"></i>
+																	{{p.date_paiement|date:"d M Y" }}</small><br>
+																<small><i class="fa fa-user me-1"></i> Par :
+																	{{p.personne_qui_paie|default:"Client" }}</small>
+															</div>
+														</div>
+													</div>
+												</li>
+
+												{% empty %}
+												<p class="text-muted">Aucun paiement enregistré pour ce dossier.</p>
+												{% endfor %}
+
+											</ul>
+
+										</div>
+
+									</div>
+
+
+
+
+
+									<!-- ==========================FORMULAIRE AJOUT PAIEMENT==============================-->
+									<div class="tab-pane" id="tab_enregistrer_paiement" role="tabpanel">
+										<div class="box-body">
+											<p class="mb-4 text-muted">Utilisez ce formulaire pour enregistrer un
+												nouveau
+												paiement pour ce dossier.</p>
+
+											<form method="POST" action="{% url 'gestion_paiements' dossier.id %}"
+												enctype="multipart/form-data">
+												{% csrf_token %}
+												<div class="row">
+													<div class="col-md-3 mb-3">
+														<label for="devise">Devise <span
+																class="text-danger">*</span></label>
+														<select class="form-select" id="devise" name="devise" required>
+															<option value="USD">USD ($)</option>
+															<option value="FC">FC (Franc Congolais)</option>
+														</select>
+													</div>
+													<div class="col-md-3 mb-3">
+														<label for="devise">Taux du jour</label>
+														<input type="text" class="form-control" id="personne_paye"
+															name="taux" value="{{taux_du_jour}}">
+													</div>
+
+													<div class="col-md-6 mb-3">
+														<label for="montant">Montant Payé <span
+																class="text-danger">*</span></label>
+														<input type="number" step="0.01" class="form-control"
+															id="montant" name="montant" required>
+													</div>
+
+												</div>
+
+												<div class="row">
+													<div class="col-md-6 mb-3">
+														<label for="type_paiement">Méthode de Paiement <span
+																class="text-danger">*</span></label>
+														<select class="form-select" id="type_paiement"
+															name="type_paiement" required>
+															<option value="Virement Bancaire">Virement Bancaire</option>
+															<option value="Cash">Cash</option>
+															<option value="Mobile Money">Mobile Money</option>
+															<option value="Carte Crédit/Débit">Carte Crédit/Débit
+															</option>
+															<option value="Chèque">Chèque</option>
+															<option value="Autre">Autre</option>
+														</select>
+													</div>
+
+													<div class="col-md-6 mb-3">
+														<label for="personne_paye">Personne qui paye (si différent du
+															client)</label>
+														<input type="text" class="form-control" id="personne_paye"
+															name="personne_paye" placeholder="Nom de la personne">
+													</div>
+												</div>
+
+												<div class="mb-3">
+													<label for="justificatif">Pièce justificative (Optionnel)</label>
+													<input type="file" class="form-control" id="justificatif"
+														name="justificatif" accept=".pdf,.jpg,.png">
+												</div>
+
+												<div class="mb-4">
+													<label for="notes">Notes/Description (Optionnel)</label>
+													<textarea class="form-control" id="notes" name="notes"
+														rows="3"></textarea>
+												</div>
+
+												<button type="submit" class="btn btn-lawfirm">
+													<i class="fa fa-save me-2"></i> Enregistrer le Paiement
+												</button>
+											</form>
+										</div>
+									</div>
+
+								</div>
+
+								<!-- Modal pour imprimer la facture -->
+								<div class="modal fade" id="modalImpression" tabindex="-1"
+									aria-labelledby="modalImpressionLabel" aria-hidden="true">
+									<div class="modal-dialog modal-dialog-centered">
+										<div class="modal-content">
+											<div class="modal-header bg-primary text-white">
+												<h5 class="modal-title" id="modalImpressionLabel text-white"><i
+														class="fa fa-check-circle"></i> Paiement enregistré</h5>
+												<button type="button" class="btn-close" data-bs-dismiss="modal"
+													aria-label="Fermer"></button>
+											</div>
+											<div class="modal-body text-center py-4">
+												<p class="fs-5">Le paiement a été enregistré avec succès.</p>
+												<p class="text-muted">Voulez-vous imprimer la facture maintenant ?</p>
+											</div>
+											<div class="modal-footer justify-content-center">
+												<button type="button" class="btn btn-light border"
+													data-bs-dismiss="modal">Plus tard</button>
+												<button type="button" class="btn btn-primary" id="btnImprimerUSD">
+													<i class="fa fa-print"></i> Imprimer en USD
+												</button>
+												<button type="button" class="btn btn-success" id="btnImprimerCDF">
+													<i class="fa fa-print"></i> Imprimer en CDF
+												</button>
+											</div>
+										</div>
+									</div>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+
+					<!-- DEBUT Section Pièces et Documents du Dossier -->
+					{% if user.is_authenticated and not user.agent.poste == 'Secretaire'%}
+					<div class="collapse mt-3" id="sectionPieces">
+						<div class="box">
+
+							<div class="box-header d-flex justify-content-between align-items-center">
+								<h4 class="box-title">Preuve et pièces jointes</h4>
+								<!-- Bouton pour ouvrir le modal d'ajout -->
+								<!-- Boutons pour ajouter différents types de pièces -->
+								<div class="d-flex gap-3 mb-3">
+
+									<!-- Document -->
+									<button type="button"
+										class="btn btn-primary btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+										data-bs-toggle="modal" data-bs-target="#modalAjouterPieces"
+										data-format="document" title="Ajouter un document"
+										style="width:40px; height:40px;">
+										<i class="fa fa-file fa-lg"></i>
+									</button>
+
+									<!-- Image -->
+									<button type="button"
+										class="btn btn-success btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+										data-bs-toggle="modal" data-bs-target="#modalAjouterPieces" data-format="image"
+										title="Ajouter une image" style="width:40px; height:40px;">
+										<i class="fa fa-image fa-lg"></i>
+									</button>
+
+									<!-- Vidéo -->
+									<button type="button"
+										class="btn btn-danger btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+										data-bs-toggle="modal" data-bs-target="#modalAjouterPieces" data-format="video"
+										title="Ajouter une vidéo" style="width:40px; height:40px;">
+										<i class="fa fa-film fa-lg"></i>
+									</button>
+
+									<!-- WhatsApp -->
+									<button type="button"
+										class="btn btn-success btn-sm rounded-circle shadow-sm rounded-circle add-line-btn d-flex align-items-center justify-content-center"
+										data-bs-toggle="modal" data-bs-target="#modalAjouterPieces"
+										data-format="whatsapp" title="Ajouter un message WhatsApp"
+										style="width:40px;height:40px;">
+										<i class="fa fa-whatsapp"></i>
+									</button>
+
+
+									<!-- SMS -->
+									<button type="button"
+										class="btn btn-warning btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center"
+										data-bs-toggle="modal" data-bs-target="#modalAjouterPieces" data-format="sms"
+										title="Ajouter un SMS" style="width:40px; height:40px;">
+										<i class="fa fa-comment fa-lg"></i>
+									</button>
+
+								</div>
+
+
+							</div>
+
+							<div class="box-body">
+								<div class="row mb-3">
+									<div class="col-md-6 mb-2">
+										<input type="text" id="searchPieces" class="form-control"
+											placeholder="Rechercher par nom...">
+									</div>
+									<div class="col-md-3 mb-2">
+										<select id="filterType" class="form-control">
+											<option value="">Tous les types</option>
+											<option value="document">Document</option>
+											<option value="image">Image</option>
+											<option value="video">Vidéo</option>
+											<option value="whatsapp">Message WhatsApp</option>
+											<option value="sms">SMS</option>
+										</select>
+									</div>
+								</div>
+								<style>
+									.scrollable-container {
+
+										max-height: 400px;
+										overflow-y: auto;
+										/* Active le défilement vertical */
+										overflow-x: hidden;
+										/* Cache le défilement horizontal */
+										padding-right: 0px;
+										/* Ajoute un peu d'espace si la barre de défilement apparaît */
+									}
+
+									/* Pour s'assurer que l'icône et le texte sont toujours bien centrés même si l'élément change de taille */
+									.card-body-custom {
+										display: flex;
+										flex-direction: column;
+										justify-content: center;
+										align-items: center;
+										padding: 10px;
+										/* Réduit un peu le padding interne de la carte */
+									}
+								</style>
+
+								<div class="scrollable-container">
+									<div class="row" id="listePieces">
+										{% for piece in dossier.pieces_dossier.all %}
+
+										<div class="col-6 col-sm-4 col-md-3 mb-5" style="padding-bottom: 100px;">
+											<div class="card shadow-sm h-100">
+
+												<div class="card-body card-body-custom">
+
+													{% if piece.format_fichier == "image" %}
+													<i class="fa fa-image fa-2x text-primary"></i>
+													{% elif piece.format_fichier == "video" %}
+													<i class="fa fa-video fa-2x text-danger"></i>
+													{% elif piece.format_fichier == "whatsapp" %}
+													<i class="fa fa-whatsapp fa-2x text-success"></i>
+													{% elif piece.format_fichier == "sms" %}
+													<i class="fa fa-comment fa-2x text-warning"></i>
+													{% else %}
+													<i class="fa fa-file fa-2x text-secondary"></i>
+													{% endif %}
+
+													<h6 class="card-title mt-2"
+														style="font-size: 0.9em; text-align: center;">
+														{{piece.titre|truncatechars:30 }}</h6>
+
+													<p class="text-muted small" style="font-size: 0.7em;">
+														{{ piece.date_ajout|date:"d/m/Y" }} par
+														{{piece.ajoute_par|truncatechars:10 }}
+													</p>
+
+													{% if piece.format_fichier == "image" %}
+													<img src="{{ piece.fichier.url }}"
+														style="width:100px;height:50px;object-fit:cover;border-radius:5px;" />
+													{% elif piece.format_fichier == "video" %}
+													<video src="{{ piece.fichier.url }}"
+														style="width:100px;height:50px;object-fit:cover;border-radius:5px;"
+														controls></video>
+													{% endif %}
+
+													<div class="d-flex flex-column gap-1 mt-2 w-100">
+														<a href="{{ piece.fichier.url }}" target="_blank"
+															class="btn btn-sm btn-outline-primary"
+															style="font-size: 0.7em; padding: 3px 5px;">
+															Ouvrir / Télécharger
+														</a>
+
+														<form method="POST"
+															action="{% url 'supprimer_piece' piece.id %}"
+															style="display:inline;"
+															onsubmit="return confirm('Voulez-vous vraiment supprimer ce document ?');">
+															{% csrf_token %}
+															<button type="submit"
+																class="btn btn-sm btn-outline-danger w-100"
+																style="font-size: 0.7em; padding: 3px 5px;">
+																<i class="fa fa-trash"></i> Supprimer
+															</button>
+														</form>
+													</div>
+
+												</div>
+											</div>
+										</div>
+										{% endfor %}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{%endif%}
+
+
+
+					<!-- ==================== DEBUT SECTION GESTION AVOCATS ==================== -->
+					<div class="collapse mt-3" id="sectionAvocats">
+						<div class="box col-xl-6">
+
+							<div class="box-header d-flex justify-content-between align-items-center mb-3">
+								<h4 class="box-title mb-0 text-dark fw-semibold">
+									<i class="fa fa-gavel text-primary me-2"></i> Avocats assignés à l'affaire
+								</h4>
+								{% if user.is_authenticated and not user.agent.poste == 'Avocat'%}
+								<button type="button" class="btn btn-lawfirm" data-bs-toggle="modal"
+									data-bs-target="#modalAssignerAvocats">
+									<i class="fa fa-user-plus me-2"></i> Ajouter un avocat
+								</button>
+								{% endif %}
+							</div>
+
+							<div class="box-body avocat-list d-flex flex-column flex-md-row flex-wrap gap-3">
+								{% for avocat_dossier in dossier.avocatdossier_set.all %}
+								<div class="avocat-card d-flex align-items-center p-3 rounded-3 shadow-sm"
+									id="avocatBox{{ avocat_dossier.id }}">
+									<img src="{{ avocat_dossier.avocat.photo.url }}"
+										class="bg-primary-light rounded-circle me-3" alt=""
+										style="width: 70px; height: 70px; object-fit: cover;" />
+
+									<div class="flex-grow-1">
+										<h5 class="mb-1 fw-bold text-dark">
+											{{ avocat_dossier.avocat.nom }} {{ avocat_dossier.avocat.prenom }}
+										</h5>
+										<p class="text-muted mb-1 small">{{ avocat_dossier.avocat.specialite }}</p>
+										<small
+											class="text-primary d-block mb-1">{{avocat_dossier.get_role_display}}</small>
+										<small class="text-muted d-block">Assigné le
+											{{avocat_dossier.date_assignation|date:"d/m/Y" }}</small>
+
+										<div class="d-flex text-warning small mt-1">
+											<i class="fa fa-star"></i><i class="fa fa-star"></i>
+											<i class="fa fa-star"></i><i class="fa fa-star"></i>
+										</div>
+									</div>
+
+									<div class="d-flex flex-column align-items-end gap-2 ms-3">
+										{% if user.is_authenticated and not user.agent.poste == 'Avocat'%}
+										<a href="javascript:void(0);"
+											class="btn btn-danger-light btn-sm btn-supprimer-avocat"
+											data-id="{{ avocat_dossier.id }}"
+											data-url="{% url 'supprimer_avocat_dossier' avocat_dossier.id %}">
+											<i class="fa fa-trash"></i>
+										</a>
+
+										<a href="{% url 'agent_details' avocat_dossier.avocat.id %}"
+											class="btn btn-success-light btn-sm">
+											<i class="fa fa-eye"></i>
+										</a>
+										{% endif %}
+									</div>
+								</div>
+								{% empty %}
+								<p class="text-muted">Aucun avocat assigné à ce dossier.</p>
+								{% endfor %}
+							</div>
+						</div>
+					</div>
+
+
+
+					<!-- ==================== DEBUT SECTION DECLARATION ==================== -->
+					<div class="collapse mt-3" id="sectionDeclaration">
+						<div class="row">
+
+							<!-- ================================ -->
+							<!-- COLONNE GAUCHE : Historique -->
+							<!-- ================================ -->
+							<div class="col-xl-4">
+								<div class="box p-3 shadow-sm">
+
+									<div class="d-flex justify-content-between align-items-center mb-3">
+										<h5 class="mb-0"><i class="fa fa-history me-2 text-dark"></i> Historique</h5>
+
+										<button class="btn btn-sm btn-dark" data-bs-toggle="modal"
+											data-bs-target="#modalNouvelleDeclaration">
+											<i class="fa fa-plus"></i>
+										</button>
+									</div>
+
+									<ul id="listeDeclarations" class="list-group">
+										{% for decl in dossier.declarations.all %}
+										<li class="list-group-item list-group-item-action declaration-item"
+											data-contenu="{{ decl.contenu|escapejs }}"
+											data-date="{{ decl.date_ajout|date:'d/m/Y à H:i' }}"
+											data-auteur="{{ decl.auteur }}" data-id="{{ decl.id }}"
+											style="cursor:pointer;">
+
+											<div class="d-flex justify-content-between">
+												<div style="max-width: 80%;">
+													<strong>{{ decl.date_ajout|date:'d/m/Y à H:i' }}</strong>
+													<br>
+													<small
+														class="text-muted d-block">{{decl.contenu|truncatewords:7}}</small>
+													<span class="badge bg-secondary mt-1">
+														{{ decl.auteur.nom|default:'Administrateur' }}
+
+													</span>
+												</div>
+
+												<div class="text-end">
+
+													<!-- Modifier -->
+													<button class="btn btn-sm btn-outline-primary btn-edit"
+														data-bs-toggle="modal"
+														data-bs-target="#modalModifierDeclaration"
+														data-id="{{ decl.id }}"
+														data-contenu="{{ decl.contenu|escapejs }}">
+														<i class="fa fa-edit"></i>
+													</button>
+
+													<!-- Supprimer -->
+													<button class="btn btn-sm btn-outline-danger btn-delete"
+														data-bs-toggle="modal"
+														data-bs-target="#modalSupprimerDeclaration"
+														data-id="{{ decl.id }}">
+														<i class="fa fa-trash"></i>
+													</button>
+
+												</div>
+											</div>
+										</li>
+										{% endfor %}
+									</ul>
+
+									<!-- PAGINATION -->
+									<nav class="mt-3">
+										<ul class="pagination justify-content-center">
+											<li class="page-item"><button class="page-link" id="prevPage">←</button>
+											</li>
+											<li class="page-item"><button class="page-link" id="nextPage">→</button>
+											</li>
+										</ul>
+									</nav>
+
+								</div>
+							</div>
+
+							<!-- ================================ -->
+							<!-- COLONNE DROITE : Affichage détail -->
+							<!-- ================================ -->
+							<div class="col-xl-8">
+								<div class="box p-4 shadow-sm">
+
+									<h4 class="mb-3"><i class="fa fa-comment-dots text-dark me-2"></i> Déclaration
+										sélectionnée</h4>
+
+									<p class="text-muted">
+										<strong>Date :</strong> <span id="detailDate"></span> <br>
+										<strong>Auteur :</strong> <span id="detailAuteur"></span>
+									</p>
+
+									<div id="zoneDeclarationContenu" class="client-declaration p-4 rounded shadow-sm"
+										style="background:#f8f9fa;border-left:4px solid #343a40;max-height:350px;overflow:auto;">
+										<em class="text-muted">Sélectionnez une déclaration à gauche.</em>
+									</div>
+
+								</div>
+							</div>
+
+						</div>
+					</div>
+
+				</div>
+				<div class="modal fade" id="modalNouvelleDeclaration" tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+
+							<form method="POST" action="{% url 'ajouter_declaration' dossier.id %}">
+								{% csrf_token %}
+
+								<div class="modal-header bg-dark text-white">
+									<h5 class="modal-title">Nouvelle Déclaration</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+
+								<div class="modal-body">
+									<textarea name="contenu" class="form-control" rows="6"
+										placeholder="Saisissez la nouvelle déclaration..." required></textarea>
+								</div>
+								<div class="modal-body">
+									<input name="auteur" class="form-control" rows="6"
+										placeholder="Nom de l'auteur"></input>
+									<small>Si vous ne renseignez pas ce champs, l'auteur sera le client</small>
+								</div>
+
+								<div class="modal-footer">
+									<button type="submit" class="btn btn-dark">Enregistrer</button>
+								</div>
+
+							</form>
+
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="modalModifierDeclaration" tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+
+							<form method="POST" id="formModifierDeclaration">
+								{% csrf_token %}
+								<div class="modal-header bg-primary text-white">
+									<h5 class="modal-title">Modifier la déclaration</h5>
+									<button class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+
+								<div class="modal-body">
+									<textarea name="contenu" id="modifierContenu" class="form-control"
+										rows="6"></textarea>
+								</div>
+
+								<div class="modal-footer">
+									<button class="btn btn-primary" type="submit">Enregistrer les modfiactions</button>
+								</div>
+							</form>
+
+						</div>
+					</div>
+				</div>
+
+
+				<div class="modal fade" id="modalSupprimerDeclaration" tabindex="-1">
+					<div class="modal-dialog">
+						<div class="modal-content">
+
+							<form method="POST" id="formSupprimerDeclaration">
+								{% csrf_token %}
+								<div class="modal-header bg-danger text-white">
+									<h5 class="modal-title">Supprimer</h5>
+									<button class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+
+								<div class="modal-body text-center">
+									<i class="fa fa-exclamation-triangle text-danger fs-1"></i>
+									<p class="mt-2">Voulez-vous vraiment supprimer cette déclaration ?</p>
+								</div>
+
+								<div class="modal-footer">
+									<button class="btn btn-danger" type="submit">Supprimer</button>
+								</div>
+							</form>
+
+						</div>
+					</div>
+				</div>
+				<!-- ==================== FIN SECTION DECLARATION ==================== -->
+				<div class="row">
+
+
+					<!-- =====================MODAL DETAILS =========================-->
+					<div class="modal fade" id="modalPaymentDetails" tabindex="-1">
+						<div class="modal-dialog modal-lg">
+							<div class="modal-content">
+
+								<div class="modal-header">
+									<h5 class="modal-title">Détails du Paiement</h5>
+									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+								</div>
+
+								<div class="modal-body">
+									<table class="table table-bordered">
+										<tr>
+											<th>Montant</th>
+											<td id="detail-montant"></td>
+										</tr>
+										<tr>
+											<th>Méthode</th>
+											<td id="detail-method"></td>
+										</tr>
+										<tr>
+											<th>Date</th>
+											<td id="detail-date"></td>
+										</tr>
+										<tr>
+											<th>Client</th>
+											<td id="detail-client"></td>
+										</tr>
+										<tr>
+											<th>Personne qui paie</th>
+											<td id="detail-personne"></td>
+										</tr>
+										<tr>
+											<th>Notes</th>
+											<td id="detail-notes"></td>
+										</tr>
+									</table>
+								</div>
+
+							</div>
+						</div>
+					</div>
+
+					<script>
+						function showPaymentDetails(el) {
+							document.getElementById("detail-montant").textContent = el.dataset.montant;
+							document.getElementById("detail-method").textContent = el.dataset.method;
+							document.getElementById("detail-date").textContent = el.dataset.date;
+							document.getElementById("detail-client").textContent = el.dataset.client;
+							document.getElementById("detail-personne").textContent = el.dataset.personne || "Client";
+							document.getElementById("detail-notes").textContent = el.dataset.notes;
+
+							new bootstrap.Modal(document.getElementById("modalPaymentDetails")).show();
+						}
+
+
+
+
+
+					</script>
+
+					<!-- ========================== VERSION FACTURE POUR IMPRESSION ========================== -->
+
+
+				</div>
+			</div>
+
+	</div>
+
+	</section>
+	<!-- /.content -->
+</div>
+</div>
+<!-- /.content-wrapper -->
+
+
+
+<!-- Modal Mode d'Honoraire -->
+<div class="modal fade" id="modalModeHonoraire" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered">
+		<div class="modal-content">
+			<form method="POST" action="{% url 'definir_mode_honoraire' dossier.id %}">
+				{% csrf_token %}
+
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title">
+						<i class="fa fa-money-bill-wave"></i> Définir le mode d'honoraire
+					</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+				</div>
+
+				<div class="modal-body">
+					<!-- Champ Mode d'Honoraire -->
+					<div class="mb-3">
+						<label for="{{ form_mode.mode_honoraire.id_for_label }}" class="form-label">
+							Mode de paiement
+						</label>
+						{{ form_mode.mode_honoraire }}
+					</div>
+
+					<!-- Info ou avertissement -->
+
+					<div class="alert alert-info">
+						<p class="mb-0">
+							<i class="fa fa-info-circle"></i>
+							Apres avoir choisis le mode honoraire, cette opération est irreverssible
+						</p>
+					</div>
+
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="submit" class="btn btn-primary">Confirmer</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+
+
+<!-- Modal Assigner Avocats -->
+<div class="modal fade" id="modalAssignerAvocats" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content">
+			<form method="POST" action="{% url 'assigner_avocats_dossier' dossier.id %}">
+				{% csrf_token %}
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title"><i class="fa fa-user-tie"></i> Assigner des avocats au dossier</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+				</div>
+
+				<div class="modal-body">
+					<div class="row">
+						<!-- Liste des avocats -->
+						<div class="col-md-5 border-end pe-4">
+							<h5 class="text-secondary mb-3"><i class="fa fa-users"></i> Avocats disponibles</h5>
+							<input type="text" id="searchAvocat" class="form-control mb-3"
+								placeholder="Rechercher un avocat...">
+							<div id="listeAvocatsDisponibles" class="list-group shadow-sm"
+								style="max-height:300px; overflow-y:auto;">
+								{% for agent in agents %}
+								<a href="javascript:void(0);" class="list-group-item list-group-item-action avocat-item"
+									data-id="{{ agent.id }}" data-nom="{{ agent.nom }}" data-prenom="{{ agent.prenom }}"
+									data-specialite="{{ agent.specialite|default:'Non spécifiée' }}"
+									data-photo="{{ agent.photo.url|default:'/static/images/avatar/avatar-10.png' }}">
+									<div class="d-flex align-items-center">
+										<img src="{{ agent.photo.url|default:'/static/images/avatar/avatar-10.png' }}"
+											class="rounded-circle me-3" width="45" height="45" alt="">
+										<div>
+											<strong>{{ agent.nom }} {{ agent.prenom }}</strong><br>
+											<small class="text-muted">{{ agent.specialite|default:'-'}}
+											</small>
+										</div>
+									</div>
+								</a>
+								{% empty %}
+								<div class="alert alert-info text-center">Aucun avocat disponible.</div>
+								{% endfor %}
+							</div>
+						</div>
+
+						<!-- Informations sur l'avocat -->
+						<div class="col-md-7">
+							<div class="card shadow-sm p-4 text-center">
+								<img id="photoAvocat" src="{% static 'images/avatar/avatar-10.png' %}"
+									class="rounded-circle border mb-3"
+									style="width:120px; height:120px; object-fit:cover;" alt="Photo Avocat">
+								<h4 id="nomComplet" class="mb-0">Sélectionnez un avocat</h4>
+								<p id="specialite" class="text-muted mb-3">Spécialité</p>
+
+								<div class="form-group mb-3">
+									<label class="form-label fw-bold">Rôle à assigner</label>
+									<select id="roleAvocat" class="form-select">
+										<option value="Principal">Avocat Principal</option>
+										<option value="Support" selected>Avocat de Support</option>
+										<option value="Partenaire">Avocat Partenaire Externe</option>
+									</select>
+								</div>
+
+								<button type="button" id="btnAjouterAvocat" class="btn btn-success" disabled>
+									<i class="fa fa-plus-circle"></i> Ajouter à la liste
+								</button>
+							</div>
+						</div>
+					</div>
+
+					<hr class="my-4">
+					<h5 class="text-secondary"><i class="fa fa-list"></i> Avocats sélectionnés</h5>
+					<div id="avocatsSelectionnes" class="list-group border shadow-sm"
+						style="max-height:150px; overflow-y:auto;"></div>
+				</div>
+
+				<div class="modal-footer bg-light">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-times"></i>
+						Annuler</button>
+					<button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Enregistrer les
+						avocats</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal Ajouter Pièces -->
+<div class="modal fade" id="modalAjouterPieces" tabindex="-1">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content border-0 shadow-lg">
+			<form id="formAjouterPieces" method="post" action="{% url 'ajouter_pieces' dossier.id %}"
+				enctype="multipart/form-data">
+				{% csrf_token %}
+				<div class="modal-header bg-primary text-white">
+					<h5 class="modal-title"><i class="mdi mdi-file-plus-outline"></i> Ajouter des pièces</h5>
+					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+
+					<!-- Conteneur des lignes -->
+					<div id="piecesContainer" class="d-flex flex-column gap-2"></div>
+
+					<!-- Boutons internes en bas à gauche -->
+					<div class="d-flex gap-2 mt-3 justify-content-start">
+						<button type="button" class="btn btn-primary btn-sm rounded-circle add-line-btn"
+							data-format="document" title="Ajouter un document" style="width:35px;height:35px;">
+							<i class="fa fa-file fa-sm"></i>
+						</button>
+						<button type="button" class="btn btn-success btn-sm rounded-circle add-line-btn"
+							data-format="image" title="Ajouter une image" style="width:35px;height:35px;">
+							<i class="fa fa-image fa-sm"></i>
+						</button>
+						<button type="button" class="btn btn-danger btn-sm rounded-circle add-line-btn"
+							data-format="video" title="Ajouter une vidéo" style="width:35px;height:35px;">
+							<i class="fa fa-film fa-sm"></i>
+						</button>
+						<button type="button" class="btn btn-success btn-sm rounded-circle add-line-btn"
+							data-format="whatsapp" title="Ajouter WhatsApp" style="width:35px;height:35px;">
+							<i class="fa fa-whatsapp fa-sm"></i>
+						</button>
+						<button type="button" class="btn btn-warning btn-sm rounded-circle add-line-btn"
+							data-format="sms" title="Ajouter SMS" style="width:35px;height:35px;">
+							<i class="fa fa-comment fa-sm"></i>
+						</button>
+					</div>
+
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+					<button type="submit" class="btn btn-success">Enregistrer</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const piecesContainer = document.getElementById('piecesContainer');
+		const fileTypes = {
+			document: ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx",
+			image: ".jpg,.jpeg,.png,.gif,.bmp",
+			video: ".mp4,.avi,.mkv,.mov,.wmv",
+			whatsapp: ".txt,.pdf,.jpg,.jpeg,.png",
+			sms: ".txt,.pdf"
+		};
+		const MAX_SIZE_BYTES = 200 * 1024 * 1024;
+
+		function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.7, callback) {
+			const reader = new FileReader();
+			reader.onload = function (e) {
+				const img = new Image();
+				img.onload = function () {
+					const canvas = document.createElement('canvas');
+					const ctx = canvas.getContext('2d');
+					const ratio = Math.min(maxWidth / img.width, maxHeight / img.height, 1);
+					canvas.width = img.width * ratio;
+					canvas.height = img.height * ratio;
+					ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+					canvas.toBlob(callback, 'image/jpeg', quality);
+				};
+				img.src = e.target.result;
+			};
+			reader.readAsDataURL(file);
+		}
+
+		function createPieceRow(format) {
+			const row = document.createElement('div');
+			row.className = 'd-flex align-items-center gap-2 piece-item';
+
+			row.innerHTML = `
+    <div class="file-type-icon">
+        <i class="fa ${format === 'document' ? 'fa-file' :
+					format === 'image' ? 'fa-image' :
+						format === 'video' ? 'fa-film' :
+							format === 'whatsapp' ? 'fa-whatsapp' : 'fa-comment'}"></i>
+    </div>
+
+    <!-- FORMAT HIDDEN : INDISPENSABLE -->
+    <input type="hidden" name="format_piece[]" value="${format}">
+
+    <input type="text" name="titre_piece[]" class="form-control form-control-sm" placeholder="Titre" required style="width:200px;">
+    <input type="file" name="fichier_piece[]" class="form-control form-control-sm piece-file" required style="flex:1;">
+    
+    <div class="preview-container d-flex align-items-center gap-1 d-none">
+        <img class="preview-image rounded" style="width:40px;height:40px;object-fit:cover;">
+        <video class="preview-video rounded" style="width:80px;height:80px;object-fit:cover;" muted controls></video>
+    </div>
+    <button type="button" class="btn btn-sm btn-danger remove-piece"><i class="fa fa-trash"></i></button>
+`;
+
+
+			piecesContainer.appendChild(row);
+
+			const fileInput = row.querySelector('.piece-file');
+			const previewImg = row.querySelector('.preview-image');
+			const previewVideo = row.querySelector('.preview-video');
+			const previewContainer = row.querySelector('.preview-container');
+
+			// Assigner le type de fichier
+			fileInput.setAttribute('accept', fileTypes[format]);
+
+			fileInput.addEventListener('change', function () {
+				previewContainer.classList.add("d-none");
+				previewImg.classList.add("d-none");
+				previewVideo.classList.add("d-none");
+
+				if (!this.files[0]) return;
+
+				const file = this.files[0];
+				if (file.size > MAX_SIZE_BYTES) {
+					alert("Le fichier dépasse la limite de 200 Mo.");
+					this.value = "";
+					return;
+				}
+
+				if (format === "image") {
+					compressImage(file, 800, 800, 0.7, function (blob) {
+						previewImg.src = URL.createObjectURL(blob);
+						previewContainer.classList.remove("d-none");
+						previewImg.classList.remove("d-none");
+
+						const dataTransfer = new DataTransfer();
+						dataTransfer.items.add(new File([blob], file.name, { type: blob.type }));
+						fileInput.files = dataTransfer.files;
+					});
+				} else if (format === "video") {
+					previewVideo.src = URL.createObjectURL(file);
+					previewContainer.classList.remove("d-none");
+					previewVideo.classList.remove("d-none");
+				} else {
+					previewContainer.classList.remove("d-none");
+				}
+			});
+		}
+
+		// Suppression dynamique
+		piecesContainer.addEventListener('click', e => {
+			const btn = e.target.closest('.remove-piece');
+			if (btn) btn.closest('.piece-item').remove();
+		});
+
+		// Boutons internes pour ajouter des lignes
+		document.querySelectorAll('.add-line-btn').forEach(btn => {
+			btn.addEventListener('click', () => createPieceRow(btn.dataset.format));
+		});
+
+		// Ligne initiale quand modal s'ouvre depuis icône externe
+		const modalPieces = document.getElementById('modalAjouterPieces');
+		modalPieces.addEventListener('show.bs.modal', function (event) {
+			piecesContainer.innerHTML = "";
+			const button = event.relatedTarget;
+			const format = button.getAttribute('data-format') || 'document';
+			createPieceRow(format);
+		});
+	});
+</script>
+
+
+<!-- Bouton pour ouvrir le modal -->
+<button type="button" class="btn btn-info btn-sm mb-3" data-bs-toggle="modal"
+	data-bs-target="#modalActivites{{ dossier.id }}">
+	<i class="fa fa-eye"></i> Voir détails activités
+</button>
+
+<!-- Modal Détails Activités -->
+<div class="modal fade" id="modalActivites{{ dossier.id }}" tabindex="-1"
+	aria-labelledby="modalActivitesLabel{{ dossier.id }}" aria-hidden="true">
+	<div class="modal-dialog modal-xl modal-dialog-centered">
+		<div class="modal-content">
+			<div class="modal-header bg-primary text-white">
+				<h5 class="modal-title" id="modalActivitesLabel{{ dossier.id }}">
+					<i class="fa fa-list"></i> Détails des activités - {{ dossier.numero_reference_dossier }}
+				</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+			</div>
+			<div class="modal-body">
+
+				<div class="d-flex justify-content-between align-items-center mb-4">
+					<div>
+						<p class="mb-1"><strong>Dossier :</strong> {{ dossier.titre }}
+							({{dossier.numero_reference_dossier }})</p>
+						<p class="mb-1"><strong>Client :</strong> {{ dossier.client.nom }} {{ dossier.client.prenom }}
+						</p>
+						<p class="mb-1"><strong>Type d’affaire :</strong> {{ dossier.type_affaire.nom_type }}</p>
+						<p class="mb-1"><strong>Secteur :</strong> {{ dossier.secteur_foncier.nom }}</p>
+					</div>
+					<div class="text-end">
+						<img src="{% static 'img/logo_cabinet.png' %}" alt="Logo" height="70">
+					</div>
+				</div>
+
+				<!-- Formulaire si mode forfaitaire editable -->
+				{% if editable %}
+				<form method="POST" action="{% url 'enregistrer_prix_forfaitaire' dossier.id %}">
+					{% csrf_token %}
+					{% endif %}
+
+					<div class="table-responsive">
+						<table class="table table-striped table-bordered align-middle">
+							<thead class="table-primary text-center">
+								<tr>
+									<th>#</th>
+									<th>Activité</th>
+									<th>Prix ($)</th>
+									<th>Prix (Fc)</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% for a in activites %}
+								<tr class="text-center">
+									<td>{{ forloop.counter }}</td>
+									<td class="text-start">{{ a.activite }}</td>
+									<td class="text-end">
+										{% if editable %}
+										<input type="number" step="0.01" name="prix_dollars_{{ a.id }}"
+											value="{{ a.prix_dollars }}" class="form-control prix-dollar">
+										{% elif forfait_defini %}
+										${{ a.prix_affiche_dollars|floatformat:2|intcomma }}
+										{% else %}
+										${{ a.prix_dollars|floatformat:2|intcomma }}
+										{% endif %}
+									</td>
+									<td class="prix-fc  text-end">
+										{% if editable %}
+										{{ a.prix_fc_calcule|floatformat:2|intcomma }}
+										{% elif forfait_defini %}
+										{{ a.prix_affiche_fc|floatformat:2|intcomma }}
+										{% else %}
+										{{ a.prix_fc_defaut|floatformat:2|intcomma }}
+										{% endif %}
+									</td>
+
+								</tr>
+								{% endfor %}
+							</tbody>
+							<tfoot class="table-secondary fw-bold text-center">
+								<tr>
+									<td colspan="2" class="text-end">TV</td>
+									<td id="total_dollars" class="text-end">{{ total_dollars|floatformat:2|intcomma }}
+									</td>
+									<td id="total_fc" class="text-end">{{ total_fc|floatformat:2|intcomma }}</td>
+
+								</tr>
+								<tr>
+									<td colspan="2" class="text-end">Total</td>
+									<td id="total_dollars" class="text-end">{{ total_dollars|floatformat:2|intcomma }}
+									</td>
+									<td id="total_fc" class="text-end">{{ total_fc|floatformat:2|intcomma }}</td>
+
+								</tr>
+							</tfoot>
+						</table>
+					</div>
+
+					{% if editable %}
+					<div class="text-end">
+						<button type="submit" class="btn btn-success">
+							<i class="fa fa-save"></i> Enregistrer prix forfaitaires
+						</button>
+					</div>
+				</form>
+				{% endif %}
+
+			</div>
+
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+				<button type="button" class="btn btn-success" onclick="printModalActivites({{ dossier.id }}, 'usd')">
+					<i class="fa fa-print"></i> Imprimer en $
+				</button>
+
+				<button type="button" class="btn btn-success" onclick="printModalActivites({{ dossier.id }}, 'fc')">
+					<i class="fa fa-print"></i> Imprimer en Fc
+				</button>
+
+
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<!-- Modal pour cloturer le dossier -->
+<div class="modal fade" id="modalClotureDossier" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg modal-dialog-centered">
+		<div class="modal-content">
+
+			<!-- En-tête -->
+			<div class="modal-header bg-danger text-white">
+				<h5 class="modal-title">
+					<i class="fa fa-gavel me-2"></i> Clôture définitive du dossier
+				</h5>
+				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+			</div>
+
+			<!-- Corps -->
+			<form method="post" action="{% url 'cloturer_dossier' dossier.id %}">
+				{% csrf_token %}
+				<div class="modal-body">
+
+					<!-- Alerte -->
+					<div class="alert alert-danger d-flex align-items-center">
+						<i class="fa fa-exclamation-triangle me-2"></i>
+						<div>
+							Cette action est <strong>irréversible</strong>.
+							Une fois le dossier clôturé, il ne pourra plus être modifié.
+						</div>
+					</div>
+
+					<!-- Observation obligatoire -->
+					<div class="mb-3">
+						<label class="form-label fw-bold">Observation / Dernier mot de l’avocat</label>
+						<textarea name="observation_cloture" rows="5" class="form-control"
+							placeholder="Ex : Dossier clôturé après exécution complète des obligations légales..."
+							required></textarea>
+					</div>
+
+					<!-- Résultat du dossier (optionnel) -->
+					<div class="mb-3">
+						<label class="form-label fw-bold">Résultat du dossier (optionnel)</label>
+						<select name="resultat_dossier" class="form-select">
+							<option value="" selected>-- Sélectionner --</option>
+							<option value="gagne">Gagné</option>
+							<option value="perdu">Perdu</option>
+							<option value="n/a">Non défini / N/A</option>
+						</select>
+					</div>
+
+					<!-- Date et avocat (optionnel pour info) -->
+					<div class="mb-2 text-muted">
+						<small>Cette clôture sera enregistrée avec votre nom et la date actuelle.</small>
+					</div>
+
+				</div>
+
+				<!-- Pied -->
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+						Annuler
+					</button>
+					<button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
+						<i class="fa fa-check-circle"></i>
+						Confirmer la clôture
+					</button>
+				</div>
+
+			</form>
+
+		</div>
+	</div>
+</div>
+
+
+
+<!--Le script pour imprimer la liste des activités-->
+<script>
+	function printModalActivites(dossierId, devise) {
+		const url = `/dossiers/${dossierId}/print/?devise=${devise}`;
+
+		window.open(url, "_blank");
+	}
+</script>
+
+
+
+
+
+<script>
+	const modalId = 'modalActivites{{ dossier.id }}';
+	const modalElement = document.getElementById(modalId);
+
+	{% if editable %}
+	const taux_fc = {{ taux_fc| safe }};
+
+	modalElement.addEventListener('shown.bs.modal', function () {
+		// Sélectionner les inputs ici, après que la modale est complètement affichée
+		const inputs = modalElement.querySelectorAll('.prix-dollar');
+
+		function updateFC() {
+			let totalDollar = 0;
+			let totalFc = 0;
+
+			inputs.forEach(input => {
+				const row = input.closest('tr');
+				const fcCell = row.querySelector('.prix-fc');
+				const valDollar = parseFloat(input.value) || 0;
+				const valFc = valDollar * taux_fc;
+
+				fcCell.textContent = 'Fc ' + valFc.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+				totalDollar += valDollar;
+				totalFc += valFc;
+			});
+
+			const totalDollarElem = document.getElementById('total_dollars');
+			const totalFcElem = document.getElementById('total_fc');
+
+			if (totalDollarElem) {
+				totalDollarElem.textContent = '$' + totalDollar.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+			}
+			if (totalFcElem) {
+				totalFcElem.textContent = 'Fc ' + totalFc.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+			}
+		}
+
+		// Attacher l'événement input pour chaque input
+		inputs.forEach(input => {
+			input.addEventListener('input', updateFC);
+		});
+
+		// Calcul initial pour que les totaux soient corrects dès l'ouverture
+		updateFC();
+	});
+	{% endif %}
+</script>
+
+
+
+
+<style>
+	/* Bouton stylé façon LawFirm Admin */
+	.btn-lawfirm {
+		background: linear-gradient(135deg, #0b5ed7, #003366);
+		/* bleu profond au bleu royal */
+		color: #fff;
+		border: none;
+		border-radius: 8px;
+		font-weight: 500;
+		letter-spacing: 0.3px;
+		padding: 0.6rem 1.2rem;
+		box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+		transition: all 0.3s ease;
+	}
+
+	/* Effet hover (brillance subtile + ombre renforcée) */
+	.btn-lawfirm:hover {
+		background: linear-gradient(135deg, #004099, #0b5ed7);
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+		transform: translateY(-2px);
+	}
+
+	/* Focus + clic */
+	.btn-lawfirm:active,
+	.btn-lawfirm:focus {
+		outline: none;
+		box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.25);
+	}
+
+	/* Icône à gauche du texte */
+	.btn-lawfirm i {
+		font-size: 0.95rem;
+	}
+
+
+	/* --- Modal global --- */
+	#modalAssignerAvocats .modal-content {
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+		border: none;
+	}
+
+	/* --- Header du modal --- */
+	#modalAssignerAvocats .modal-header {
+		background: linear-gradient(135deg, #0b5ed7, #003366);
+		color: #fff;
+		font-size: 1.2rem;
+		font-weight: 600;
+		letter-spacing: 0.5px;
+		border-bottom: none;
+	}
+
+	/* Bouton fermer header */
+	#modalAssignerAvocats .btn-close {
+		filter: brightness(0) invert(1);
+	}
+
+	/* --- Corps du modal --- */
+	#modalAssignerAvocats .modal-body {
+		background-color: #f8f9fa;
+		padding: 1.8rem;
+	}
+
+	/* Titre listes */
+	#modalAssignerAvocats h5 {
+		font-weight: 600;
+		color: #333;
+	}
+
+	/* --- Avocats disponibles --- */
+	#modalAssignerAvocats .list-group-item.avocat-item {
+		border-radius: 8px;
+		margin-bottom: 0.5rem;
+		transition: all 0.2s ease;
+	}
+
+	#modalAssignerAvocats .list-group-item.avocat-item:hover,
+	#modalAssignerAvocats .list-group-item.avocat-item.active {
+		background-color: #e7f1ff;
+		transform: translateX(2px);
+	}
+
+	/* --- Carte info avocat sélectionné --- */
+	#modalAssignerAvocats .card {
+		border-radius: 12px;
+		border: 1px solid #dee2e6;
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+	}
+
+	/* Bouton Ajouter avocat */
+	#modalAssignerAvocats #btnAjouterAvocat {
+		border-radius: 8px;
+		padding: 0.5rem 1.2rem;
+		font-weight: 500;
+		letter-spacing: 0.3px;
+		transition: all 0.3s ease;
+	}
+
+	#modalAssignerAvocats #btnAjouterAvocat:hover {
+		transform: translateY(-2px);
+		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+	}
+
+	/* --- Liste des avocats sélectionnés --- */
+	#modalAssignerAvocats #avocatsSelectionnes .list-group-item {
+		border-radius: 8px;
+		margin-bottom: 0.5rem;
+		transition: all 0.2s ease;
+	}
+
+	#modalAssignerAvocats #avocatsSelectionnes .list-group-item:hover {
+		background-color: #f0f8ff;
+	}
+
+	/* --- Box général --- */
+	.box {
+		background-color: #fff;
+		border-radius: 12px;
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+		margin-bottom: 1.5rem;
+		border: none;
+		padding: 1rem 1.5rem;
+	}
+
+	/* --- Header de la box --- */
+	.box-header {
+		border-bottom: none;
+		margin-bottom: 1rem;
+	}
+
+	.box-header .box-title {
+		font-weight: 600;
+		font-size: 1.2rem;
+		color: #333;
+	}
+
+	/* --- Bouton Ajouter un document --- */
+	.box-header .btn-primary {
+		background: linear-gradient(135deg, #0b5ed7, #003366);
+		border: none;
+		border-radius: 8px;
+		font-weight: 500;
+		padding: 0.45rem 1rem;
+		transition: all 0.3s ease;
+	}
+
+	.box-header .btn-primary:hover {
+		background: linear-gradient(135deg, #003366, #0b5ed7);
+		transform: translateY(-2px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	}
+
+	/* --- Cartes de documents --- */
+	#listePieces .card {
+		border-radius: 12px;
+		border: 1px solid #dee2e6;
+		transition: all 0.3s ease;
+	}
+
+	#listePieces .card:hover {
+		transform: translateY(-3px);
+		box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+	}
+
+	/* --- Titres et boutons dans les cartes --- */
+	#listePieces .card-title {
+		font-weight: 600;
+		font-size: 1rem;
+		color: #0b5ed7;
+		margin-bottom: 0.5rem;
+	}
+
+	#listePieces .btn-outline-primary {
+		border-radius: 6px;
+		font-size: 0.85rem;
+		transition: all 0.2s ease;
+	}
+
+	#listePieces .btn-outline-primary:hover {
+		background-color: #0b5ed7;
+		color: #fff;
+		border-color: #0b5ed7;
+	}
+
+	/* --- Modal plus compacte et stylée --- */
+	#modalAjouterPieces .modal-dialog {
+		max-width: 800px;
+		/* réduit la largeur du modal XL par défaut */
+	}
+
+	#modalAjouterPieces .modal-content {
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+	}
+
+	/* --- Header du modal --- */
+	#modalAjouterPieces .modal-header {
+		background: linear-gradient(135deg, #0b5ed7, #003366);
+		color: #fff;
+		border-bottom: none;
+		font-weight: 600;
+	}
+
+	#modalAjouterPieces .modal-header .btn-close {
+		filter: invert(1);
+		/* pour bouton blanc */
+	}
+
+	/* --- Boutons du modal --- */
+	#modalAjouterPieces .btn-primary {
+		border-radius: 8px;
+		background: linear-gradient(135deg, #0b5ed7, #003366);
+		font-weight: 500;
+		transition: all 0.3s ease;
+	}
+
+	#modalAjouterPieces .btn-primary:hover {
+		background: linear-gradient(135deg, #003366, #0b5ed7);
+		transform: translateY(-1px);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+	}
+
+	#modalAjouterPieces .btn-outline-primary {
+		border-radius: 6px;
+		transition: all 0.2s ease;
+	}
+
+	#modalAjouterPieces .btn-outline-primary:hover {
+		background-color: #0b5ed7;
+		color: #fff;
+		border-color: #0b5ed7;
+	}
+
+	/* --- Form inputs --- */
+	#modalAjouterPieces .form-control {
+		border-radius: 8px;
+		box-shadow: none;
+		border: 1px solid #ced4da;
+		transition: all 0.2s ease;
+	}
+
+	#modalAjouterPieces .form-control:focus {
+		border-color: #0b5ed7;
+		box-shadow: 0 0 5px rgba(11, 94, 215, 0.3);
+	}
+
+	/* --- Footer --- */
+	#modalAjouterPieces .modal-footer {
+		border-top: none;
+		justify-content: flex-end;
+		gap: 0.5rem;
+	}
+
+	/* --- Box générale --- */
+	.box {
+		border-radius: 12px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+		overflow: hidden;
+		margin-bottom: 20px;
+		background-color: #fff;
+	}
+
+	/* --- Image client --- */
+	.box-body.wed-up img {
+		border-radius: 15px;
+		border: 4px solid #e7f1ff;
+		object-fit: cover;
+	}
+
+	/* --- Texte client --- */
+	.box-body.wed-up h4 {
+		font-size: 1.5rem;
+		color: #0b5ed7;
+	}
+
+	.box-body.wed-up h5 {
+		color: #6c757d;
+	}
+
+	/* --- Description --- */
+	.box-body.pt-0 h4 {
+		font-size: 1.25rem;
+		color: #343a40;
+	}
+
+	/* --- Bouton modifier description sur la même ligne --- */
+	.box-body.pt-0 .btn-primary {
+		font-size: 0.85rem;
+		padding: 5px 12px;
+		border-radius: 8px;
+		transition: all 0.3s ease;
+	}
+
+	.box-body.pt-0 .btn-primary:hover {
+		background-color: #0056b3;
+		transform: translateY(-1px);
+	}
+
+	/* --- Texte de la description --- */
+	.box-body.pt-0 p {
+		font-size: 0.95rem;
+		color: #6c757d;
+		line-height: 1.6;
+	}
+</style>
+
+<style>
+	@media print {
+		body * {
+			visibility: hidden;
+			/* tout cacher */
+		}
+
+		#modalActivites {
+				{
+				dossier.id
+			}
+		}
+
+		,
+		#modalActivites {
+				{
+				dossier.id
+			}
+		}
+
+		* {
+			visibility: visible;
+			/* ne montrer que le modal */
+		}
+
+		#modalActivites {
+				{
+				dossier.id
+			}
+		}
+
+			{
+			position: absolute;
+			left: 0;
+			top: 0;
+			width: 100%;
+		}
+
+		#modalActivites {
+				{
+				dossier.id
+			}
+		}
+
+		.modal-footer {
+			display: none;
+			/* masquer les boutons */
+		}
+	}
+</style>
+
+<!-- style pour l'impression de l'historique de paiement-->
+<style>
+	/* RÈGLES CSS POUR L'IMPRESSION (Media Query) */
+	@media print {
+
+		/* Masquer tous les éléments non essentiels pour un document propre */
+		.nav-tabs,
+		.box-header,
+		.print-hide,
+		/* Masque la section filtres et le bouton imprimer */
+		.float-end.ms-2,
+		/* Masque le bouton Modifier */
+		.tabcontent-border,
+		#tab_enregistrer_paiement {
+			display: none !important;
+		}
+
+		/* Assurez-vous que l'historique est affiché et occupe toute la largeur */
+		#tab_historique_paiements {
+			display: block !important;
+			width: 100%;
+			padding: 0;
+		}
+
+		/* Nettoyer la timeline pour un rendu plus simple sur papier */
+		.timeline-panel {
+			border: 1px solid #eee;
+			padding: 10px;
+			margin-bottom: 15px;
+			/* Force le contenu à l'intérieur de la timeline à s'afficher si les éléments sont flottants */
+			overflow: visible;
+		}
+
+		/* Supprimer les fonds de couleur des icônes pour économiser de l'encre */
+		.icon {
+			background: transparent !important;
+			color: #333 !important;
+			border: 1px solid #ccc;
+		}
+	}
+</style>
+
+
+<!-- WYSIWYG JS -->
+<link rel="stylesheet"
+	href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-wysihtml5-bower/0.3.3/bootstrap3-wysihtml5.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/wysihtml5/0.4.0/wysihtml5.min.js"></script>
+<script
+	src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap3-wysihtml5-bower/0.3.3/bootstrap3-wysihtml5.min.js"></script>
+
+<script>
+	$(document).ready(function () {
+		$('#modalModifierDescription').on('shown.bs.modal', function () {
+			$('#wysiwyg-description').wysihtml5({
+				toolbar: { "fa": true }
+			});
+		});
+	});
+</script>
+
+<!-- Scripts pour les pieces (preuves) -->
+
+
+
+<!-- Scripts pour les filtrages et recherches pieces (preuves) -->
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const searchInput = document.getElementById('searchPieces');
+		const filterSelect = document.getElementById('filterType');
+
+		// MODIFICATION ICI : Sélecteur générique pour capturer toutes les pièces
+		const pieces = document.querySelectorAll('#listePieces > div');
+
+		function filterPieces() {
+			const searchText = searchInput.value.toLowerCase();
+			const selectedType = filterSelect.value;
+
+			pieces.forEach(piece => {
+				const titleElement = piece.querySelector('.card-title');
+
+				// Si l'élément est masqué par le filtre précédent ou est introuvable, passez.
+				if (!titleElement) return;
+
+				const title = titleElement.textContent.toLowerCase();
+				const typeIcon = piece.querySelector('.card-body i');
+				let type = '';
+
+				// La logique de détection du type est correcte, basée sur les icônes
+				if (typeIcon.classList.contains('fa-image')) type = 'image';
+				else if (typeIcon.classList.contains('fa-film')) type = 'video'; // Correction de 'fa-video' à 'fa-film' si c'est ce que vous utilisez pour la vidéo
+				else if (typeIcon.classList.contains('fa-whatsapp')) type = 'whatsapp';
+				else if (typeIcon.classList.contains('fa-comment')) type = 'sms';
+				else if (typeIcon.classList.contains('fa-file')) type = 'document';
+
+				const matchesSearch = title.includes(searchText);
+				const matchesType = selectedType === '' || selectedType === type;
+
+				piece.style.display = matchesSearch && matchesType ? 'block' : 'none';
+			});
+		}
+
+		searchInput.addEventListener('input', filterPieces);
+		filterSelect.addEventListener('change', filterPieces);
+	});
+</script>
+
+
+<script>
+	const modalAjouterPieces = document.getElementById('modalAjouterPieces');
+	modalAjouterPieces.addEventListener('show.bs.modal', function (event) {
+		const button = event.relatedTarget;
+		const format = button.getAttribute('data-format');
+		modalAjouterPieces.querySelector('#format_piece_modal').value = format;
+	});
+
+</script>
+
+<!-- Scripts pour les  -->
+<script>
+	document.addEventListener('DOMContentLoaded', () => {
+		const listeAvocats = document.querySelectorAll('.avocat-item');
+		const btnAjouter = document.getElementById('btnAjouterAvocat');
+		const photo = document.getElementById('photoAvocat');
+		const nomComplet = document.getElementById('nomComplet');
+		const specialite = document.getElementById('specialite');
+		const roleSelect = document.getElementById('roleAvocat');
+		const containerSelectionnes = document.getElementById('avocatsSelectionnes');
+		const searchInput = document.getElementById('searchAvocat');
+
+		let avocatSelectionne = null;
+
+		// ✅ Sélection d'un avocat dans la liste
+		listeAvocats.forEach(item => {
+			item.addEventListener('click', () => {
+				listeAvocats.forEach(a => a.classList.remove('active'));
+				item.classList.add('active');
+
+				avocatSelectionne = {
+					id: item.dataset.id,
+					nom: item.dataset.nom,
+					prenom: item.dataset.prenom,
+					specialite: item.dataset.specialite,
+					photo: item.dataset.photo
+				};
+
+				photo.src = avocatSelectionne.photo;
+				nomComplet.textContent = avocatSelectionne.nom + ' ' + avocatSelectionne.prenom;
+				specialite.textContent = avocatSelectionne.specialite;
+				btnAjouter.disabled = false;
+			});
+		});
+
+		// ✅ Ajout d'un avocat à la liste
+		btnAjouter.addEventListener('click', () => {
+			if (!avocatSelectionne) return;
+			const role = roleSelect.value;
+			const avocatId = avocatSelectionne.id;
+
+			// Empêcher les doublons
+			if (document.getElementById('avocat_' + avocatId)) {
+				alert("⚠️ Cet avocat est déjà sélectionné.");
+				return;
+			}
+
+			const div = document.createElement('div');
+			div.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center', 'fade-in');
+			div.id = 'avocat_' + avocatId;
+			div.innerHTML = `
+			<div class="d-flex align-items-center">
+				<img src="${avocatSelectionne.photo}" width="40" height="40" class="rounded-circle me-2">
+				<div>
+					<strong>${avocatSelectionne.nom} ${avocatSelectionne.prenom}</strong><br>
+					<small class="text-muted">${avocatSelectionne.specialite}</small>
+				</div>
+			</div>
+			<div>
+				<span class="badge bg-info text-dark me-2">${role}</span>
+				<button type="button" class="btn btn-sm btn-danger removeAvocat"><i class="fa fa-times"></i></button>
+			</div>
+			<input type="hidden" name="avocats_ids[]" value="${avocatId}">
+			<input type="hidden" name="roles[]" value="${role}">
+		`;
+
+			containerSelectionnes.appendChild(div);
+			div.querySelector('.removeAvocat').addEventListener('click', () => div.remove());
+			btnAjouter.disabled = true;
+		});
+
+		// ✅ Recherche par nom, prénom ou spécialité
+		searchInput.addEventListener('keyup', function () {
+			const value = this.value.toLowerCase().trim();
+
+			listeAvocats.forEach(av => {
+				const nom = av.dataset.nom.toLowerCase();
+				const prenom = av.dataset.prenom.toLowerCase();
+				const specialite = (av.dataset.specialite || '').toLowerCase();
+
+				// Correspondance sur nom, prénom OU spécialité
+				if (nom.includes(value) || prenom.includes(value) || specialite.includes(value)) {
+					av.style.display = 'block';
+				} else {
+					av.style.display = 'none';
+				}
+			});
+		});
+	});
+</script>
+
+
+<script>
+	const csrftoken = '{{ csrf_token }}';
+
+	document.addEventListener('DOMContentLoaded', function () {
+		document.querySelectorAll('.btn-supprimer-avocat').forEach(button => {
+			button.addEventListener('click', function () {
+				const avocatId = this.dataset.id;
+				const box = document.getElementById('avocatBox' + avocatId);
+				const url = this.dataset.url; // on récupère la vraie URL Django
+
+				console.log("Suppression de l'avocat ID =", avocatId, "URL:", url);
+
+				if (confirm("Voulez-vous vraiment supprimer cet avocat de l'affaire ?")) {
+					fetch(url, {
+						method: 'POST',
+						headers: {
+							'X-CSRFToken': csrftoken,
+							'X-Requested-With': 'XMLHttpRequest'
+						}
+					})
+						.then(response => response.json())
+						.then(data => {
+							console.log("Réponse serveur:", data);
+							if (data.success) {
+								box.style.transition = 'opacity 0.4s ease';
+								box.style.opacity = '0';
+								setTimeout(() => box.remove(), 400);
+								toastr.success("Avocat supprimé avec succès !");
+							} else {
+								toastr.error("Erreur: " + (data.error || "suppression échouée"));
+							}
+						})
+						.catch(error => {
+							console.error("Erreur réseau:", error);
+							toastr.error("Erreur réseau.");
+						});
+				}
+			});
+		});
+	});
+</script>
+
+<!-- Scripts pour l'impression de l'historique de paiement -->
+
+
+<script>
+	document.addEventListener("DOMContentLoaded", function () {
+		const urlParams = new URLSearchParams(window.location.search);
+		const openModal = urlParams.get('open_modal');
+		if (openModal === 'activites') {
+			const modalId = "#modalActivites{{ dossier.id }}";
+			const modal = new bootstrap.Modal(document.querySelector(modalId));
+			modal.show();
+
+			// Supprime le paramètre GET pour éviter la réouverture au refresh
+			urlParams.delete('open_modal');
+			const newUrl = window.location.pathname + '?' + urlParams.toString();
+			window.history.replaceState({}, '', newUrl);
+		}
+	});
+</script>
+
+
+<!-- Scripts pour le declararion du client-->
+<script>
+
+	let currentPage = 1;
+	const itemsPerPage = 10;
+	const items = document.querySelectorAll('#listeDeclarations li');
+
+	function showPage(page) {
+		const start = (page - 1) * itemsPerPage;
+		const end = start + itemsPerPage;
+
+		items.forEach((item, index) => {
+			item.style.display = (index >= start && index < end) ? "block" : "none";
+		});
+	}
+
+	document.getElementById("prevPage").onclick = () => {
+		if (currentPage > 1) {
+			currentPage--;
+			showPage(currentPage);
+		}
+	};
+
+	document.getElementById("nextPage").onclick = () => {
+		if ((currentPage * itemsPerPage) < items.length) {
+			currentPage++;
+			showPage(currentPage);
+		}
+	};
+
+	showPage(currentPage);
+
+	// ===========================
+	// Affichage détail au clic
+	// ===========================
+	document.querySelectorAll('.declaration-item').forEach(item => {
+		item.onclick = function () {
+			document.getElementById('detailDate').innerText = this.dataset.date;
+			document.getElementById('detailAuteur').innerText = this.dataset.auteur;
+			const contenuBrut = this.dataset.contenu;
+			const contenuDecode = JSON.parse('"' + contenuBrut.replace(/"/g, '\\"') + '"');
+			document.getElementById('zoneDeclarationContenu').innerHTML = contenuDecode.replace(/\n/g, "<br>");
+		};
+	});
+
+	// ===========================
+	// Bouton Modifier
+	// ===========================
+	document.querySelectorAll('.btn-edit').forEach(btn => {
+		btn.onclick = function () {
+
+			const id = this.dataset.id;
+			const contenu = this.dataset.contenu;
+
+			document.getElementById("modifierContenu").value = contenu;
+			document.getElementById("formModifierDeclaration").action =
+				"/declaration/" + id + "/modifier/";
+		};
+	});
+
+	// ===========================
+	// Bouton Supprimer
+	// ===========================
+	document.querySelectorAll('.btn-delete').forEach(btn => {
+		btn.onclick = function () {
+			const id = this.dataset.id;
+			document.getElementById("formSupprimerDeclaration").action =
+				"/declaration/" + id + "/supprimer/";
+		};
+	});
+
+</script>
+
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+		const formPaiement = document.querySelector('#tab_enregistrer_paiement form');
+
+		formPaiement.addEventListener('submit', function (e) {
+			e.preventDefault(); // Empêche le submit classique
+
+			const formData = new FormData(formPaiement);
+
+			fetch(formPaiement.action, {
+				method: 'POST',
+				headers: {
+					'X-Requested-With': 'XMLHttpRequest',
+					'X-CSRFToken': formPaiement.querySelector('[name=csrfmiddlewaretoken]').value
+				},
+				body: formData
+			})
+				.then(response => response.json())
+				.then(data => {
+					if (data.success) {
+						// Afficher la modal
+						const modalElement = document.getElementById('modalImpression');
+						const modal = new bootstrap.Modal(modalElement);
+						modal.show();
+
+						// Fonction pour ouvrir la facture avec la devise choisie
+						function imprimerFacture(devise) {
+							const url = data.url_facture + '?devise=' + devise;
+							window.open(url, '_blank');
+							modal.hide();
+						}
+
+						// Boutons USD et CDF
+						const btnUSD = document.getElementById('btnImprimerUSD');
+						const btnCDF = document.getElementById('btnImprimerCDF');
+
+						btnUSD.addEventListener('click', function () {
+							imprimerFacture('USD');
+						});
+
+						btnCDF.addEventListener('click', function () {
+							imprimerFacture('CDF');
+						});
+
+						// Réinitialiser le formulaire après succès
+						formPaiement.reset();
+					} else {
+						alert('Erreur lors de l\'enregistrement du paiement.');
+					}
+				})
+				.catch(error => {
+					console.error('Erreur:', error);
+					alert('Une erreur est survenue. Veuillez réessayer.');
+				});
+		});
+	});
+</script>
+
+
+
+{%endblock%}

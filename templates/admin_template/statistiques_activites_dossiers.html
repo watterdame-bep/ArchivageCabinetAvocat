@@ -1,0 +1,481 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Statistiques Activités Dossiers{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">📊 Statistiques Activités Dossiers</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dashboard' %}">Rapport</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dossier' %}">Dossiers</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Statistiques</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <button type="button" class="btn btn-primary" onclick="window.print()">
+                        <i class="mdi mdi-printer"></i> Imprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Statistiques générales -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ statistiques.total_activites }}</h3>
+                            <p>Total Activités</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-history"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ statistiques.heures_totales|floatformat:0 }}</h3>
+                            <p>Heures Totales</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-timer"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ statistiques.activites_facturees }}</h3>
+                            <p>Activités Facturées</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ statistiques.activites_non_facturees }}</h3>
+                            <p>Non Facturées</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Graphiques et analyses -->
+            <div class="row">
+                <!-- Répartition par type d'activité -->
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-chart-pie text-primary"></i> 
+                                Répartition Facturation
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Statut</th>
+                                            <th class="text-center">Nombre</th>
+                                            <th class="text-center">Pourcentage</th>
+                                            <th>Progression</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-success">Facturées</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <strong>{{ statistiques.activites_facturees }}</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if statistiques.total_activites > 0 %}
+                                                    {% widthratio statistiques.activites_facturees statistiques.total_activites 100 %}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-success" role="progressbar" 
+                                                         style="width: {% if statistiques.total_activites > 0 %}{% widthratio statistiques.activites_facturees statistiques.total_activites 100 %}{% else %}0{% endif %}%">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-warning">Non facturées</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <strong>{{ statistiques.activites_non_facturees }}</strong>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if statistiques.total_activites > 0 %}
+                                                    {% widthratio statistiques.activites_non_facturees statistiques.total_activites 100 %}%
+                                                {% else %}
+                                                    0%
+                                                {% endif %}
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-warning" role="progressbar" 
+                                                         style="width: {% if statistiques.total_activites > 0 %}{% widthratio statistiques.activites_non_facturees statistiques.total_activites 100 %}{% else %}0{% endif %}%">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activités par avocat -->
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-account-group text-success"></i> 
+                                Top Avocats Actifs
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            {% if statistiques.activites_par_avocat %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Avocat</th>
+                                                <th class="text-center">Activités</th>
+                                                <th class="text-center">Heures</th>
+                                                <th class="text-center">%</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in statistiques.activites_par_avocat %}
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <div class="avatar avatar-sm bg-success rounded-circle me-2 d-flex align-items-center justify-content-center">
+                                                            <i class="mdi mdi-account text-white"></i>
+                                                        </div>
+                                                        <div>
+                                                            <strong>{{ item.avocat__nom }} {{ item.avocat__prenom }}</strong>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="text-center">
+                                                    <strong class="text-success">{{ item.count }}</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    <strong class="text-info">{{ item.heures_totales|floatformat:1 }}h</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    {% if statistiques.total_activites > 0 %}
+                                                        {% widthratio item.count statistiques.total_activites 100 %}%
+                                                    {% else %}
+                                                        0%
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="mdi mdi-information mdi-48px"></i>
+                                    <br>Aucune donnée disponible
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dossiers les plus actifs -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-folder-star text-warning"></i> 
+                                Top 10 Dossiers les Plus Actifs
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            {% if statistiques.dossiers_actifs %}
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>Rang</th>
+                                                <th>Numéro Référence</th>
+                                                <th>Titre</th>
+                                                <th>Client</th>
+                                                <th class="text-center">Activités</th>
+                                                <th class="text-center">Heures</th>
+                                                <th class="text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in statistiques.dossiers_actifs %}
+                                            <tr>
+                                                <td class="text-center">
+                                                    {% if forloop.counter <= 3 %}
+                                                        <span class="badge badge-warning">
+                                                            <i class="mdi mdi-trophy"></i> {{ forloop.counter }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">{{ forloop.counter }}</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    <span class="badge badge-info">
+                                                        {{ item.numero_reference|default:"-" }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <strong>{{ item.dossier.titre|truncatechars:40 }}</strong>
+                                                </td>
+                                                <td>{{ item.client_nom }}</td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-primary badge-lg">
+                                                        {{ item.count }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge badge-info badge-lg">
+                                                        {{ item.heures_totales|floatformat:1 }}h
+                                                    </span>
+                                                </td>
+                                                <td class="text-center">
+                                                    <div class="btn-group">
+                                                        <a href="{% url 'rapport_activites_dossier' item.dossier.id %}" 
+                                                           class="btn btn-sm btn-info" title="Voir activités">
+                                                            <i class="mdi mdi-eye"></i>
+                                                        </a>
+                                                        <a href="{% url 'rapport_activites_dossier' item.dossier.id %}?format=pdf" 
+                                                           class="btn btn-sm btn-danger" title="Export PDF" target="_blank">
+                                                            <i class="mdi mdi-file-pdf"></i>
+                                                        </a>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted py-4">
+                                    <i class="mdi mdi-information mdi-48px"></i>
+                                    <br>Aucun dossier avec activités trouvé
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Évolution des activités -->
+            {% if statistiques.activites_recentes %}
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-chart-line text-info"></i> 
+                                Évolution des Activités (30 derniers jours)
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th class="text-center">Nombre d'Activités</th>
+                                            <th>Tendance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for item in statistiques.activites_recentes %}
+                                        <tr>
+                                            <td>{{ item.day|date:"d/m/Y" }}</td>
+                                            <td class="text-center">
+                                                <strong>{{ item.count }}</strong>
+                                            </td>
+                                            <td>
+                                                <div class="progress" style="height: 15px;">
+                                                    <div class="progress-bar bg-info" role="progressbar" 
+                                                         style="width: {% if item.count > 0 %}{{ item.count|add:0 }}0{% else %}5{% endif %}%">
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Résumé et insights -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border bg-light">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-lightbulb text-warning"></i> 
+                                Insights et Recommandations
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card border-info">
+                                        <div class="card-body text-center">
+                                            <i class="mdi mdi-trending-up mdi-48px text-info"></i>
+                                            <h5 class="card-title mt-2">Productivité</h5>
+                                            <p class="card-text">
+                                                {% if statistiques.total_activites > 0 %}
+                                                    Moyenne de {{ statistiques.activites_cette_semaine|floatformat:1 }} activités par jour cette semaine.
+                                                {% else %}
+                                                    Aucune activité enregistrée récemment.
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-success">
+                                        <div class="card-body text-center">
+                                            <i class="mdi mdi-account-star mdi-48px text-success"></i>
+                                            <h5 class="card-title mt-2">Utilisateur le Plus Actif</h5>
+                                            <p class="card-text">
+                                                {% if statistiques.activites_par_user %}
+                                                    {% with top_user=statistiques.activites_par_user.0 %}
+                                                        {% if top_user.user__first_name %}
+                                                            {{ top_user.user__first_name }} {{ top_user.user__last_name }}
+                                                        {% else %}
+                                                            {{ top_user.user__username }}
+                                                        {% endif %}
+                                                        <br><small>({{ top_user.count }} activités)</small>
+                                                    {% endwith %}
+                                                {% else %}
+                                                    Aucune donnée disponible
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card border-warning">
+                                        <div class="card-body text-center">
+                                            <i class="mdi mdi-folder-star mdi-48px text-warning"></i>
+                                            <h5 class="card-title mt-2">Dossier le Plus Actif</h5>
+                                            <p class="card-text">
+                                                {% if statistiques.dossiers_actifs %}
+                                                    {% with top_dossier=statistiques.dossiers_actifs.0 %}
+                                                        {{ top_dossier.numero_reference|default:"Dossier sans référence" }}
+                                                        <br><small>({{ top_dossier.count }} activités)</small>
+                                                    {% endwith %}
+                                                {% else %}
+                                                    Aucune donnée disponible
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+.avatar {
+    width: 2rem;
+    height: 2rem;
+}
+
+.avatar-sm {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.badge-lg {
+    font-size: 1rem;
+    padding: 0.5rem 0.75rem;
+}
+
+@media print {
+    .btn, .content-header .text-end {
+        display: none !important;
+    }
+    
+    .content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .box {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+    }
+}
+</style>
+
+{% endblock %}

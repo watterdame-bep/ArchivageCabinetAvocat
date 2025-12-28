@@ -1,0 +1,412 @@
+{% extends 'admin_template/base.html' %}
+{% load static %}
+
+{% block title %}Rapport Activités - Dossier {{ dossier.numero_reference_dossier }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container-full">
+        <!-- Content Header -->
+        <div class="content-header">
+            <div class="d-flex align-items-center">
+                <div class="me-auto">
+                    <h3 class="page-title">📋 Rapport d'Activités - Dossier {{ dossier.numero_reference_dossier }}</h3>
+                    <div class="d-inline-block align-items-center">
+                        <nav>
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dashboard' %}">Rapport</a></li>
+                                <li class="breadcrumb-item"><a href="{% url 'rapport_dossier' %}">Dossiers</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">Activités</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="btn-group">
+                        <a href="?format=pdf&periode={{ periode }}&type={{ type_activite }}" class="btn btn-danger" target="_blank">
+                            <i class="mdi mdi-file-pdf"></i> Export PDF
+                        </a>
+                        <button type="button" class="btn btn-primary" onclick="window.print()">
+                            <i class="mdi mdi-printer"></i> Imprimer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main content -->
+        <section class="content">
+            <!-- Informations du dossier -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border bg-primary text-white">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-folder"></i> Informations du Dossier
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Numéro de référence:</strong></td>
+                                            <td>{{ dossier.numero_reference_dossier|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Titre:</strong></td>
+                                            <td>{{ dossier.titre }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Client:</strong></td>
+                                            <td>{{ dossier.client.nom }} {{ dossier.client.prenom }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Type d'affaire:</strong></td>
+                                            <td>{{ dossier.type_affaire.nom_type|default:"Non défini" }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                                <div class="col-md-6">
+                                    <table class="table table-borderless">
+                                        <tr>
+                                            <td><strong>Statut:</strong></td>
+                                            <td>
+                                                {% if dossier.statut_dossier == 'Ouvert' %}
+                                                    <span class="badge badge-success">{{ dossier.statut_dossier }}</span>
+                                                {% elif dossier.statut_dossier == 'Clôturé' %}
+                                                    <span class="badge badge-secondary">{{ dossier.statut_dossier }}</span>
+                                                {% else %}
+                                                    <span class="badge badge-warning">{{ dossier.statut_dossier }}</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Date d'ouverture:</strong></td>
+                                            <td>{{ dossier.date_ouverture|date:"d/m/Y"|default:"-" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Juridiction:</strong></td>
+                                            <td>{{ dossier.juridiction.nom|default:"Non définie" }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Rapport généré le:</strong></td>
+                                            <td>{{ rapport_data.rapport.date_generation }}</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques des activités -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ rapport_data.statistiques.total_activites }}</h3>
+                            <p>Total Activités</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-history"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ rapport_data.statistiques.total_heures|floatformat:1 }}</h3>
+                            <p>Heures Totales</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-timer"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ rapport_data.statistiques.activites_facturees }}</h3>
+                            <p>Activités Facturées</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ rapport_data.statistiques.activites_non_facturees }}</h3>
+                            <p>Non Facturées</p>
+                        </div>
+                        <div class="icon">
+                            <i class="mdi mdi-clock"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtres et options -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-filter"></i> Filtres et Options
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <form method="GET" class="row">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Période:</label>
+                                        <select name="periode" class="form-control" onchange="this.form.submit()">
+                                            <option value="7" {% if periode == '7' %}selected{% endif %}>7 derniers jours</option>
+                                            <option value="30" {% if periode == '30' %}selected{% endif %}>30 derniers jours</option>
+                                            <option value="90" {% if periode == '90' %}selected{% endif %}>3 derniers mois</option>
+                                            <option value="all" {% if periode == 'all' %}selected{% endif %}>Toutes les activités</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Avocat:</label>
+                                        <select name="avocat" class="form-control" onchange="this.form.submit()">
+                                            <option value="all" {% if avocat_filter == 'all' %}selected{% endif %}>Tous les avocats</option>
+                                            {% for avocat in avocats %}
+                                                <option value="{{ avocat.id }}" {% if avocat_filter == avocat.id|stringformat:"s" %}selected{% endif %}>
+                                                    {{ avocat.nom }} {{ avocat.prenom }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Statut facturation:</label>
+                                        <select name="facturee" class="form-control" onchange="this.form.submit()">
+                                            <option value="all" {% if facturee_filter == 'all' %}selected{% endif %}>Toutes</option>
+                                            <option value="true" {% if facturee_filter == 'true' %}selected{% endif %}>Facturées</option>
+                                            <option value="false" {% if facturee_filter == 'false' %}selected{% endif %}>Non facturées</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>Format:</label>
+                                        <select name="format" class="form-control" onchange="this.form.submit()">
+                                            <option value="html" {% if format != 'pdf' %}selected{% endif %}>Affichage HTML</option>
+                                            <option value="pdf">Export PDF</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label>&nbsp;</label>
+                                        <div class="d-flex">
+                                            <button type="submit" class="btn btn-primary me-2">
+                                                <i class="mdi mdi-refresh"></i> Actualiser
+                                            </button>
+                                            <a href="?" class="btn btn-secondary">
+                                                <i class="mdi mdi-restore"></i> Reset
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Liste des activités -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-timeline"></i> 
+                                Historique des Activités ({{ rapport_data.statistiques.periode_affichee }})
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            {% if activites %}
+                                <div class="timeline">
+                                    {% for activite in activites %}
+                                    <div class="timeline-item mb-4">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0">
+                                                <div class="avatar bg-{{ activite.color }} rounded-circle d-flex align-items-center justify-content-center">
+                                                    <i class="{{ activite.icon }} text-white"></i>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1 ms-3">
+                                                <div class="card">
+                                                    <div class="card-body">
+                                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                                            <h6 class="card-title mb-0">Activité du {{ activite.date_activite|date:"d/m/Y" }}</h6>
+                                                            <small class="text-muted">{{ activite.date_activite|date:"d/m/Y" }}</small>
+                                                        </div>
+                                                        <p class="card-text text-muted mb-2">{{ activite.description }}</p>
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div>
+                                                                <span class="badge badge-info">{{ activite.duree_heures }}h</span>
+                                                                <span class="badge badge-{{ activite.color }}">
+                                                                    {% if activite.facturee %}Facturée{% else %}Non facturée{% endif %}
+                                                                </span>
+                                                            </div>
+                                                            <small class="text-muted">
+                                                                <i class="mdi mdi-account"></i> {{ activite.avocat.nom }} {{ activite.avocat.prenom }}
+                                                            </small>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="text-center text-muted py-5">
+                                    <i class="mdi mdi-information mdi-48px"></i>
+                                    <h5 class="mt-3">Aucune activité trouvée</h5>
+                                    <p>Aucune activité ne correspond aux critères sélectionnés pour ce dossier.</p>
+                                    <a href="?" class="btn btn-primary">
+                                        <i class="mdi mdi-refresh"></i> Voir toutes les activités
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistiques détaillées -->
+            {% if rapport_data.statistiques.activites_par_avocat %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-account-group"></i> Activités par Avocat
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Avocat</th>
+                                            <th class="text-center">Activités</th>
+                                            <th class="text-center">Heures</th>
+                                            <th class="text-center">%</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for avocat, data in rapport_data.statistiques.activites_par_avocat.items %}
+                                        <tr>
+                                            <td>{{ avocat }}</td>
+                                            <td class="text-center">{{ data.count }}</td>
+                                            <td class="text-center">{{ data.heures|floatformat:1 }}h</td>
+                                            <td class="text-center">
+                                                {% widthratio data.count rapport_data.statistiques.total_activites 100 %}%
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="box">
+                        <div class="box-header with-border">
+                            <h4 class="box-title">
+                                <i class="mdi mdi-calendar"></i> Activités par Jour
+                            </h4>
+                        </div>
+                        <div class="box-body">
+                            <div class="table-responsive">
+                                <table class="table table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th class="text-center">Activités</th>
+                                            <th class="text-center">Heures</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for jour, count in rapport_data.statistiques.activites_par_jour.items %}
+                                        <tr>
+                                            <td>{{ jour }}</td>
+                                            <td class="text-center">{{ count }}</td>
+                                            <td class="text-center">{{ rapport_data.statistiques.heures_par_jour|get_item:jour|floatformat:1 }}h</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<style>
+.timeline-item {
+    position: relative;
+}
+
+.avatar {
+    width: 3rem;
+    height: 3rem;
+}
+
+.small-box {
+    border-radius: 10px;
+    position: relative;
+    display: block;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}
+
+.small-box > .inner {
+    padding: 10px;
+}
+
+.small-box .icon {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    z-index: 0;
+    font-size: 90px;
+    color: rgba(0,0,0,0.15);
+}
+
+@media print {
+    .btn, .box-tools, .content-header .text-end {
+        display: none !important;
+    }
+    
+    .content-wrapper {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    
+    .box {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+    }
+}
+</style>
+
+{% endblock %}
