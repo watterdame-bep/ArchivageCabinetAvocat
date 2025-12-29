@@ -91,11 +91,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Configuration Whitenoise pour Railway - Utiliser les fichiers déjà collectés
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
 # Configuration Whitenoise pour Railway
 WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = False
+WHITENOISE_AUTOREFRESH = True
 WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br']
 
 # Debug: Afficher les chemins pour diagnostiquer
@@ -117,13 +117,10 @@ if staticfiles_dir.exists():
         logger.error(f"Erreur lors du comptage des fichiers: {e}")
 else:
     logger.info("Dossier staticfiles n'existe pas encore")
-WHITENOISE_AUTOREFRESH = False
+WHITENOISE_AUTOREFRESH = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-# ⚠️ OVERRIDE OBLIGATOIRE - Écrase l'héritage de settings.py
-STATICFILES_DIRS = []
 
 # Sécurité
 SECURE_BROWSER_XSS_FILTER = True
