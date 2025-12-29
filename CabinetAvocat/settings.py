@@ -150,7 +150,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# En développement local uniquement
+# Dossiers contenant les fichiers statiques en développement
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
