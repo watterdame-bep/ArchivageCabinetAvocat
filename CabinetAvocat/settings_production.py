@@ -90,13 +90,17 @@ else:
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Créer le répertoire static s'il n'existe pas
-STATICFILES_DIRS = []
-static_dir = os.path.join(BASE_DIR, 'static')
-if os.path.exists(static_dir):
-    STATICFILES_DIRS = [static_dir]
+# Configuration des répertoires statiques
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuration Whitenoise pour Railway - Version simplifiée
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
+
+# Configuration Whitenoise pour Railway
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
