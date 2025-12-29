@@ -88,26 +88,27 @@ else:
 
 # Fichiers statiques
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Configuration des répertoires statiques
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
+    BASE_DIR / 'static',
 ]
 
 # Debug: Afficher les chemins pour diagnostiquer
 import logging
 logger = logging.getLogger(__name__)
 logger.info(f"BASE_DIR: {BASE_DIR}")
-logger.info(f"STATIC_ROOT: {os.path.join(BASE_DIR, 'staticfiles')}")
-logger.info(f"STATICFILES_DIRS: {[os.path.join(BASE_DIR, 'static')]}")
-logger.info(f"Static directory exists: {os.path.exists(os.path.join(BASE_DIR, 'static'))}")
+logger.info(f"STATIC_ROOT: {BASE_DIR / 'staticfiles'}")
+logger.info(f"STATICFILES_DIRS: {[BASE_DIR / 'static']}")
+logger.info(f"Static directory exists: {(BASE_DIR / 'static').exists()}")
 
 # Configuration Whitenoise pour Railway - Version simplifiée
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
 # Configuration Whitenoise pour Railway
 WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 WHITENOISE_AUTOREFRESH = True
 
 MEDIA_URL = '/media/'
