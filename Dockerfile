@@ -1,64 +1,33 @@
-FROM jsreport/jsreport:4.7.0
+# Dockerfile pour l'application Django CabinetAvocat
+FROM python:3.11-slim
 
-USER root
+# Variables d'environnement
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV DJANGO_SETTINGS_MODULE=CabinetAvocat.settings_production
 
-# Installer Google Chrome avec toutes les dépendances
+# Répertoire de travail
+WORKDIR /app
+
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
-    wget \
-    gnupg \
-    ca-certificates \
-    fonts-liberation \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libgtk-3-0 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libxss1 \
-    --no-install-recommends
+    gcc \
+    default-libmysqlclient-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-# Ajouter la clé GPG de Google et installer Chrome
-RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - && \
-    echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
-    apt-get update && \
-    apt-get install -y google-chrome-stable && \
-    rm -rf /var/lib/apt/lists/*
+# Copier et installer les dépendances Python
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Variables d'environnement pour Puppeteer
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
-ENV PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox"
-ENV PUPPETEER_CACHE_DIR=/app/.puppeteer-cache
+# Copier le code de l'application
+COPY . .
 
-# Créer le cache Puppeteer accessible
-RUN mkdir -p /app/.puppeteer-cache && chown -R jsreport:jsreport /app/.puppeteer-cache
-
-# Copier la configuration JSReport
-COPY jsreport.config.json /app/jsreport.config.json
-
-# Copier le fichier d'export des templates
-COPY export.jsrexport /app/export.jsrexport
-
-# Copier le script de démarrage
-COPY start-jsreport.sh /app/start-jsreport.sh
-
-# Rendre le script exécutable
-RUN chmod +x /app/start-jsreport.sh
-
-# Changer les permissions pour l'utilisateur jsreport
-RUN chown -R jsreport:jsreport /app
-
-USER jsreport
+# Collecter les fichiers statiques
+RUN python manage.py collectstatic --noinput
 
 # Exposer le port
-EXPOSE 5488
+EXPOSE 8000
 
-# Utiliser le script de démarrage au lieu de la commande par défaut
-CMD ["/app/start-jsreport.sh"]
+# Commande de démarrage
+CMD ["sh", "-c", "python manage.py migrate && gunicorn CabinetAvocat.wsgi:application --bind 0.0.0.0:$PORT"]
