@@ -11,11 +11,11 @@ cmds = [
 
 [phases.build]
 cmds = [
-    "echo '🔧 Build phase - Collection sécurisée des fichiers statiques'",
+    "echo '🔧 Build phase - Collection des fichiers statiques'",
     "export RAILWAY_STATIC_BUILD=true",
     "export DJANGO_SETTINGS_MODULE=CabinetAvocat.settings_production",
-    ". /opt/venv/bin/activate && python collectstatic_safe.py"
+    ". /opt/venv/bin/activate && python manage.py collectstatic --noinput"
 ]
 
 [start]
-cmd = ". /opt/venv/bin/activate && chmod +x start.sh && ./start.sh"
+cmd = ". /opt/venv/bin/activate && python manage.py migrate && python manage.py collectstatic --noinput && gunicorn CabinetAvocat.wsgi:application --bind 0.0.0.0:$PORT"
