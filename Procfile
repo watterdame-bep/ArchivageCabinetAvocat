@@ -1,1 +1,1 @@
-web: python manage.py collectstatic --noinput --clear && python manage.py migrate && gunicorn CabinetAvocat.wsgi:application --bind 0.0.0.0:$PORT
+web: python copy_static.py && python manage.py collectstatic --noinput && python manage.py migrate && gunicorn CabinetAvocat.wsgi:application --bind 0.0.0.0:$PORT

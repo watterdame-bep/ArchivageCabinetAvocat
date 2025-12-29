@@ -105,7 +105,6 @@ dmypy.json
 
 # Django
 media/
-staticfiles/
 *.log
 db.sqlite3
 

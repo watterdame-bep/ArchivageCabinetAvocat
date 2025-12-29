@@ -86,43 +86,37 @@ else:
         }
     }
 
-# Fichiers statiques
+# Fichiers statiques - Configuration Railway optimisée
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Configuration des répertoires statiques
-STATICFILES_DIRS = [
-    BASE_DIR / 'static',
-]
+# Configuration Whitenoise pour Railway - Utiliser les fichiers déjà collectés
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
-# Créer le dossier static s'il n'existe pas (pour Railway)
-static_dir = BASE_DIR / 'static'
-if not static_dir.exists():
-    static_dir.mkdir(parents=True, exist_ok=True)
-    print(f"📁 Dossier static créé: {static_dir}")
+# Configuration Whitenoise pour Railway
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br']
 
 # Debug: Afficher les chemins pour diagnostiquer
 import logging
 logger = logging.getLogger(__name__)
 logger.info(f"BASE_DIR: {BASE_DIR}")
 logger.info(f"STATIC_ROOT: {BASE_DIR / 'staticfiles'}")
-logger.info(f"STATICFILES_DIRS: {[BASE_DIR / 'static']}")
-logger.info(f"Static directory exists: {(BASE_DIR / 'static').exists()}")
+logger.info("Configuration: Utilisation de Whitenoise avec fichiers pré-collectés")
 
-# Lister le contenu du dossier static pour debug
-if (BASE_DIR / 'static').exists():
+# Vérifier si staticfiles existe déjà
+staticfiles_dir = BASE_DIR / 'staticfiles'
+if staticfiles_dir.exists():
     import os
-    static_files = list(os.listdir(BASE_DIR / 'static'))
-    logger.info(f"Contenu du dossier static: {static_files}")
+    try:
+        static_files = list(staticfiles_dir.rglob('*'))
+        files_count = len([f for f in static_files if f.is_file()])
+        logger.info(f"Fichiers dans staticfiles: {files_count} fichiers")
+    except Exception as e:
+        logger.error(f"Erreur lors du comptage des fichiers: {e}")
 else:
-    logger.error("❌ Le dossier static n'existe pas !")
-
-# Configuration Whitenoise pour Railway - Version simplifiée
-STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
-
-# Configuration Whitenoise pour Railway
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
+    logger.info("Dossier staticfiles n'existe pas encore")
 WHITENOISE_AUTOREFRESH = True
 
 MEDIA_URL = '/media/'
