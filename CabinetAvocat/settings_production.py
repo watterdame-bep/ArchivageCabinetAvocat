@@ -89,6 +89,13 @@ else:
 # Fichiers statiques
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Créer le répertoire static s'il n'existe pas
+STATICFILES_DIRS = []
+static_dir = os.path.join(BASE_DIR, 'static')
+if os.path.exists(static_dir):
+    STATICFILES_DIRS = [static_dir]
+
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
@@ -103,8 +110,8 @@ CSRF_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 
-# JSReport (service externe - optionnel)
-JSREPORT_URL = os.environ.get('JSREPORT_URL', 'http://localhost:5488')
+# JSReport (service externe séparé sur Railway)
+JSREPORT_URL = os.environ.get('JSREPORT_URL', 'https://votre-jsreport-service.railway.app')
 JSREPORT_USERNAME = os.environ.get('JSREPORT_USERNAME', 'admin')
 JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD', '')
 JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '120'))

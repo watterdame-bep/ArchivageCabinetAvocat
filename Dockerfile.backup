@@ -23,6 +23,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le code de l'application
 COPY . .
 
+# Créer les répertoires nécessaires
+RUN mkdir -p /app/static /app/staticfiles /app/media
+
 # Collecter les fichiers statiques
 RUN python manage.py collectstatic --noinput
 

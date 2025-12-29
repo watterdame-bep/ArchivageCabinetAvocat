@@ -24,6 +24,28 @@ class JSReportService:
         self.timeout = getattr(settings, 'JSREPORT_TIMEOUT', 120)  # 2 minutes au lieu de 60s
         self.api_url = f"{self.base_url}/api/report"
         
+    def test_connection(self) -> bool:
+        """
+        Teste la connexion au service JSReport
+        """
+        try:
+            # Test simple avec un ping vers l'API
+            test_url = f"{self.base_url}/api/ping"
+            headers = self._get_auth_headers()
+            
+            response = requests.get(test_url, headers=headers, timeout=10)
+            
+            if response.status_code == 200:
+                logger.info(f"✅ Connexion JSReport réussie: {self.base_url}")
+                return True
+            else:
+                logger.warning(f"⚠️ JSReport répond mais avec le code: {response.status_code}")
+                return False
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"❌ Erreur de connexion JSReport ({self.base_url}): {str(e)}")
+            return False
+    
     def _get_auth_headers(self) -> Dict[str, str]:
         """
         Génère les headers d'authentification pour JSReport
