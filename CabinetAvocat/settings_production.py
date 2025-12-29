@@ -95,6 +95,12 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Créer le dossier static s'il n'existe pas (pour Railway)
+static_dir = BASE_DIR / 'static'
+if not static_dir.exists():
+    static_dir.mkdir(parents=True, exist_ok=True)
+    print(f"📁 Dossier static créé: {static_dir}")
+
 # Debug: Afficher les chemins pour diagnostiquer
 import logging
 logger = logging.getLogger(__name__)
@@ -102,6 +108,14 @@ logger.info(f"BASE_DIR: {BASE_DIR}")
 logger.info(f"STATIC_ROOT: {BASE_DIR / 'staticfiles'}")
 logger.info(f"STATICFILES_DIRS: {[BASE_DIR / 'static']}")
 logger.info(f"Static directory exists: {(BASE_DIR / 'static').exists()}")
+
+# Lister le contenu du dossier static pour debug
+if (BASE_DIR / 'static').exists():
+    import os
+    static_files = list(os.listdir(BASE_DIR / 'static'))
+    logger.info(f"Contenu du dossier static: {static_files}")
+else:
+    logger.error("❌ Le dossier static n'existe pas !")
 
 # Configuration Whitenoise pour Railway - Version simplifiée
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'

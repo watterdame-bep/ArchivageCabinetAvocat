@@ -1,0 +1,3 @@
+# Ne pas ignorer les fichiers statiques
+!static/
+!static/**/*
