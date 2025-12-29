@@ -95,6 +95,14 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
 
+# Debug: Afficher les chemins pour diagnostiquer
+import logging
+logger = logging.getLogger(__name__)
+logger.info(f"BASE_DIR: {BASE_DIR}")
+logger.info(f"STATIC_ROOT: {os.path.join(BASE_DIR, 'staticfiles')}")
+logger.info(f"STATICFILES_DIRS: {[os.path.join(BASE_DIR, 'static')]}")
+logger.info(f"Static directory exists: {os.path.exists(os.path.join(BASE_DIR, 'static'))}")
+
 # Configuration Whitenoise pour Railway - Version simplifiée
 STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
