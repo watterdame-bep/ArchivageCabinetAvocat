@@ -57,6 +57,8 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Configuration WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'map']
+WHITENOISE_MANIFEST_STRICT = False  # Plus tolérant avec les fichiers manquants
 
 # Configuration JSReport pour Railway (service séparé)
 JSREPORT_CONFIG = {
