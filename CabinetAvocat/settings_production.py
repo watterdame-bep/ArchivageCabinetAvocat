@@ -16,7 +16,15 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '*.railway.app',
     '*.up.railway.app',
+    'archivagecabinetavocat-production.up.railway.app',  # Domaine exact Railway
     config('RAILWAY_PUBLIC_DOMAIN', default=''),
+]
+
+# Configuration CSRF pour Railway (CRITIQUE)
+CSRF_TRUSTED_ORIGINS = [
+    'https://archivagecabinetavocat-production.up.railway.app',
+    'https://*.railway.app',
+    'https://*.up.railway.app',
 ]
 
 # Configuration de la base de données MySQL Railway
@@ -42,6 +50,11 @@ DATABASES = {
 # Configuration des fichiers statiques pour Railway
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# CRITIQUE: Configuration STATICFILES_DIRS pour collectstatic
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Configuration des médias pour Railway
 MEDIA_URL = '/media/'
