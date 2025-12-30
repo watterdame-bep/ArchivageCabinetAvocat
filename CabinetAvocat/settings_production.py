@@ -51,10 +51,10 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# CRITIQUE: Configuration STATICFILES_DIRS pour collectstatic
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# CRITIQUE: STATICFILES_DIRS supprimé en production (conflit avec WhiteNoise)
+# En production, seul STATIC_ROOT est utilisé
+# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Seulement en local
+STATICFILES_DIRS = []  # OBLIGATOIRE: Vider en production pour WhiteNoise
 
 # Configuration des médias pour Railway
 MEDIA_URL = '/media/'
@@ -63,16 +63,13 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Middleware pour les fichiers statiques
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise ULTRA-PERMISSIVE pour Railway
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Configuration WhiteNoise pour Railway
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
-    'map', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'svg', 'ico', 'css', 'js'
-]
 WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_MAX_AGE = 0  # Pas de cache pour éviter les problèmes
+WHITENOISE_MAX_AGE = 31536000  # 1 an de cache (optimisé pour production)
+WHITENOISE_MAX_AGE = 31536000  # 1 an de cache (optimisé pour production)
 
 # Configuration JSReport pour Railway (service séparé)
 JSREPORT_URL = config('JSREPORT_SERVICE_URL', default='http://localhost:5488')
