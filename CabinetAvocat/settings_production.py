@@ -65,16 +65,6 @@ WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
 ]
 WHITENOISE_MANIFEST_STRICT = False
 WHITENOISE_MAX_AGE = 0  # Pas de cache pour éviter les problèmes
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
-    'map', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'svg', 'ico', 'css', 'js'
-]
-WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_MAX_AGE = 0  # Pas de cache pour éviter les problèmes
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
-    'map', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'svg', 'ico'
-]
-WHITENOISE_MANIFEST_STRICT = False  # Tolérant avec les fichiers manquants
-WHITENOISE_MAX_AGE = 31536000  # Cache 1 an pour les assets
 
 # Configuration JSReport pour Railway (service séparé)
 JSREPORT_URL = config('JSREPORT_SERVICE_URL', default='http://localhost:5488')

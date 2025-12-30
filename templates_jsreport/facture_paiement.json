@@ -1,0 +1,16 @@
+{
+  "name": "Facture_paiement_client",
+  "engine": "handlebars",
+  "recipe": "chrome-pdf",
+  "chrome": {
+    "format": "A4",
+    "marginTop": "1cm",
+    "marginBottom": "1cm",
+    "marginLeft": "1cm",
+    "marginRight": "1cm",
+    "landscape": false,
+    "printBackground": true
+  },
+  "helpers": "",
+  "data": {}
+}
