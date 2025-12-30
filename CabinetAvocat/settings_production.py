@@ -20,29 +20,14 @@ ALLOWED_HOSTS = [
 ]
 
 # Configuration de la base de données MySQL Railway
-if 'DATABASE_URL' in os.environ:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.environ.get('DATABASE_URL'),
-            conn_max_age=600,
-        )
-    }
-else:
-    # Fallback vers la configuration locale MySQL
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.mysql',
-            'NAME': config('DB_NAME', default='cabinet_avocat'),
-            'USER': config('DB_USER', default='root'),
-            'PASSWORD': config('DB_PASSWORD', default=''),
-            'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='3306'),
-            'OPTIONS': {
-                'charset': 'utf8mb4',
-                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            },
-        }
-    }
+# Railway fournit automatiquement DATABASE_URL quand vous ajoutez un service MySQL
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,
+    )
+}
 
 # Configuration des fichiers statiques pour Railway
 STATIC_URL = '/static/'

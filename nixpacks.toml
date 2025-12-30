@@ -14,4 +14,4 @@ cmds = [
 ]
 
 [start]
-cmd = '. /opt/venv/bin/activate && python manage.py migrate && gunicorn CabinetAvocat.wsgi --bind 0.0.0.0:$PORT'
+cmd = '. /opt/venv/bin/activate && python start_railway.py'
