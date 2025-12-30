@@ -65,8 +65,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Middleware pour les fichiers statiques
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise pour Railway
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuration WhiteNoise pour Railway (sans vérification stricte des sourcemaps)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
