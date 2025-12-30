@@ -11,23 +11,27 @@ import subprocess
 import pymysql
 from urllib.parse import urlparse
 
-def wait_for_mysql(database_url, max_attempts=30, delay=2):
-    """Attend que MySQL soit disponible"""
-    print("🔍 Vérification de la disponibilité MySQL...")
+def wait_for_mysql_individual_vars(max_attempts=30, delay=2):
+    """Attend que MySQL soit disponible en utilisant les variables individuelles"""
+    print("🔍 Vérification de la disponibilité MySQL (variables individuelles)...")
     
-    # Parser l'URL de la base de données
-    try:
-        parsed = urlparse(database_url)
-        host = parsed.hostname
-        port = parsed.port or 3306
-        user = parsed.username
-        password = parsed.password
-        database = parsed.path.lstrip('/')
-        
-        print(f"📊 Connexion à MySQL: {user}@{host}:{port}/{database}")
-    except Exception as e:
-        print(f"❌ Erreur parsing DATABASE_URL: {e}")
+    # Récupérer les variables MySQL Railway
+    host = os.environ.get('MYSQLHOST')
+    port = int(os.environ.get('MYSQLPORT', '3306'))
+    user = os.environ.get('MYSQLUSER')
+    password = os.environ.get('MYSQLPASSWORD')
+    database = os.environ.get('MYSQLDATABASE')
+    
+    if not all([host, user, password, database]):
+        print("❌ Variables MySQL manquantes:")
+        print(f"  MYSQLHOST: {host}")
+        print(f"  MYSQLUSER: {user}")
+        print(f"  MYSQLPASSWORD: {'***' if password else 'MANQUANT'}")
+        print(f"  MYSQLDATABASE: {database}")
+        print(f"  MYSQLPORT: {port}")
         return False
+    
+    print(f"📊 Connexion à MySQL: {user}@{host}:{port}/{database}")
     
     for attempt in range(max_attempts):
         try:
@@ -70,20 +74,36 @@ def main():
     """Fonction principale de démarrage"""
     print("🚀 Démarrage de l'application Cabinet Avocat sur Railway")
     
-    # Vérifier les variables d'environnement
-    database_url = os.environ.get('DATABASE_URL')
-    if not database_url:
-        print("❌ DATABASE_URL non définie")
+    # Vérifier les variables d'environnement MySQL
+    mysql_vars = ['MYSQLHOST', 'MYSQLUSER', 'MYSQLPASSWORD', 'MYSQLDATABASE', 'MYSQLPORT']
+    missing_vars = []
+    
+    print("🔍 Vérification des variables MySQL Railway:")
+    for var in mysql_vars:
+        value = os.environ.get(var)
+        if value:
+            if 'PASSWORD' in var:
+                print(f"  ✅ {var}=***")
+            else:
+                print(f"  ✅ {var}={value}")
+        else:
+            print(f"  ❌ {var}=MANQUANT")
+            missing_vars.append(var)
+    
+    if missing_vars:
+        print(f"❌ Variables MySQL manquantes: {missing_vars}")
         print("🔍 Variables disponibles:")
-        for key in os.environ:
+        for key in sorted(os.environ.keys()):
             if 'MYSQL' in key or 'DATABASE' in key:
-                print(f"  {key}={os.environ[key][:50]}...")
+                value = os.environ[key]
+                if 'PASSWORD' in key:
+                    print(f"  {key}=***")
+                else:
+                    print(f"  {key}={value[:50]}...")
         sys.exit(1)
     
-    print(f"📊 DATABASE_URL configurée: {database_url[:50]}...")
-    
     # Attendre que MySQL soit prêt
-    if not wait_for_mysql(database_url):
+    if not wait_for_mysql_individual_vars():
         print("🚨 Impossible de se connecter à MySQL")
         sys.exit(1)
     
