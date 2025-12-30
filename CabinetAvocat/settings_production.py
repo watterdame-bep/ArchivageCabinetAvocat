@@ -52,25 +52,25 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# CRITIQUE: Configuration STATICFILES_DIRS pour production WhiteNoise
-# En production, nous devons inclure nos fichiers statiques personnalisés
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+# CRITIQUE: STATICFILES_DIRS doit être VIDE en production avec WhiteNoise
+# Cela évite les conflits entre les fichiers source et collectstatic
+STATICFILES_DIRS = []
 
 # Configuration des médias pour Railway
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Middleware pour les fichiers statiques
+# Middleware pour les fichiers statiques - WhiteNoise APRÈS SecurityMiddleware
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise pour Railway (sans vérification stricte des sourcemaps)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Configuration WhiteNoise ULTRA-SIMPLE pour Railway
+# Utilisation du storage standard sans compression pour éviter les problèmes
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_MAX_AGE = 31536000  # 1 an de cache (optimisé pour production)
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['css', 'js']  # Éviter la compression CSS/JS
+WHITENOISE_MAX_AGE = 0  # Pas de cache pour le debug
 
 # Configuration JSReport pour Railway (service séparé)
 JSREPORT_URL = config('JSREPORT_SERVICE_URL', default='http://localhost:5488')

@@ -64,7 +64,9 @@ urlpatterns = [
     path('rapport/', include('rapport.urls'))
 ]
 
-# 🔥 CRITIQUE: Servir les fichiers statiques et médias en production Railway
-# Sans Nginx, Django doit servir ces fichiers directement
-urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# 🔥 CRITIQUE: En production Railway, WhiteNoise gère les fichiers statiques
+# Ne pas servir les fichiers statiques via Django URLs en production
+if settings.DEBUG:
+    # Seulement en développement local
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
