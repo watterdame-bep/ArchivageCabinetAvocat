@@ -52,9 +52,11 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# CRITIQUE: STATICFILES_DIRS doit être VIDE en production avec WhiteNoise
-# Cela évite les conflits entre les fichiers source et collectstatic
-STATICFILES_DIRS = []
+# CRITIQUE: STATICFILES_DIRS doit inclure le dossier static pour que collectstatic copie les fichiers
+# Sur Railway, le container est vide au départ, donc collectstatic doit copier depuis static/
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Configuration des médias pour Railway
 MEDIA_URL = '/media/'
