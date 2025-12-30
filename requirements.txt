@@ -11,4 +11,3 @@ requests==2.31.0
 reportlab==4.0.7
 weasyprint==60.2
 django-select2==8.1.2
-jsreport-python-client==3.0.0
