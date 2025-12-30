@@ -10,7 +10,10 @@ cmds = [
 
 [phases.build]
 cmds = [
-    '. /opt/venv/bin/activate && python manage.py collectstatic --noinput'
+    '. /opt/venv/bin/activate && export DJANGO_SETTINGS_MODULE=CabinetAvocat.settings_production',
+    '. /opt/venv/bin/activate && python manage.py collectstatic --noinput --clear --verbosity=2',
+    'ls -la staticfiles/ || echo "Staticfiles directory not found"',
+    'ls -la staticfiles/css/ || echo "CSS directory not found"'
 ]
 
 [start]

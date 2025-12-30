@@ -111,9 +111,9 @@ def main():
     print("📋 Exécution des migrations...")
     run_django_command("python manage.py migrate --noinput")
     
-    # Collecter les fichiers statiques (optionnel, déjà fait au build)
+    # Collecter les fichiers statiques (CRITIQUE pour Railway)
     print("📁 Collection des fichiers statiques...")
-    run_django_command("python manage.py collectstatic --noinput")
+    run_django_command("python manage.py collectstatic --noinput --clear")
     
     # Démarrer Gunicorn
     port = os.environ.get('PORT', '8000')

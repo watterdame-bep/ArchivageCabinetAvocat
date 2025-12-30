@@ -18,9 +18,40 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+import os
+
+def test_static_files(request):
+    """Endpoint pour tester la disponibilité des fichiers statiques sur Railway"""
+    static_root = settings.STATIC_ROOT
+    
+    test_files = [
+        'css/style.css',
+        'css/vendors_css.css',
+        'assets/vendor_components/bootstrap/dist/css/bootstrap.css'
+    ]
+    
+    results = {}
+    for file_path in test_files:
+        full_path = os.path.join(static_root, file_path)
+        results[file_path] = {
+            'exists': os.path.exists(full_path),
+            'size': os.path.getsize(full_path) if os.path.exists(full_path) else 0,
+            'full_path': full_path
+        }
+    
+    return JsonResponse({
+        'static_root': static_root,
+        'static_url': settings.STATIC_URL,
+        'staticfiles_dirs': settings.STATICFILES_DIRS,
+        'debug': settings.DEBUG,
+        'files': results,
+        'environment': 'Railway' if 'RAILWAY_ENVIRONMENT' in os.environ else 'Local'
+    })
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('test-static/', test_static_files, name='test_static'),
     path('',include('Authentification.urls')),
     path('',include('Devellopeur.urls')),
     path('',include('Structure.urls')),
