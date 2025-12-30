@@ -16,6 +16,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     '*.railway.app',
     '*.up.railway.app',
+    'healthcheck.railway.app',  # CRITIQUE: Pour le healthcheck Railway
     'archivagecabinetavocat-production.up.railway.app',  # Domaine exact Railway
     config('RAILWAY_PUBLIC_DOMAIN', default=''),
 ]
@@ -51,10 +52,11 @@ DATABASES = {
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# CRITIQUE: STATICFILES_DIRS supprimé en production (conflit avec WhiteNoise)
-# En production, seul STATIC_ROOT est utilisé
-# STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # Seulement en local
-STATICFILES_DIRS = []  # OBLIGATOIRE: Vider en production pour WhiteNoise
+# CRITIQUE: Configuration STATICFILES_DIRS pour production WhiteNoise
+# En production, nous devons inclure nos fichiers statiques personnalisés
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
 # Configuration des médias pour Railway
 MEDIA_URL = '/media/'
@@ -68,7 +70,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_MAX_AGE = 31536000  # 1 an de cache (optimisé pour production)
 WHITENOISE_MAX_AGE = 31536000  # 1 an de cache (optimisé pour production)
 
 # Configuration JSReport pour Railway (service séparé)
