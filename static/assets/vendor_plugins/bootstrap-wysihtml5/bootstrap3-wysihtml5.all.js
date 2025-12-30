@@ -11354,7 +11354,7 @@ wysihtml5.commands.formatCode = {
           selectedNode  = composer.selection.getSelectedNode(),
           list          = findListEl(selectedNode, nodeName, composer);
 
-      if (!list.el) {
+      if (!list.el)Â {
         if (composer.commands.support(cmd)) {
           doc.execCommand(cmd, false, null);
         } else {

@@ -72,7 +72,7 @@
 							setTimeout(() => {
 								iframe.contentWindow.focus();
 								iframe.contentWindow.print();
-							}, 500); // petit délai pour que le rendu soit complet
+							}, 500); // petit d√(c)lai pour que le rendu soit complet
 						}
 
 					</script>

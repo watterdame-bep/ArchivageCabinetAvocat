@@ -10,7 +10,7 @@
         <div class="content-header">
             <div class="d-flex align-items-center">
                 <div class="me-auto">
-                    <h3 class="page-title">📋 Rapport Dossiers</h3>
+                    <h3 class="page-title">üìã Rapport Dossiers</h3>
                     <div class="d-inline-block align-items-center">
                         <nav>
                             <ol class="breadcrumb">
@@ -59,7 +59,7 @@
                                     <div class="small-box bg-success">
                                         <div class="inner">
                                             <h3 id="dossiers-actifs">0</h3>
-                                            <p>Avec Activités Récentes</p>
+                                            <p>Avec Activit√(c)s R√(c)centes</p>
                                         </div>
                                         <div class="icon">
                                             <i class="mdi mdi-chart-line"></i>
@@ -70,7 +70,7 @@
                                     <div class="small-box bg-warning">
                                         <div class="inner">
                                             <h3 id="total-activites">0</h3>
-                                            <p>Total Activités</p>
+                                            <p>Total Activit√(c)s</p>
                                         </div>
                                         <div class="icon">
                                             <i class="mdi mdi-history"></i>
@@ -81,7 +81,7 @@
                                     <div class="small-box bg-danger">
                                         <div class="inner">
                                             <h3 id="rapports-generes">0</h3>
-                                            <p>Rapports générés</p>
+                                            <p>Rapports g√(c)n√(c)r√(c)s</p>
                                         </div>
                                         <div class="icon">
                                             <i class="mdi mdi-file-document"></i>
@@ -96,7 +96,7 @@
                                     <thead class="bg-primary text-white">
                                         <tr>
                                             <th>ID</th>
-                                            <th>Numéro Référence</th>
+                                            <th>Num√(c)ro R√(c)f√(c)rence</th>
                                             <th>Titre</th>
                                             <th>Client</th>
                                             <th>Type Affaire</th>
@@ -146,7 +146,7 @@
                                                     <span class="badge badge-success">
                                                         <i class="mdi mdi-folder-open"></i> {{ item.dossier.statut_dossier }}
                                                     </span>
-                                                {% elif item.dossier.statut_dossier == 'Clôturé' %}
+                                                {% elif item.dossier.statut_dossier == 'Cl√¥tur√(c)' %}
                                                     <span class="badge badge-secondary">
                                                         <i class="mdi mdi-folder-check"></i> {{ item.dossier.statut_dossier }}
                                                     </span>
@@ -161,8 +161,8 @@
                                         <tr>
                                             <td colspan="7" class="text-center text-muted py-4">
                                                 <i class="mdi mdi-information mdi-48px"></i>
-                                                <br>Aucun dossier trouvé
-                                                <br><small>Vérifiez vos filtres ou ajoutez des dossiers</small>
+                                                <br>Aucun dossier trouv√(c)
+                                                <br><small>V√(c)rifiez vos filtres ou ajoutez des dossiers</small>
                                             </td>
                                         </tr>
                                         {% endfor %}
@@ -176,25 +176,25 @@
         </section>
     </div>
 </div>
-<!-- Modal Activités Dossier -->
+<!-- Modal Activit√(c)s Dossier -->
 <div class="modal fade" id="modalActivitesDossier" tabindex="-1" aria-labelledby="modalActivitesDossierLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header bg-info text-white">
                 <h5 class="modal-title" id="modalActivitesDossierLabel">
-                    <i class="mdi mdi-history"></i> Activités du Dossier
+                    <i class="mdi mdi-history"></i> Activit√(c)s du Dossier
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" id="contenu-activites-dossier">
                 <div class="text-center">
-                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des activités...
+                    <i class="mdi mdi-loading mdi-spin"></i> Chargement des activit√(c)s...
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
                 <button type="button" class="btn btn-primary" onclick="genererRapportActivitesModal()">
-                    <i class="mdi mdi-file-document"></i> Générer Rapport
+                    <i class="mdi mdi-file-document"></i> G√(c)n√(c)rer Rapport
                 </button>
             </div>
         </div>
@@ -202,13 +202,13 @@
 </div>
 
 <script>
-// Imprimer rapport avec filtres appliqués (même logique que les autres rapports)
+// Imprimer rapport avec filtres appliqu√(c)s (m√™me logique que les autres rapports)
 function imprimerRapportFiltre(typeRapport = 'complet') {
-    // Récupérer les dossiers visibles (après filtrage)
+    // R√(c)cup√(c)rer les dossiers visibles (apr√(R)s filtrage)
     const lignesVisibles = document.querySelectorAll('#tableau-dossiers tbody tr[data-dossier-id]:not([style*="display: none"])');
     
     if (lignesVisibles.length === 0) {
-        alert('Aucun dossier visible à imprimer. Vérifiez vos filtres.');
+        alert('Aucun dossier visible √† imprimer. V√(c)rifiez vos filtres.');
         return;
     }
     
@@ -217,12 +217,12 @@ function imprimerRapportFiltre(typeRapport = 'complet') {
         ligne.getAttribute('data-dossier-id')
     );
     
-    // Récupérer les filtres appliqués
+    // R√(c)cup√(c)rer les filtres appliqu√(c)s
     const filtreStatut = document.getElementById('filtre-statut') ? document.getElementById('filtre-statut').value : '';
     const filtreActivite = document.getElementById('filtre-activite') ? document.getElementById('filtre-activite').value : '';
     const recherche = document.getElementById('recherche-dossier') ? document.getElementById('recherche-dossier').value : '';
     
-    // Créer un formulaire pour envoyer les données en POST
+    // Cr√(c)er un formulaire pour envoyer les donn√(c)es en POST
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/rapport/dossier/imprimer-filtre/';
@@ -296,7 +296,7 @@ function calculerStatistiques() {
     document.getElementById('dossiers-actifs').textContent = dossiersActifs;
     document.getElementById('total-activites').textContent = totalActivites;
     
-    // Simuler le nombre de rapports générés
+    // Simuler le nombre de rapports g√(c)n√(c)r√(c)s
     document.getElementById('rapports-generes').textContent = Math.floor(Math.random() * 25);
 }
 
@@ -347,7 +347,7 @@ function appliquerFiltres() {
     });
 }
 
-// Réinitialiser les filtres
+// R√(c)initialiser les filtres
 function reinitialiserFiltres() {
     document.getElementById('filtre-statut').value = '';
     document.getElementById('filtre-activite').value = '';
@@ -355,7 +355,7 @@ function reinitialiserFiltres() {
     appliquerFiltres();
 }
 
-// Voir les activités d'un dossier
+// Voir les activit√(c)s d'un dossier
 function voirActivitesDossier(dossierId) {
     dossierSelectionne = dossierId;
     
@@ -363,7 +363,7 @@ function voirActivitesDossier(dossierId) {
     const modal = new bootstrap.Modal(document.getElementById('modalActivitesDossier'));
     modal.show();
     
-    // Charger les activités via AJAX
+    // Charger les activit√(c)s via AJAX
     fetch(`/rapport/dossier/activites-ajax/${dossierId}/`)
         .then(response => response.json())
         .then(data => {
@@ -386,7 +386,7 @@ function voirActivitesDossier(dossierId) {
         });
 }
 
-// Afficher les activités dans le modal
+// Afficher les activit√(c)s dans le modal
 function afficherActivitesDossier(activites, pagination) {
     let html = '';
     
@@ -394,7 +394,7 @@ function afficherActivitesDossier(activites, pagination) {
         html = `
             <div class="text-center text-muted py-4">
                 <i class="mdi mdi-information mdi-48px"></i>
-                <br>Aucune activité trouvée pour ce dossier
+                <br>Aucune activit√(c) trouv√(c)e pour ce dossier
             </div>
         `;
     } else {
@@ -412,7 +412,7 @@ function afficherActivitesDossier(activites, pagination) {
                         <div class="flex-grow-1 ms-3">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
-                                    <h6 class="mb-1">Activité du ${activite.date_activite}</h6>
+                                    <h6 class="mb-1">Activit√(c) du ${activite.date_activite}</h6>
                                     <p class="text-muted mb-1">${activite.description}</p>
                                     <div class="d-flex align-items-center">
                                         <small class="text-muted me-3">
@@ -437,15 +437,15 @@ function afficherActivitesDossier(activites, pagination) {
         
         html += '</div>';
         
-        // Ajouter la pagination si nécessaire
+        // Ajouter la pagination si n√(c)cessaire
         if (pagination.pages > 1) {
             html += `
                 <div class="d-flex justify-content-between align-items-center mt-3">
                     <small class="text-muted">
-                        Page ${pagination.page} sur ${pagination.pages} (${pagination.total} activités)
+                        Page ${pagination.page} sur ${pagination.pages} (${pagination.total} activit√(c)s)
                     </small>
                     <div class="btn-group">
-                        ${pagination.has_prev ? `<button class="btn btn-sm btn-outline-primary" onclick="chargerPageActivites(${pagination.page - 1})">Précédent</button>` : ''}
+                        ${pagination.has_prev ? `<button class="btn btn-sm btn-outline-primary" onclick="chargerPageActivites(${pagination.page - 1})">Pr√(c)c√(c)dent</button>` : ''}
                         ${pagination.has_next ? `<button class="btn btn-sm btn-outline-primary" onclick="chargerPageActivites(${pagination.page + 1})">Suivant</button>` : ''}
                     </div>
                 </div>
@@ -456,7 +456,7 @@ function afficherActivitesDossier(activites, pagination) {
     document.getElementById('contenu-activites-dossier').innerHTML = html;
 }
 
-// Charger une page d'activités
+// Charger une page d'activit√(c)s
 function chargerPageActivites(page) {
     if (!dossierSelectionne) return;
     
@@ -476,19 +476,19 @@ function chargerPageActivites(page) {
         .catch(error => console.error('Erreur:', error));
 }
 
-// Générer rapport d'activités
+// G√(c)n√(c)rer rapport d'activit√(c)s
 function genererRapportActivites(dossierId) {
     window.open(`/rapport/dossier/activites/${dossierId}/`, '_blank');
 }
 
-// Générer rapport depuis le modal
+// G√(c)n√(c)rer rapport depuis le modal
 function genererRapportActivitesModal() {
     if (dossierSelectionne) {
         genererRapportActivites(dossierSelectionne);
     }
 }
 
-// Imprimer rapport d'activités
+// Imprimer rapport d'activit√(c)s
 function imprimerRapportActivites(dossierId) {
     window.open(`/rapport/dossier/activites/${dossierId}/?format=pdf`, '_blank');
 }

@@ -43,7 +43,7 @@ $(function () {
     }
     ), 
 	$("#range_11").ionRangeSlider( {
-        type: "single", grid: !0, min: -90, max: 90, from: 0, postfix: "°"
+        type: "single", grid: !0, min: -90, max: 90, from: 0, postfix: "Â°"
     }
     ), 
 	$("#range_12").ionRangeSlider( {
