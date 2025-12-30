@@ -18,6 +18,14 @@
 **Erreur**: `MissingFileError: materialdesignicons.css.map could not be found`
 **Solution**: Suppression des références sourcemap dans 33 fichiers CSS, configuration WhiteNoise optimisée
 
+### 5. Erreur fichiers manquants collectstatic ✅ RÉSOLU
+**Erreur**: `MissingFileError: weathericons-regular-webfont.woff2 could not be found`
+**Solution**: Création automatique de 147 fichiers manquants (polices, sourcemaps, etc.)
+
+### 6. Erreur indentation Python ✅ RÉSOLU
+**Erreur**: `IndentationError: unexpected indent` dans settings_production.py
+**Solution**: Correction automatique de toutes les indentations avec syntaxe Python parfaite
+
 ## 📋 Configuration Railway Actuelle
 
 ### Fichiers de Configuration
