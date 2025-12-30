@@ -1,35 +1,46 @@
 from .settings import *
 import os
 import dj_database_url
+import pymysql
 from decouple import config
+
+# Installer PyMySQL comme MySQLdb pour la compatibilité
+pymysql.install_as_MySQLdb()
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Hosts autorisés
+# Hosts autorisés pour Railway
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '.railway.app',
-    '.up.railway.app',
+    '*.railway.app',
+    '*.up.railway.app',
     config('RAILWAY_PUBLIC_DOMAIN', default=''),
 ]
 
-# Configuration de la base de données pour Railway
+# Configuration de la base de données MySQL Railway
 if 'DATABASE_URL' in os.environ:
     DATABASES = {
-        'default': dj_database_url.parse(os.environ.get('DATABASE_URL'))
+        'default': dj_database_url.config(
+            default=os.environ.get('DATABASE_URL'),
+            conn_max_age=600,
+        )
     }
 else:
-    # Fallback vers la configuration locale
+    # Fallback vers la configuration locale MySQL
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'django.db.backends.mysql',
             'NAME': config('DB_NAME', default='cabinet_avocat'),
-            'USER': config('DB_USER', default='postgres'),
+            'USER': config('DB_USER', default='root'),
             'PASSWORD': config('DB_PASSWORD', default=''),
             'HOST': config('DB_HOST', default='localhost'),
-            'PORT': config('DB_PORT', default='5432'),
+            'PORT': config('DB_PORT', default='3306'),
+            'OPTIONS': {
+                'charset': 'utf8mb4',
+                'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+            },
         }
     }
 
@@ -47,37 +58,31 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 # Configuration WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# Configuration JSReport pour production Railway
+# Configuration JSReport pour Railway (service séparé)
 JSREPORT_CONFIG = {
-    # URL du service JSReport Railway (sera fournie via variable d'environnement)
     'url': config('JSREPORT_SERVICE_URL', default='http://localhost:5488'),
-    'username': config('JSREPORT_USERNAME', default=''),
+    'username': config('JSREPORT_USERNAME', default='admin'),
     'password': config('JSREPORT_PASSWORD', default=''),
-    'timeout': config('JSREPORT_TIMEOUT', default=60000, cast=int),
-    # Configuration spécifique Railway
-    'railway_service': True,
-    'verify_ssl': config('JSREPORT_VERIFY_SSL', default=True, cast=bool),
+    'timeout': 60000,
+    'verify_ssl': True,
     'templates': {
         'rapport_agent': config('JSREPORT_TEMPLATE_AGENT', default='rapport_agent'),
         'rapport_client': config('JSREPORT_TEMPLATE_CLIENT', default='rapport_client'),
         'rapport_juridiction': config('JSREPORT_TEMPLATE_JURIDICTION', default='rapport_juridiction'),
         'rapport_commune': config('JSREPORT_TEMPLATE_COMMUNE', default='rapport_commune'),
         'rapport_dossier': config('JSREPORT_TEMPLATE_DOSSIER', default='rapport_dossier'),
-        'rapport_activites_internes': config('JSREPORT_TEMPLATE_ACTIVITES', default='rapport_activites_internes'),
-        'facture_paiement': config('JSREPORT_TEMPLATE_FACTURE', default='facture_paiement'),
+        'rapport_activite': config('JSREPORT_TEMPLATE_ACTIVITES', default='rapport_activite'),
+        'facture_paiement_client': config('JSREPORT_TEMPLATE_FACTURE', default='Facture_paiement_client'),
+        'facture_dossier': config('JSREPORT_TEMPLATE_FACTURE_DOSSIER', default='Facture_dossier'),
+        'extrait_compte_client': config('JSREPORT_TEMPLATE_EXTRAIT_COMPTE', default='Extrait_de_compte_client'),
     }
 }
+
 
 # Configuration de sécurité pour la production
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
-
-# Configuration CORS si nécessaire
-CORS_ALLOW_ALL_ORIGINS = False
-CORS_ALLOWED_ORIGINS = [
-    config('FRONTEND_URL', default=''),
-]
 
 # Configuration des logs pour Railway
 LOGGING = {

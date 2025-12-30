@@ -89,7 +89,8 @@ def main():
             required_packages = [
                 "Django",
                 "gunicorn",
-                "psycopg2-binary",
+                "mysqlclient",
+                "PyMySQL",
                 "whitenoise",
                 "dj-database-url",
                 "python-decouple",
