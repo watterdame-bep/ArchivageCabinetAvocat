@@ -57,8 +57,19 @@ MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Configuration WhiteNoise
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'map']
-WHITENOISE_MANIFEST_STRICT = False  # Plus tolérant avec les fichiers manquants
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
+    'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
+    'map', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'svg', 'ico'
+]
+WHITENOISE_MANIFEST_STRICT = False  # Tolérant avec les fichiers manquants
+WHITENOISE_MAX_AGE = 31536000  # Cache 1 an pour les assets
+    'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
+    'map', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'svg', 'ico'
+]
+WHITENOISE_MANIFEST_STRICT = False  # Tolérant avec les fichiers manquants
+WHITENOISE_MAX_AGE = 31536000  # Cache 1 an pour les assets
 
 # Configuration JSReport pour Railway (service séparé)
 JSREPORT_CONFIG = {

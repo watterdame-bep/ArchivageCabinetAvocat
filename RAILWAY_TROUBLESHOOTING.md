@@ -14,6 +14,10 @@
 **Erreur**: `No matching distribution found for jsreport-python-client==3.0.0`
 **Solution**: Suppression du package inexistant, utilisation de `requests` directement
 
+### 4. Erreur collectstatic WhiteNoise ✅ RÉSOLU
+**Erreur**: `MissingFileError: materialdesignicons.css.map could not be found`
+**Solution**: Suppression des références sourcemap dans 33 fichiers CSS, configuration WhiteNoise optimisée
+
 ## 📋 Configuration Railway Actuelle
 
 ### Fichiers de Configuration
