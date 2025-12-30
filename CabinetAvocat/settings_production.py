@@ -55,9 +55,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'mediafiles')
 # Middleware pour les fichiers statiques
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuration WhiteNoise ULTIME pour Railway
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
     'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
@@ -65,18 +63,18 @@ WHITENOISE_SKIP_COMPRESS_EXTENSIONS = [
 ]
 WHITENOISE_MANIFEST_STRICT = False  # Tolérant avec les fichiers manquants
 WHITENOISE_MAX_AGE = 31536000  # Cache 1 an pour les assets
-    'jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br',
-    'map', 'woff', 'woff2', 'ttf', 'otf', 'eot', 'svg', 'ico'
-]
-WHITENOISE_MANIFEST_STRICT = False  # Tolérant avec les fichiers manquants
-WHITENOISE_MAX_AGE = 31536000  # Cache 1 an pour les assets
 
 # Configuration JSReport pour Railway (service séparé)
+JSREPORT_URL = config('JSREPORT_SERVICE_URL', default='http://localhost:5488')
+JSREPORT_USERNAME = config('JSREPORT_USERNAME', default='admin')
+JSREPORT_PASSWORD = config('JSREPORT_PASSWORD', default='')
+JSREPORT_TIMEOUT = config('JSREPORT_TIMEOUT', default=60000, cast=int)
+
 JSREPORT_CONFIG = {
-    'url': config('JSREPORT_SERVICE_URL', default='http://localhost:5488'),
-    'username': config('JSREPORT_USERNAME', default='admin'),
-    'password': config('JSREPORT_PASSWORD', default=''),
-    'timeout': 60000,
+    'url': JSREPORT_URL,
+    'username': JSREPORT_USERNAME,
+    'password': JSREPORT_PASSWORD,
+    'timeout': JSREPORT_TIMEOUT,
     'verify_ssl': True,
     'templates': {
         'rapport_agent': config('JSREPORT_TEMPLATE_AGENT', default='rapport_agent'),
@@ -84,13 +82,12 @@ JSREPORT_CONFIG = {
         'rapport_juridiction': config('JSREPORT_TEMPLATE_JURIDICTION', default='rapport_juridiction'),
         'rapport_commune': config('JSREPORT_TEMPLATE_COMMUNE', default='rapport_commune'),
         'rapport_dossier': config('JSREPORT_TEMPLATE_DOSSIER', default='rapport_dossier'),
-        'rapport_activite': config('JSREPORT_TEMPLATE_ACTIVITES', default='rapport_activite'),
-        'facture_paiement_client': config('JSREPORT_TEMPLATE_FACTURE', default='Facture_paiement_client'),
+        'rapport_activites_internes': config('JSREPORT_TEMPLATE_ACTIVITES', default='rapport_activites_internes'),
+        'facture_paiement': config('JSREPORT_TEMPLATE_FACTURE', default='facture_paiement'),
         'facture_dossier': config('JSREPORT_TEMPLATE_FACTURE_DOSSIER', default='Facture_dossier'),
         'extrait_compte_client': config('JSREPORT_TEMPLATE_EXTRAIT_COMPTE', default='Extrait_de_compte_client'),
     }
 }
-
 
 # Configuration de sécurité pour la production
 SECURE_BROWSER_XSS_FILTER = True
