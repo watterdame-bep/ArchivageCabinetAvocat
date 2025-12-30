@@ -136,12 +136,11 @@
                                             <th>Statut</th>
                                             <th>Dossiers</th>
                                             <th>Activités (30j)</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for item in agents_data %}
-                                        <tr data-poste="{{ item.agent.poste }}" data-statut="{{ item.statut_display }}">
+                                        <tr data-poste="{{ item.agent.poste }}" data-statut="{{ item.statut_display }}" data-agent-id="{{ item.agent.id }}">
                                             <td class="text-center">
                                                 {% if item.agent.photo %}
                                                     <img src="{{ item.agent.photo.url }}" alt="Photo" class="avatar avatar-sm rounded-circle">
@@ -182,29 +181,10 @@
                                             <td class="text-center">
                                                 <span class="badge badge-warning">{{ item.activites_recentes }}</span>
                                             </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm btn-info" 
-                                                            onclick="voirDetailsAgent({{ item.agent.id }})"
-                                                            title="Voir détails">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            onclick="genererRapportAgent({{ item.agent.id }})"
-                                                            title="Générer rapport">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-success" 
-                                                            onclick="imprimerRapportAgent({{ item.agent.id }})"
-                                                            title="Imprimer rapport">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="9" class="text-center text-muted">
+                                            <td colspan="8" class="text-center text-muted">
                                                 <i class="mdi mdi-information"></i> Aucun agent trouvé
                                             </td>
                                         </tr>
@@ -257,7 +237,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Calculer les statistiques
 function calculerStatistiques() {
-    const lignes = document.querySelectorAll('#tableau-agents tbody tr[data-poste]');
+    const lignes = document.querySelectorAll('#tableau-agents tbody tr[data-agent-id]');
     let agentsActifs = 0;
     let avocats = 0;
     let secretaires = 0;
@@ -300,7 +280,7 @@ function appliquerFiltres() {
     const filtreStatut = document.getElementById('filtre-statut').value.toLowerCase();
     const recherche = document.getElementById('recherche-agent').value.toLowerCase();
     
-    const lignes = document.querySelectorAll('#tableau-agents tbody tr[data-poste]');
+    const lignes = document.querySelectorAll('#tableau-agents tbody tr[data-agent-id]');
     
     lignes.forEach(ligne => {
         const poste = ligne.getAttribute('data-poste').toLowerCase();
@@ -387,49 +367,67 @@ function imprimerRapportAgent(agentId) {
 // Imprimer rapport avec filtres appliqués
 function imprimerRapportFiltre(typeRapport = 'complet') {
     // Récupérer les agents visibles (après filtrage)
-    const lignesVisibles = document.querySelectorAll('#tableau-agents tbody tr[data-poste]:not([style*="display: none"])');
+    const lignesVisibles = document.querySelectorAll('#tableau-agents tbody tr[data-agent-id]:not([style*="display: none"])');
     
     if (lignesVisibles.length === 0) {
-        alert('Aucun agent à imprimer avec les filtres actuels');
+        alert('Aucun agent visible à imprimer. Vérifiez vos filtres.');
         return;
     }
     
     // Extraire les IDs des agents visibles
-    const agentsIds = [];
-    lignesVisibles.forEach(ligne => {
-        // Récupérer l'ID depuis le bouton "Voir détails" ou autre élément
-        const btnDetails = ligne.querySelector('button[onclick*="voirDetailsAgent"]');
-        if (btnDetails) {
-            const onclick = btnDetails.getAttribute('onclick');
-            const match = onclick.match(/voirDetailsAgent\((\d+)\)/);
-            if (match) {
-                agentsIds.push(parseInt(match[1]));
-            }
-        }
-    });
+    const agentsIds = Array.from(lignesVisibles).map(ligne => 
+        ligne.getAttribute('data-agent-id')
+    );
     
-    if (agentsIds.length === 0) {
-        alert('Impossible de récupérer les IDs des agents');
-        return;
+    // Récupérer les filtres appliqués
+    const filtrePoste = document.getElementById('filtre-poste') ? document.getElementById('filtre-poste').value : '';
+    const filtreStatut = document.getElementById('filtre-statut') ? document.getElementById('filtre-statut').value : '';
+    const recherche = document.getElementById('recherche-agent') ? document.getElementById('recherche-agent').value : '';
+    
+    // Créer un formulaire pour envoyer les données en POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/agent/imprimer-filtre/';
+    form.target = '_blank'; // Ouvrir dans un nouvel onglet
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
     }
     
-    // Récupérer les filtres actuels
-    const filtres = {
-        poste: document.getElementById('filtre-poste').value,
-        statut: document.getElementById('filtre-statut').value,
-        recherche: document.getElementById('recherche-agent').value
-    };
+    // Ajouter les IDs des agents
+    agentsIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'agents_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
     
-    // Construire l'URL avec les paramètres (comme pour les autres rapports)
-    const params = new URLSearchParams();
-    params.append('agents_ids', JSON.stringify(agentsIds));
-    params.append('filtres', JSON.stringify(filtres));
-    params.append('type_rapport', typeRapport);
+    // Ajouter les filtres
+    const filtres = [
+        { name: 'filtre_poste', value: filtrePoste },
+        { name: 'filtre_statut', value: filtreStatut },
+        { name: 'recherche', value: recherche }
+    ];
     
-    const urlImpression = `/rapport/agent/imprimer-filtre/?${params.toString()}`;
+    filtres.forEach(filtre => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = filtre.name;
+        input.value = filtre.value;
+        form.appendChild(input);
+    });
     
-    // Ouvrir le PDF dans un nouvel onglet (même logique que les autres rapports)
-    window.open(urlImpression, '_blank');
+    // Ajouter le formulaire au DOM et le soumettre
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }
 
 // Exporter le tableau (fonction conservée pour compatibilité)

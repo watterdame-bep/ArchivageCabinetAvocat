@@ -67,7 +67,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             <!-- Filtres -->
                             <div class="row mb-3">
                                 <div class="col-md-6">
@@ -101,12 +100,11 @@
                                             <th>Lieu</th>
                                             <th>Date Création</th>
                                             <th>Statut</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for item in juridictions_data %}
-                                        <tr data-lieu="{{ item.lieu_nom }}" data-statut="Actif">
+                                        <tr data-lieu="{{ item.lieu_nom }}" data-statut="Actif" data-juridiction-id="{{ item.juridiction.id }}">
                                             <td class="text-center">
                                                 <strong>{{ item.juridiction.id }}</strong>
                                             </td>
@@ -125,29 +123,10 @@
                                                     <i class="mdi mdi-check-circle"></i> Actif
                                                 </span>
                                             </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm btn-info" 
-                                                            onclick="voirDetailsJuridiction({{ item.juridiction.id }})"
-                                                            title="Voir détails">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            onclick="genererRapportJuridiction({{ item.juridiction.id }})"
-                                                            title="Générer rapport">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-success" 
-                                                            onclick="imprimerRapportJuridiction({{ item.juridiction.id }})"
-                                                            title="Imprimer rapport">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="6" class="text-center text-muted">
+                                            <td colspan="5" class="text-center text-muted">
                                                 <i class="mdi mdi-information"></i> Aucune juridiction trouvée
                                             </td>
                                         </tr>
@@ -200,7 +179,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Calculer les statistiques
 function calculerStatistiques() {
-    const lignes = document.querySelectorAll('#tableau-juridictions tbody tr[data-lieu]');
+    const lignes = document.querySelectorAll('#tableau-juridictions tbody tr[data-juridiction-id]');
     let juridictionsActives = 0;
     
     lignes.forEach(ligne => {
@@ -230,7 +209,7 @@ function appliquerFiltres() {
     const filtreLieu = document.getElementById('filtre-lieu').value.toLowerCase();
     const recherche = document.getElementById('recherche-juridiction').value.toLowerCase();
     
-    const lignes = document.querySelectorAll('#tableau-juridictions tbody tr[data-lieu]');
+    const lignes = document.querySelectorAll('#tableau-juridictions tbody tr[data-juridiction-id]');
     
     lignes.forEach(ligne => {
         const lieu = ligne.getAttribute('data-lieu').toLowerCase();
@@ -325,51 +304,68 @@ function exporterTableau(format) {
     }
 }
 
-// Imprimer rapport avec filtres appliqués (même logique que les clients)
+// Imprimer rapport avec filtres appliqués (même logique que les autres rapports)
 function imprimerRapportFiltre(typeRapport = 'complet') {
     // Récupérer les juridictions visibles (après filtrage)
-    const lignesVisibles = document.querySelectorAll('#tableau-juridictions tbody tr[data-lieu]:not([style*="display: none"])');
+    const lignesVisibles = document.querySelectorAll('#tableau-juridictions tbody tr[data-juridiction-id]:not([style*="display: none"])');
     
     if (lignesVisibles.length === 0) {
-        alert('Aucune juridiction à imprimer avec les filtres actuels');
+        alert('Aucune juridiction visible à imprimer. Vérifiez vos filtres.');
         return;
     }
     
     // Extraire les IDs des juridictions visibles
-    const juridictionsIds = [];
-    lignesVisibles.forEach(ligne => {
-        // Récupérer l'ID depuis le bouton "Voir détails" ou autre élément
-        const btnDetails = ligne.querySelector('button[onclick*="voirDetailsJuridiction"]');
-        if (btnDetails) {
-            const onclick = btnDetails.getAttribute('onclick');
-            const match = onclick.match(/voirDetailsJuridiction\((\d+)\)/);
-            if (match) {
-                juridictionsIds.push(parseInt(match[1]));
-            }
-        }
-    });
+    const juridictionsIds = Array.from(lignesVisibles).map(ligne => 
+        ligne.getAttribute('data-juridiction-id')
+    );
     
-    if (juridictionsIds.length === 0) {
-        alert('Impossible de récupérer les IDs des juridictions');
-        return;
+    // Récupérer les filtres appliqués
+    const filtreLieu = document.getElementById('filtre-lieu') ? document.getElementById('filtre-lieu').value : '';
+    const recherche = document.getElementById('recherche-juridiction') ? document.getElementById('recherche-juridiction').value : '';
+    
+    // Créer un formulaire pour envoyer les données en POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/juridiction/imprimer-filtre/';
+    form.target = '_blank'; // Ouvrir dans un nouvel onglet
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
     }
     
-    // Récupérer les filtres actuels
-    const filtres = {
-        lieu: document.getElementById('filtre-lieu').value,
-        recherche: document.getElementById('recherche-juridiction').value
-    };
+    // Ajouter les IDs des juridictions
+    juridictionsIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'juridictions_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
     
-    // Construire l'URL avec les paramètres
-    const params = new URLSearchParams();
-    params.append('juridictions_ids', JSON.stringify(juridictionsIds));
-    params.append('filtres', JSON.stringify(filtres));
-    params.append('type_rapport', typeRapport);
+    // Ajouter les filtres
+    const filtres = [
+        { name: 'filtre_lieu', value: filtreLieu },
+        { name: 'recherche', value: recherche }
+    ];
     
-    const urlImpression = `/rapport/juridiction/imprimer-filtre/?${params.toString()}`;
+    filtres.forEach(filtre => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = filtre.name;
+        input.value = filtre.value;
+        form.appendChild(input);
+    });
     
-    // Ouvrir le PDF dans un nouvel onglet
-    window.open(urlImpression, '_blank');
+    // Ajouter le formulaire au DOM et le soumettre
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }
 </script>
 

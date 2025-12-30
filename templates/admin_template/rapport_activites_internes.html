@@ -108,7 +108,6 @@
                                 </div>
                             </div>
                         </div>
-                        
                         <div class="box-body">
                             <!-- Filtres -->
                             <div class="row mb-3">
@@ -161,7 +160,6 @@
                                             <th class="text-center">Heures Totales</th>
                                             <th class="text-center">Revenus Générés</th>
                                             <th class="text-center">Dernière Utilisation</th>
-                                            <th width="150">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -239,29 +237,10 @@
                                                     <small class="text-muted">Jamais utilisée</small>
                                                 {% endif %}
                                             </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm btn-info" 
-                                                            onclick="voirDetailsActivite({{ item.activite.id }})"
-                                                            title="Voir détails">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            onclick="genererRapportActivite({{ item.activite.id }})"
-                                                            title="Générer rapport">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-success" 
-                                                            onclick="imprimerRapportActivite({{ item.activite.id }})"
-                                                            title="Imprimer rapport">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="8" class="text-center text-muted py-4">
+                                            <td colspan="7" class="text-center text-muted py-4">
                                                 <i class="mdi mdi-information mdi-48px"></i>
                                                 <br>Aucune activité interne configurée
                                                 <br><small>Ajoutez des activités dans les paramètres du cabinet</small>

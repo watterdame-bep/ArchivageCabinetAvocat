@@ -3557,46 +3557,48 @@ def generer_rapport_caisse(request):
 def imprimer_rapport_agents_filtre(request):
     """
     Génère et retourne directement le PDF du rapport agents avec filtres appliqués
-    Suit la même logique que imprimer_facture_paiement (GET avec paramètres)
     """
     try:
-        from utils.jsreport_service import jsreport_service
-        
-        # Récupérer les paramètres GET (comme pour les autres rapports)
-        agents_ids_json = request.GET.get('agents_ids', '[]')
-        filtres_json = request.GET.get('filtres', '{}')
-        type_rapport = request.GET.get('type_rapport', 'complet')
-        
-        logger.info(f"Début génération rapport agents - agents_ids: {agents_ids_json}, filtres: {filtres_json}")
-        
-        # Parser les données JSON
-        try:
-            agents_ids = json.loads(agents_ids_json)
-            filtres = json.loads(filtres_json)
-        except json.JSONDecodeError as e:
-            logger.error(f"Erreur parsing JSON: {str(e)}")
-            return HttpResponse("Données JSON invalides", status=400)
+        # Récupérer les IDs des agents depuis les paramètres POST
+        agents_ids = request.POST.getlist('agents_ids[]')
         
         if not agents_ids:
-            logger.warning("Aucun agent sélectionné")
             return HttpResponse("Aucun agent sélectionné", status=400)
         
-        logger.info(f"Agents sélectionnés: {len(agents_ids)} agents")
+        logger.info(f"Impression rapport agents filtrés - IDs: {agents_ids}")
         
         # Récupérer les agents
         user_company = getattr(request.user, 'company', None)
+        
         if user_company:
             agents_obj = agent.objects.filter(id__in=agents_ids, company=user_company)
         else:
             agents_obj = agent.objects.filter(id__in=agents_ids)
         
-        logger.info(f"Agents trouvés en base: {agents_obj.count()} agents")
+        if not agents_obj.exists():
+            return HttpResponse("Aucun agent trouvé", status=404)
         
-        # Préparer les données pour JSReport (même structure que facture_paiement)
+        # Récupérer les filtres appliqués
+        filtres = {
+            'poste': request.POST.get('filtre_poste', ''),
+            'statut': request.POST.get('filtre_statut', ''),
+            'recherche': request.POST.get('recherche', ''),
+        }
+        
+        # Préparer les données pour JSReport
         rapport_data = preparer_donnees_rapport_agents_filtre_simple(agents_obj, filtres, request)
         
         logger.info(f"Données préparées - {len(rapport_data.get('agents', []))} agents dans les données")
-        logger.info(f"Template à utiliser: rapport_agent")
+        
+        from utils.jsreport_service import jsreport_service
+        
+        # Test de connexion JSReport
+        if not jsreport_service.test_connection():
+            logger.error("Impossible de se connecter au service JSReport")
+            return HttpResponse("Service JSReport indisponible", status=503)
+        
+        # Génération du PDF via le service centralisé JSReport avec template_name
+        filename = f"rapport_agents_filtre_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         
         # Test de connexion JSReport
         if not jsreport_service.test_connection():
@@ -4011,53 +4013,48 @@ def test_jsreport_agent(request):
 def imprimer_rapport_clients_filtre(request):
     """
     Génère et retourne directement le PDF du rapport clients avec filtres appliqués
-    Suit la même logique que imprimer_rapport_agents_filtre
     """
     try:
-        from utils.jsreport_service import jsreport_service
-        
-        # Récupérer les paramètres GET
-        clients_ids_json = request.GET.get('clients_ids', '[]')
-        filtres_json = request.GET.get('filtres', '{}')
-        type_rapport = request.GET.get('type_rapport', 'complet')
-        
-        logger.info(f"Début génération rapport clients - clients_ids: {clients_ids_json}, filtres: {filtres_json}")
-        
-        # Parser les données JSON
-        try:
-            clients_ids = json.loads(clients_ids_json)
-            filtres = json.loads(filtres_json)
-        except json.JSONDecodeError as e:
-            logger.error(f"Erreur parsing JSON: {str(e)}")
-            return HttpResponse("Données JSON invalides", status=400)
+        # Récupérer les IDs des clients depuis les paramètres POST
+        clients_ids = request.POST.getlist('clients_ids[]')
         
         if not clients_ids:
-            logger.warning("Aucun client sélectionné")
             return HttpResponse("Aucun client sélectionné", status=400)
         
-        logger.info(f"Clients sélectionnés: {len(clients_ids)} clients")
+        logger.info(f"Impression rapport clients filtrés - IDs: {clients_ids}")
         
         # Récupérer les clients
         user_cabinet = getattr(request.user, 'cabinet', None)
+        
         if user_cabinet:
             clients_obj = client.objects.filter(id__in=clients_ids, cabinet=user_cabinet)
         else:
             clients_obj = client.objects.filter(id__in=clients_ids)
         
-        logger.info(f"Clients trouvés en base: {clients_obj.count()} clients")
+        if not clients_obj.exists():
+            return HttpResponse("Aucun client trouvé", status=404)
+        
+        # Récupérer les filtres appliqués
+        filtres = {
+            'type': request.POST.get('filtre_type', ''),
+            'statut': request.POST.get('filtre_statut', ''),
+            'recherche': request.POST.get('recherche', ''),
+        }
         
         # Préparer les données pour JSReport
         rapport_data = preparer_donnees_rapport_clients_filtre(clients_obj, filtres, request)
         
         logger.info(f"Données préparées - {len(rapport_data.get('clients', []))} clients dans les données")
-        logger.info(f"Template à utiliser: rapport_client")
+        
+        from utils.jsreport_service import jsreport_service
         
         # Test de connexion JSReport
         if not jsreport_service.test_connection():
             logger.error("Impossible de se connecter au service JSReport")
             return HttpResponse("Service JSReport indisponible", status=503)
         
-        # Génération du PDF via le service centralisé JSReport
+        # Génération du PDF via le service centralisé JSReport avec template_name
+        filename = f"rapport_clients_filtre_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         filename = f"rapport_clients_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         
         logger.info(f"Appel JSReport avec template 'rapport_client' et filename '{filename}'")
@@ -4212,55 +4209,48 @@ def preparer_donnees_rapport_clients_filtre(clients_obj, filtres, request):
 def imprimer_rapport_juridictions_filtre(request):
     """
     Génère et retourne directement le PDF du rapport juridictions avec filtres appliqués
-    Suit la même logique que imprimer_rapport_clients_filtre
     """
     try:
-        from utils.jsreport_service import jsreport_service
-        
-        # Récupérer les paramètres GET
-        juridictions_ids_json = request.GET.get('juridictions_ids', '[]')
-        filtres_json = request.GET.get('filtres', '{}')
-        type_rapport = request.GET.get('type_rapport', 'complet')
-        
-        logger.info(f"Début génération rapport juridictions - juridictions_ids: {juridictions_ids_json}, filtres: {filtres_json}")
-        
-        # Parser les données JSON
-        try:
-            juridictions_ids = json.loads(juridictions_ids_json)
-            filtres = json.loads(filtres_json)
-        except json.JSONDecodeError as e:
-            logger.error(f"Erreur parsing JSON: {str(e)}")
-            return HttpResponse("Données JSON invalides", status=400)
+        # Récupérer les IDs des juridictions depuis les paramètres POST
+        juridictions_ids = request.POST.getlist('juridictions_ids[]')
         
         if not juridictions_ids:
-            logger.warning("Aucune juridiction sélectionnée")
             return HttpResponse("Aucune juridiction sélectionnée", status=400)
         
-        logger.info(f"Juridictions sélectionnées: {len(juridictions_ids)} juridictions")
+        logger.info(f"Impression rapport juridictions filtrées - IDs: {juridictions_ids}")
         
         # Récupérer les juridictions
         from Structure.models import Juridiction
         user_cabinet = getattr(request.user, 'cabinet', None)
+        
         if user_cabinet:
             juridictions_obj = Juridiction.objects.filter(id__in=juridictions_ids, cabinet=user_cabinet)
         else:
             juridictions_obj = Juridiction.objects.filter(id__in=juridictions_ids)
         
-        logger.info(f"Juridictions trouvées en base: {juridictions_obj.count()} juridictions")
+        if not juridictions_obj.exists():
+            return HttpResponse("Aucune juridiction trouvée", status=404)
+        
+        # Récupérer les filtres appliqués
+        filtres = {
+            'lieu': request.POST.get('filtre_lieu', ''),
+            'recherche': request.POST.get('recherche', ''),
+        }
         
         # Préparer les données pour JSReport
         rapport_data = preparer_donnees_rapport_juridictions_filtre(juridictions_obj, filtres, request)
         
         logger.info(f"Données préparées - {len(rapport_data.get('juridictions', []))} juridictions dans les données")
-        logger.info(f"Template à utiliser: rapport_juridiction")
+        
+        from utils.jsreport_service import jsreport_service
         
         # Test de connexion JSReport
         if not jsreport_service.test_connection():
             logger.error("Impossible de se connecter au service JSReport")
             return HttpResponse("Service JSReport indisponible", status=503)
         
-        # Génération du PDF via le service centralisé JSReport
-        filename = f"rapport_juridictions_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        # Génération du PDF via le service centralisé JSReport avec template_name
+        filename = f"rapport_juridictions_filtre_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
         
         logger.info(f"Appel JSReport avec template 'rapport_juridiction' et filename '{filename}'")
         

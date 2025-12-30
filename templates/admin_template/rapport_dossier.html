@@ -21,11 +21,6 @@
                         </nav>
                     </div>
                 </div>
-                <div class="text-end">
-                    <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
-                        <i class="mdi mdi-printer"></i> Imprimer
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -39,6 +34,11 @@
                                 <i class="mdi mdi-folder-multiple text-primary"></i> 
                                 Liste des Dossiers ({{ total_dossiers }})
                             </h4>
+                            <div class="box-tools">
+                                <button type="button" class="btn btn-success btn-sm" onclick="imprimerRapportFiltre()">
+                                    <i class="mdi mdi-printer"></i> Imprimer
+                                </button>
+                            </div>
                         </div>
                         
                         <div class="box-body">
@@ -90,45 +90,6 @@
                                 </div>
                             </div>
 
-                            <!-- Filtres -->
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>Filtrer par statut:</label>
-                                        <select id="filtre-statut" class="form-control">
-                                            <option value="">Tous les statuts</option>
-                                            <option value="Ouvert">Ouvert</option>
-                                            <option value="Clôturé">Clôturé</option>
-                                            <option value="En cours">En cours</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>Activité récente:</label>
-                                        <select id="filtre-activite" class="form-control">
-                                            <option value="">Toutes</option>
-                                            <option value="7">7 derniers jours</option>
-                                            <option value="30">30 derniers jours</option>
-                                            <option value="0">Aucune activité</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Rechercher:</label>
-                                        <input type="text" id="recherche-dossier" class="form-control" placeholder="Numéro, titre, client...">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>&nbsp;</label>
-                                        <button type="button" class="btn btn-secondary btn-block" onclick="reinitialiserFiltres()">
-                                            <i class="mdi mdi-refresh"></i> Reset
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
                             <!-- Tableau des dossiers -->
                             <div class="table-responsive">
                                 <table id="tableau-dossiers" class="table table-bordered table-striped">
@@ -141,8 +102,6 @@
                                             <th>Type Affaire</th>
                                             <th>Avocat Principal</th>
                                             <th>Statut</th>
-                                            
-                                            <th width="150">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -197,31 +156,10 @@
                                                     </span>
                                                 {% endif %}
                                             </td>
-                                            
-                                            
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm btn-info" 
-                                                            onclick="voirActivitesDossier({{ item.dossier.id }})"
-                                                            title="Voir activités">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            onclick="genererRapportActivites({{ item.dossier.id }})"
-                                                            title="Générer rapport">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-success" 
-                                                            onclick="imprimerRapportActivites({{ item.dossier.id }})"
-                                                            title="Imprimer rapport">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="10" class="text-center text-muted py-4">
+                                            <td colspan="7" class="text-center text-muted py-4">
                                                 <i class="mdi mdi-information mdi-48px"></i>
                                                 <br>Aucun dossier trouvé
                                                 <br><small>Vérifiez vos filtres ou ajoutez des dossiers</small>
@@ -280,9 +218,9 @@ function imprimerRapportFiltre(typeRapport = 'complet') {
     );
     
     // Récupérer les filtres appliqués
-    const filtreStatut = document.getElementById('filtre-statut').value;
-    const filtreActivite = document.getElementById('filtre-activite').value;
-    const recherche = document.getElementById('recherche-dossier').value;
+    const filtreStatut = document.getElementById('filtre-statut') ? document.getElementById('filtre-statut').value : '';
+    const filtreActivite = document.getElementById('filtre-activite') ? document.getElementById('filtre-activite').value : '';
+    const recherche = document.getElementById('recherche-dossier') ? document.getElementById('recherche-dossier').value : '';
     
     // Créer un formulaire pour envoyer les données en POST
     const form = document.createElement('form');
@@ -291,12 +229,14 @@ function imprimerRapportFiltre(typeRapport = 'complet') {
     form.target = '_blank'; // Ouvrir dans un nouvel onglet
     
     // Ajouter le token CSRF
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrfmiddlewaretoken';
-    csrfInput.value = csrfToken;
-    form.appendChild(csrfInput);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
+    }
     
     // Ajouter les IDs des dossiers
     dossiersIds.forEach(id => {

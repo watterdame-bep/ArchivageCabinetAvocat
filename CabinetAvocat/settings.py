@@ -12,10 +12,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
-import pymysql
-
-# Configuration PyMySQL pour remplacer MySQLdb
-pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -92,9 +88,6 @@ WSGI_APPLICATION = 'CabinetAvocat.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-# Configuration PyMySQL pour compatibilité Railway
-pymysql.install_as_MySQLdb()
 
 DATABASES = {
     'default': {
@@ -173,11 +166,11 @@ USE_L10N = True
 USE_THOUSAND_SEPARATOR = True
 NUMBER_GROUPING = 3
 
-# Configuration JSReport
-JSREPORT_URL = os.environ.get('JSREPORT_URL', 'http://localhost:5488')
-JSREPORT_USERNAME = os.environ.get('JSREPORT_USERNAME', 'admin')
-JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD', 'admin123')
-JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '60'))
+# Configuration JSReport (local)
+JSREPORT_URL = 'http://localhost:5488'
+JSREPORT_USERNAME = 'admin'
+JSREPORT_PASSWORD = 'admin123'
+JSREPORT_TIMEOUT = 60
 
 # Configuration de logging pour JSReport
 LOGGING = {

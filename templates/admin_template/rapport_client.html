@@ -133,12 +133,11 @@
                                             <th>Dossiers</th>
                                             <th>Montants</th>
                                             <th>Dernière Activité</th>
-                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for item in clients_data %}
-                                        <tr data-type="{{ item.client.type_client }}" data-statut="Actif">
+                                        <tr data-type="{{ item.client.type_client }}" data-statut="Actif" data-client-id="{{ item.client.id }}">
                                             <td class="text-center">
                                                 {% if item.client.photo %}
                                                     <img src="{{ item.client.photo.url }}" alt="Photo" class="avatar avatar-sm rounded-circle">
@@ -183,29 +182,10 @@
                                                 <small class="text-muted">Aucune</small>
                                                 {% endif %}
                                             </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm btn-info" 
-                                                            onclick="voirDetailsClient({{ item.client.id }})"
-                                                            title="Voir détails">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            onclick="genererRapportClient({{ item.client.id }})"
-                                                            title="Générer rapport">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-success" 
-                                                            onclick="imprimerRapportClient({{ item.client.id }})"
-                                                            title="Imprimer rapport">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="9" class="text-center text-muted">
+                                            <td colspan="8" class="text-center text-muted">
                                                 <i class="mdi mdi-information"></i> Aucun client trouvé
                                             </td>
                                         </tr>
@@ -258,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Calculer les statistiques
 function calculerStatistiques() {
-    const lignes = document.querySelectorAll('#tableau-clients tbody tr[data-type]');
+    const lignes = document.querySelectorAll('#tableau-clients tbody tr[data-client-id]');
     let clientsActifs = 0;
     let dossiersOuverts = 0;
     let dossiersClotures = 0;
@@ -306,7 +286,7 @@ function appliquerFiltres() {
     const filtreStatut = document.getElementById('filtre-statut').value.toLowerCase();
     const recherche = document.getElementById('recherche-client').value.toLowerCase();
     
-    const lignes = document.querySelectorAll('#tableau-clients tbody tr[data-type]');
+    const lignes = document.querySelectorAll('#tableau-clients tbody tr[data-client-id]');
     
     lignes.forEach(ligne => {
         const type = ligne.getAttribute('data-type').toLowerCase();
@@ -403,52 +383,70 @@ function exporterTableau(format) {
     }
 }
 
-// Imprimer rapport avec filtres appliqués (même logique que les agents)
+// Imprimer rapport avec filtres appliqués (même logique que les autres rapports)
 function imprimerRapportFiltre(typeRapport = 'complet') {
     // Récupérer les clients visibles (après filtrage)
-    const lignesVisibles = document.querySelectorAll('#tableau-clients tbody tr[data-type]:not([style*="display: none"])');
+    const lignesVisibles = document.querySelectorAll('#tableau-clients tbody tr[data-client-id]:not([style*="display: none"])');
     
     if (lignesVisibles.length === 0) {
-        alert('Aucun client à imprimer avec les filtres actuels');
+        alert('Aucun client visible à imprimer. Vérifiez vos filtres.');
         return;
     }
     
     // Extraire les IDs des clients visibles
-    const clientsIds = [];
-    lignesVisibles.forEach(ligne => {
-        // Récupérer l'ID depuis le bouton "Voir détails" ou autre élément
-        const btnDetails = ligne.querySelector('button[onclick*="voirDetailsClient"]');
-        if (btnDetails) {
-            const onclick = btnDetails.getAttribute('onclick');
-            const match = onclick.match(/voirDetailsClient\((\d+)\)/);
-            if (match) {
-                clientsIds.push(parseInt(match[1]));
-            }
-        }
-    });
+    const clientsIds = Array.from(lignesVisibles).map(ligne => 
+        ligne.getAttribute('data-client-id')
+    );
     
-    if (clientsIds.length === 0) {
-        alert('Impossible de récupérer les IDs des clients');
-        return;
+    // Récupérer les filtres appliqués
+    const filtreType = document.getElementById('filtre-type') ? document.getElementById('filtre-type').value : '';
+    const filtreStatut = document.getElementById('filtre-statut') ? document.getElementById('filtre-statut').value : '';
+    const recherche = document.getElementById('recherche-client') ? document.getElementById('recherche-client').value : '';
+    
+    // Créer un formulaire pour envoyer les données en POST
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '/rapport/client/imprimer-filtre/';
+    form.target = '_blank'; // Ouvrir dans un nouvel onglet
+    
+    // Ajouter le token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
     }
     
-    // Récupérer les filtres actuels
-    const filtres = {
-        type: document.getElementById('filtre-type').value,
-        statut: document.getElementById('filtre-statut').value,
-        recherche: document.getElementById('recherche-client').value
-    };
+    // Ajouter les IDs des clients
+    clientsIds.forEach(id => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'clients_ids[]';
+        input.value = id;
+        form.appendChild(input);
+    });
     
-    // Construire l'URL avec les paramètres
-    const params = new URLSearchParams();
-    params.append('clients_ids', JSON.stringify(clientsIds));
-    params.append('filtres', JSON.stringify(filtres));
-    params.append('type_rapport', typeRapport);
+    // Ajouter les filtres
+    const filtres = [
+        { name: 'filtre_type', value: filtreType },
+        { name: 'filtre_statut', value: filtreStatut },
+        { name: 'recherche', value: recherche }
+    ];
     
-    const urlImpression = `/rapport/client/imprimer-filtre/?${params.toString()}`;
+    filtres.forEach(filtre => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = filtre.name;
+        input.value = filtre.value;
+        form.appendChild(input);
+    });
     
-    // Ouvrir le PDF dans un nouvel onglet
-    window.open(urlImpression, '_blank');
+    // Ajouter le formulaire au DOM et le soumettre
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
 }
 </script>
 

@@ -21,11 +21,6 @@
                         </nav>
                     </div>
                 </div>
-                <div class="text-end">
-                    <button type="button" class="btn btn-success" onclick="exporterToutesCommunes()">
-                        <i class="mdi mdi-download"></i> Rapport Global
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -95,46 +90,6 @@
                                 </div>
                             </div>
 
-                            <!-- Filtres avancés -->
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>Filtrer par statut:</label>
-                                        <select id="filtre-statut" class="form-control">
-                                            <option value="">Tous les statuts</option>
-                                            <option value="Actif">Actif</option>
-                                            <option value="Inactif">Inactif</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-3">
-                                    <div class="form-group">
-                                        <label>Période de création:</label>
-                                        <select id="filtre-periode" class="form-control">
-                                            <option value="">Toutes les périodes</option>
-                                            <option value="7">7 derniers jours</option>
-                                            <option value="30">30 derniers jours</option>
-                                            <option value="90">3 derniers mois</option>
-                                            <option value="365">Cette année</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="form-group">
-                                        <label>Rechercher:</label>
-                                        <input type="text" id="recherche-commune" class="form-control" placeholder="Nom de commune/district...">
-                                    </div>
-                                </div>
-                                <div class="col-md-2">
-                                    <div class="form-group">
-                                        <label>&nbsp;</label>
-                                        <button type="button" class="btn btn-secondary btn-block" onclick="reinitialiserFiltres()">
-                                            <i class="mdi mdi-refresh"></i> Reset
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-
                             <!-- Actions en lot -->
                             <div class="row mb-3" id="actions-lot" style="display: none;">
                                 <div class="col-12">
@@ -165,7 +120,6 @@
                                             <th>Date Ouverture</th>
                                             <th>Statut</th>
                                             <th>Dernière Activité</th>
-                                            <th width="150">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -205,29 +159,10 @@
                                                     <i class="mdi mdi-clock"></i> Récente
                                                 </small>
                                             </td>
-                                            <td>
-                                                <div class="btn-group" role="group">
-                                                    <button type="button" class="btn btn-sm btn-info" 
-                                                            onclick="voirDetailsCommune({{ item.commune.id }})"
-                                                            title="Voir détails">
-                                                        <i class="mdi mdi-eye"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-primary" 
-                                                            onclick="genererRapportCommune({{ item.commune.id }})"
-                                                            title="Générer rapport">
-                                                        <i class="mdi mdi-file-document"></i>
-                                                    </button>
-                                                    <button type="button" class="btn btn-sm btn-success" 
-                                                            onclick="imprimerRapportCommune({{ item.commune.id }})"
-                                                            title="Imprimer rapport">
-                                                        <i class="mdi mdi-printer"></i>
-                                                    </button>
-                                                </div>
-                                            </td>
                                         </tr>
                                         {% empty %}
                                         <tr>
-                                            <td colspan="7" class="text-center text-muted py-4">
+                                            <td colspan="6" class="text-center text-muted py-4">
                                                 <i class="mdi mdi-information mdi-48px"></i>
                                                 <br>Aucune commune trouvée
                                                 <br><small>Vérifiez vos filtres ou ajoutez des communes</small>
@@ -535,9 +470,9 @@ function imprimerRapportFiltre(typeRapport = 'complet') {
     );
     
     // Récupérer les filtres appliqués
-    const filtreStatut = document.getElementById('filtre-statut').value;
-    const filtrePeriode = document.getElementById('filtre-periode').value;
-    const recherche = document.getElementById('recherche-commune').value;
+    const filtreStatut = document.getElementById('filtre-statut') ? document.getElementById('filtre-statut').value : '';
+    const filtrePeriode = document.getElementById('filtre-periode') ? document.getElementById('filtre-periode').value : '';
+    const recherche = document.getElementById('recherche-commune') ? document.getElementById('recherche-commune').value : '';
     
     // Créer un formulaire pour envoyer les données en POST
     const form = document.createElement('form');
@@ -546,12 +481,14 @@ function imprimerRapportFiltre(typeRapport = 'complet') {
     form.target = '_blank'; // Ouvrir dans un nouvel onglet
     
     // Ajouter le token CSRF
-    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
-    const csrfInput = document.createElement('input');
-    csrfInput.type = 'hidden';
-    csrfInput.name = 'csrfmiddlewaretoken';
-    csrfInput.value = csrfToken;
-    form.appendChild(csrfInput);
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+    if (csrfToken) {
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken.value;
+        form.appendChild(csrfInput);
+    }
     
     // Ajouter les IDs des communes
     communesIds.forEach(id => {
@@ -581,8 +518,6 @@ function imprimerRapportFiltre(typeRapport = 'complet') {
     document.body.appendChild(form);
     form.submit();
     document.body.removeChild(form);
-    
-    // L'impression se fait dans le nouvel onglet - pas besoin d'alerte
 }
 
 // Voir détails d'une commune
