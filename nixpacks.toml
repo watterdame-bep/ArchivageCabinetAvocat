@@ -2,14 +2,7 @@
 nixPkgs = ['python311']
 
 [phases.install]
-cmds = [
-    'pip install -r requirements.txt'
-]
+cmds = ['pip install -r requirements.txt']
 
-[phases.build]
-cmds = [
-    'python manage.py collectstatic --noinput --settings=CabinetAvocat.settings_production'
-]
-
-[start]
-cmd = 'python manage.py migrate --settings=CabinetAvocat.settings_production && gunicorn CabinetAvocat.wsgi:application --bind 0.0.0.0:$PORT'
+[variables]
+DJANGO_SETTINGS_MODULE = 'CabinetAvocat.settings_production'

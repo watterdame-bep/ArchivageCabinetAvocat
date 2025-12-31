@@ -1,1 +1,0 @@
-web: gunicorn CabinetAvocat.wsgi --log-file -
