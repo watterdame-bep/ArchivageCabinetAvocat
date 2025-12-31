@@ -74,10 +74,6 @@ def main():
     """Fonction principale de démarrage"""
     print("🚀 Démarrage de l'application Cabinet Avocat sur Railway")
     
-    # CRITIQUE: Définir les settings de production pour Railway
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CabinetAvocat.settings_production')
-    print("✅ Utilisation de settings_production.py")
-    
     # Vérifier les variables d'environnement MySQL
     mysql_vars = ['MYSQLHOST', 'MYSQLUSER', 'MYSQLPASSWORD', 'MYSQLDATABASE', 'MYSQLPORT']
     missing_vars = []
@@ -113,11 +109,11 @@ def main():
     
     # Exécuter les migrations
     print("📋 Exécution des migrations...")
-    run_django_command("python manage.py migrate --noinput --settings=CabinetAvocat.settings_production")
+    run_django_command("python manage.py migrate --noinput")
     
     # Collecter les fichiers statiques (CRITIQUE pour Railway)
     print("📁 Collection des fichiers statiques...")
-    run_django_command("python manage.py collectstatic --noinput --clear --settings=CabinetAvocat.settings_production")
+    run_django_command("python manage.py collectstatic --noinput --clear")
     
     # Démarrer Gunicorn
     port = os.environ.get('PORT', '8000')
