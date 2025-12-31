@@ -18,11 +18,23 @@ class JSReportService:
     """
     
     def __init__(self):
-        self.base_url = getattr(settings, 'JSREPORT_URL', 'http://localhost:5488')
+        base_url = getattr(settings, 'JSREPORT_URL', 'http://localhost:5488')
+        
+        # Correction automatique de l'URL si le schéma manque
+        if not base_url.startswith(('http://', 'https://')):
+            if 'localhost' in base_url or '127.0.0.1' in base_url:
+                base_url = f'http://{base_url}'
+            else:
+                base_url = f'https://{base_url}'  # Railway utilise HTTPS
+        
+        self.base_url = base_url
         self.username = getattr(settings, 'JSREPORT_USERNAME', None)
         self.password = getattr(settings, 'JSREPORT_PASSWORD', None)
         self.timeout = getattr(settings, 'JSREPORT_TIMEOUT', 300)  # 5 minutes pour Railway
         self.api_url = f"{self.base_url}/api/report"
+        
+        # Log de la configuration pour debug
+        logger.info(f"🔧 JSReport configuré: {self.base_url}")
         
     def test_connection(self) -> bool:
         """
