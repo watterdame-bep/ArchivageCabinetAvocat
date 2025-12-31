@@ -21,7 +21,7 @@ class JSReportService:
         self.base_url = getattr(settings, 'JSREPORT_URL', 'http://localhost:5488')
         self.username = getattr(settings, 'JSREPORT_USERNAME', None)
         self.password = getattr(settings, 'JSREPORT_PASSWORD', None)
-        self.timeout = getattr(settings, 'JSREPORT_TIMEOUT', 120)  # 2 minutes au lieu de 60s
+        self.timeout = getattr(settings, 'JSREPORT_TIMEOUT', 300)  # 5 minutes pour Railway
         self.api_url = f"{self.base_url}/api/report"
         
     def test_connection(self) -> bool:
@@ -66,7 +66,7 @@ class JSReportService:
     def generate_pdf(self, template_name: str, data: Dict[str, Any], 
                     options: Optional[Dict[str, Any]] = None) -> Optional[bytes]:
         """
-        Génère un PDF via JSReport
+        Génère un PDF via JSReport - Optimisé pour Railway
         
         Args:
             template_name: Nom du template JSReport
@@ -77,51 +77,59 @@ class JSReportService:
             bytes: Contenu du PDF généré ou None en cas d'erreur
         """
         try:
+            # Options par défaut optimisées pour Railway
+            default_options = {
+                "preview": False,  # CRITIQUE: Pas de preview en production
+                "timeout": 300000,  # 5 minutes
+            }
+            
+            # Fusionner avec les options fournies
+            if options:
+                default_options.update(options)
+            
             # Préparer le payload
             payload = {
                 "template": {
                     "name": template_name
                 },
-                "data": data
+                "data": data,
+                "options": default_options
             }
-            
-            # Ajouter les options si fournies
-            if options:
-                payload["options"] = options
                 
             # Préparer les headers
             headers = self._get_auth_headers()
             
-            logger.info(f"Génération PDF avec template: {template_name}")
+            logger.info(f"🚀 Génération PDF avec template: {template_name}")
             logger.debug(f"URL JSReport: {self.api_url}")
+            logger.debug(f"Options: {default_options}")
             
-            # Appel à JSReport
+            # Appel à JSReport avec timeout étendu
             response = requests.post(
                 self.api_url,
                 json=payload,
                 headers=headers,
-                timeout=self.timeout
+                timeout=self.timeout  # 5 minutes
             )
             
             response.raise_for_status()
             
-            logger.info(f"PDF généré avec succès. Taille: {len(response.content)} bytes")
+            logger.info(f"✅ PDF généré avec succès. Taille: {len(response.content)} bytes")
             return response.content
             
         except requests.exceptions.Timeout:
-            logger.error(f"Timeout lors de la génération du PDF (template: {template_name})")
+            logger.error(f"⏰ Timeout lors de la génération du PDF (template: {template_name}) - {self.timeout}s")
             return None
             
         except requests.exceptions.ConnectionError:
-            logger.error(f"Impossible de se connecter à JSReport: {self.base_url}")
+            logger.error(f"🔌 Impossible de se connecter à JSReport: {self.base_url}")
             return None
             
         except requests.exceptions.HTTPError as e:
-            logger.error(f"Erreur HTTP JSReport: {e.response.status_code} - {e.response.text}")
+            logger.error(f"❌ Erreur HTTP JSReport: {e.response.status_code} - {e.response.text}")
             return None
             
         except Exception as e:
-            logger.error(f"Erreur inattendue lors de la génération PDF: {str(e)}")
+            logger.error(f"💥 Erreur inattendue lors de la génération PDF: {str(e)}")
             return None
     
     def generate_pdf_response(self, template_name: str, data: Dict[str, Any], 

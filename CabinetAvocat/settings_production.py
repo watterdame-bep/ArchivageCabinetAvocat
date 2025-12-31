@@ -73,11 +73,11 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Configuration JSReport (service séparé sur Railway)
+# Configuration JSReport (service séparé sur Railway) - Optimisé Railway
 JSREPORT_URL = os.environ.get('JSREPORT_SERVICE_URL', 'http://localhost:5488')
 JSREPORT_USERNAME = os.environ.get('JSREPORT_USERNAME', 'admin')
 JSREPORT_PASSWORD = os.environ.get('JSREPORT_PASSWORD', '')
-JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '60000'))
+JSREPORT_TIMEOUT = int(os.environ.get('JSREPORT_TIMEOUT', '300000'))  # 5 minutes
 
 JSREPORT_CONFIG = {
     'url': JSREPORT_URL,
@@ -85,13 +85,15 @@ JSREPORT_CONFIG = {
     'password': JSREPORT_PASSWORD,
     'timeout': JSREPORT_TIMEOUT,
     'verify_ssl': True,
+    'chrome_timeout': 180000,  # 3 minutes pour Chrome
+    'preview': False,  # CRITIQUE: Pas de preview en production
     'templates': {
         'rapport_agent': 'rapport_agent',
         'rapport_client': 'rapport_client',
         'rapport_juridiction': 'rapport_juridiction',
         'rapport_commune': 'rapport_commune',
         'rapport_dossier': 'rapport_dossier',
-        'rapport_activites_internes': 'rapport_activites_internes',
+        'rapport_activite': 'rapport_activite',
         'facture_paiement': 'facture_paiement',
         'facture_dossier': 'Facture_dossier',
         'extrait_compte_client': 'Extrait_de_compte_client',
