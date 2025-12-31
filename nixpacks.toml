@@ -1,20 +1,15 @@
 [phases.setup]
-nixPkgs = ['python311', 'gcc', 'pkg-config']
+nixPkgs = ['python311']
 
 [phases.install]
 cmds = [
-    'python -m venv --copies /opt/venv',
-    '. /opt/venv/bin/activate && pip install --upgrade pip',
-    '. /opt/venv/bin/activate && pip install -r requirements.txt'
+    'pip install -r requirements.txt'
 ]
 
 [phases.build]
 cmds = [
-    '. /opt/venv/bin/activate && export DJANGO_SETTINGS_MODULE=CabinetAvocat.settings_production',
-    '. /opt/venv/bin/activate && python manage.py collectstatic --noinput --clear --verbosity=2',
-    'ls -la staticfiles/ || echo "Staticfiles directory not found"',
-    'ls -la staticfiles/css/ || echo "CSS directory not found"'
+    'python manage.py collectstatic --noinput --settings=CabinetAvocat.settings_production'
 ]
 
 [start]
-cmd = '. /opt/venv/bin/activate && python start_railway.py'
+cmd = 'python manage.py migrate --settings=CabinetAvocat.settings_production && gunicorn CabinetAvocat.wsgi:application --bind 0.0.0.0:$PORT'
