@@ -65,14 +65,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Middleware pour les fichiers statiques - WhiteNoise APRÈS SecurityMiddleware
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise ULTRA-SIMPLE pour Railway
-# Utilisation du storage standard sans compression pour éviter les problèmes
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuration WhiteNoise SIMPLE pour Railway (sans manifest strict)
+# Utilisation du storage standard pour éviter les erreurs de sourcemap manquants
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
-WHITENOISE_MANIFEST_STRICT = False
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['css', 'js']  # Éviter la compression CSS/JS
-WHITENOISE_MAX_AGE = 0  # Pas de cache pour le debug
 
 # Configuration JSReport pour Railway (service séparé)
 JSREPORT_URL = config('JSREPORT_SERVICE_URL', default='http://localhost:5488')
