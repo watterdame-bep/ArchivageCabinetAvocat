@@ -14,19 +14,33 @@ pymysql.install_as_MySQLdb()
 DEBUG = False
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-9nb+f!7lb30p1bxdd4pw+dbq_z7h%zn^8#i_=vpcbvw(-f$sd*')
 
-# Hosts autorisés
+# Hosts autorisés - Solution robuste pour Railway
 ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
-    '*.railway.app',
-    '*.up.railway.app',
+    '.railway.app',
+    '.up.railway.app',
 ]
 
-# CSRF trusted origins
+# Ajouter automatiquement le domaine Railway si disponible
+railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if railway_domain:
+    ALLOWED_HOSTS.append(railway_domain)
+
+# En développement, permettre tous les hosts
+if os.environ.get('RAILWAY_ENVIRONMENT'):
+    ALLOWED_HOSTS.append('*')  # Temporaire pour debug Railway
+
+# CSRF trusted origins - CORRECTION pour Railway
 CSRF_TRUSTED_ORIGINS = [
-    'https://*.railway.app',
-    'https://*.up.railway.app',
+    'https://.railway.app',
+    'https://.up.railway.app',
 ]
+
+# Ajouter le domaine spécifique si disponible
+railway_domain = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if railway_domain:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{railway_domain}')
 
 # Base de données MySQL Railway
 DATABASES = {

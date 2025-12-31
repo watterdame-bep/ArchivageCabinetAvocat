@@ -18,9 +18,26 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+import os
+
+def railway_debug(request):
+    """Debug endpoint pour Railway"""
+    return JsonResponse({
+        'status': 'OK',
+        'host': request.get_host(),
+        'allowed_hosts': settings.ALLOWED_HOSTS,
+        'csrf_trusted_origins': settings.CSRF_TRUSTED_ORIGINS,
+        'debug': settings.DEBUG,
+        'railway_env': os.environ.get('RAILWAY_ENVIRONMENT', 'Not set'),
+        'railway_domain': os.environ.get('RAILWAY_PUBLIC_DOMAIN', 'Not set'),
+        'static_url': settings.STATIC_URL,
+        'database_name': settings.DATABASES['default']['NAME'],
+    })
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('railway-debug/', railway_debug, name='railway_debug'),
     path('',include('Authentification.urls')),
     path('',include('Devellopeur.urls')),
     path('',include('Structure.urls')),
