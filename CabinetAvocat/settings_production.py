@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'Agent.middleware.ActivityLogMiddleware',
+    # 'Agent.middleware.ActivityLogMiddleware',  # Temporairement désactivé pour debug
 ]
 
 ROOT_URLCONF = 'CabinetAvocat.urls'
@@ -98,8 +98,8 @@ DATABASES = {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
             'sql_mode': 'STRICT_TRANS_TABLES',
         },
-        'CONN_MAX_AGE': 600,
-        'CONN_HEALTH_CHECKS': True,
+        'CONN_MAX_AGE': 0,  # Désactiver la réutilisation des connexions pour debug
+        'CONN_HEALTH_CHECKS': False,  # Désactiver les health checks DB pour debug
     }
 }
 
