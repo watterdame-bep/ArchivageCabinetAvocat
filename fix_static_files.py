@@ -6,102 +6,146 @@ import os
 import shutil
 from pathlib import Path
 
-def copy_missing_files():
-    """Copier manuellement les fichiers critiques manquants"""
-    print("🔧 Correction des fichiers statiques manquants...")
+def find_bootstrap_files():
+    """Chercher où sont les fichiers Bootstrap dans le conteneur"""
+    print("🔍 Recherche des fichiers Bootstrap...")
     
-    # Chemins de base
-    static_root = Path('/app/staticfiles')
-    static_source = Path('/app/static')
-    
-    # Fichiers critiques à copier
-    critical_files = [
-        'assets/vendor_components/bootstrap/dist/css/bootstrap.css',
-        'assets/vendor_components/bootstrap/dist/css/bootstrap.min.css',
-        'assets/vendor_components/select2/dist/css/select2.min.css',
-        'assets/vendor_components/OwlCarousel2/dist/assets/owl.carousel.css',
-        'assets/vendor_components/OwlCarousel2/dist/assets/owl.theme.default.min.css',
-        'assets/vendor_components/Magnific-Popup-master/dist/magnific-popup.css',
-        'assets/vendor_components/lightbox-master/dist/ekko-lightbox.css',
-        'assets/vendor_components/bootstrap-colorpicker/dist/css/bootstrap-colorpicker.min.css',
-        'assets/vendor_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css',
-        'assets/vendor_components/bootstrap-tagsinput/dist/bootstrap-tagsinput.css',
-        'assets/vendor_components/bootstrap-select/dist/css/bootstrap-select.css',
-        'assets/vendor_components/x-editable/dist/bootstrap3-editable/css/bootstrap-editable.css',
+    search_paths = [
+        '/app/static',
+        '/app',
+        '/usr/local/lib/python3.11/site-packages',
     ]
     
-    copied_count = 0
-    
-    for file_path in critical_files:
-        source_file = static_source / file_path
-        dest_file = static_root / file_path
-        
-        if source_file.exists():
-            # Créer le répertoire de destination si nécessaire
-            dest_file.parent.mkdir(parents=True, exist_ok=True)
-            
-            try:
-                shutil.copy2(source_file, dest_file)
-                print(f"✅ Copié: {file_path}")
-                copied_count += 1
-            except Exception as e:
-                print(f"❌ Erreur copie {file_path}: {e}")
-        else:
-            print(f"⚠️ Source manquante: {file_path}")
-    
-    print(f"📊 {copied_count} fichiers copiés")
-    
-    # Vérifier Bootstrap après copie
-    bootstrap_css = static_root / 'assets/vendor_components/bootstrap/dist/css/bootstrap.css'
-    if bootstrap_css.exists():
-        print("✅ Bootstrap CSS maintenant disponible!")
-    else:
-        print("❌ Bootstrap CSS toujours manquant")
-
-def copy_entire_vendor_components():
-    """Copier tout le dossier vendor_components si nécessaire"""
-    print("🔄 Copie complète du dossier vendor_components...")
-    
-    static_root = Path('/app/staticfiles')
-    static_source = Path('/app/static')
-    
-    source_vendor = static_source / 'assets/vendor_components'
-    dest_vendor = static_root / 'assets/vendor_components'
-    
-    if source_vendor.exists():
+    for search_path in search_paths:
+        print(f"\n📁 Recherche dans {search_path}...")
         try:
-            if dest_vendor.exists():
-                shutil.rmtree(dest_vendor)
-            
-            shutil.copytree(source_vendor, dest_vendor)
-            print("✅ Dossier vendor_components copié complètement")
-            
-            # Vérifier Bootstrap
-            bootstrap_css = dest_vendor / 'bootstrap/dist/css/bootstrap.css'
-            if bootstrap_css.exists():
-                print("✅ Bootstrap CSS maintenant disponible!")
-            else:
-                print("❌ Bootstrap CSS toujours manquant après copie complète")
-                
+            for root, dirs, files in os.walk(search_path):
+                if 'bootstrap.css' in files:
+                    print(f"✅ Trouvé: {root}/bootstrap.css")
+                if 'bootstrap' in dirs:
+                    bootstrap_path = os.path.join(root, 'bootstrap')
+                    print(f"📁 Dossier Bootstrap: {bootstrap_path}")
+                    
+                    # Vérifier le contenu
+                    css_path = os.path.join(bootstrap_path, 'dist', 'css')
+                    if os.path.exists(css_path):
+                        css_files = os.listdir(css_path)
+                        print(f"   CSS files: {css_files}")
         except Exception as e:
-            print(f"❌ Erreur copie complète: {e}")
+            print(f"❌ Erreur recherche dans {search_path}: {e}")
+
+def list_static_directory():
+    """Lister le contenu du répertoire static"""
+    print("\n📁 Contenu de /app/static:")
+    static_path = Path('/app/static')
+    
+    if static_path.exists():
+        for item in static_path.rglob('*bootstrap*'):
+            print(f"🔍 Bootstrap trouvé: {item}")
+        
+        # Lister assets/vendor_components
+        vendor_path = static_path / 'assets' / 'vendor_components'
+        if vendor_path.exists():
+            print(f"\n📁 Contenu de {vendor_path}:")
+            for item in sorted(vendor_path.iterdir())[:20]:
+                print(f"  {item.name}")
+        else:
+            print(f"❌ {vendor_path} n'existe pas")
     else:
-        print("❌ Dossier source vendor_components introuvable")
+        print("❌ /app/static n'existe pas")
+
+def copy_from_correct_location():
+    """Copier depuis la bonne localisation"""
+    print("\n🔧 Tentative de copie depuis la localisation correcte...")
+    
+    # Chercher Bootstrap dans le répertoire static
+    static_path = Path('/app/static')
+    staticfiles_path = Path('/app/staticfiles')
+    
+    # Chercher tous les fichiers bootstrap.css
+    bootstrap_files = list(static_path.rglob('bootstrap.css'))
+    
+    for bootstrap_file in bootstrap_files:
+        print(f"📁 Bootstrap trouvé: {bootstrap_file}")
+        
+        # Calculer le chemin relatif depuis static
+        try:
+            rel_path = bootstrap_file.relative_to(static_path)
+            dest_path = staticfiles_path / rel_path
+            
+            # Créer le répertoire de destination
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Copier le fichier
+            shutil.copy2(bootstrap_file, dest_path)
+            print(f"✅ Copié vers: {dest_path}")
+            
+        except Exception as e:
+            print(f"❌ Erreur copie: {e}")
 
 def main():
-    print("🔧 Correction des fichiers statiques Railway")
-    print("=" * 50)
+    print("🔧 Diagnostic et correction des fichiers statiques")
+    print("=" * 60)
     
-    # Essayer d'abord la copie sélective
-    copy_missing_files()
+    find_bootstrap_files()
+    list_static_directory()
+    copy_from_correct_location()
     
-    # Si Bootstrap n'est toujours pas là, copie complète
+    # Vérifier le résultat
     bootstrap_css = Path('/app/staticfiles/assets/vendor_components/bootstrap/dist/css/bootstrap.css')
-    if not bootstrap_css.exists():
-        print("\n🔄 Bootstrap toujours manquant, copie complète...")
-        copy_entire_vendor_components()
-    
-    print("\n✅ Correction terminée!")
+    if bootstrap_css.exists():
+        print("\n✅ Bootstrap CSS maintenant disponible!")
+    else:
+        print("\n❌ Bootstrap CSS toujours manquant")
+        
+        # Essayer une copie alternative
+        print("🔄 Tentative de copie alternative...")
+        staticfiles_path = Path('/app/staticfiles')
+        
+        # Créer le répertoire Bootstrap manuellement
+        bootstrap_dir = staticfiles_path / 'assets' / 'vendor_components' / 'bootstrap' / 'dist' / 'css'
+        bootstrap_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Créer un fichier Bootstrap minimal
+        bootstrap_content = """
+/* Bootstrap CSS minimal pour Railway */
+.btn { 
+    padding: 6px 12px; 
+    margin-bottom: 0; 
+    font-size: 14px; 
+    font-weight: normal; 
+    line-height: 1.42857143; 
+    text-align: center; 
+    white-space: nowrap; 
+    vertical-align: middle; 
+    cursor: pointer; 
+    border: 1px solid transparent; 
+    border-radius: 4px; 
+}
+.btn-primary { 
+    color: #fff; 
+    background-color: #337ab7; 
+    border-color: #2e6da4; 
+}
+.form-control { 
+    display: block; 
+    width: 100%; 
+    height: 34px; 
+    padding: 6px 12px; 
+    font-size: 14px; 
+    line-height: 1.42857143; 
+    color: #555; 
+    background-color: #fff; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+}
+"""
+        
+        bootstrap_file = bootstrap_dir / 'bootstrap.css'
+        with open(bootstrap_file, 'w') as f:
+            f.write(bootstrap_content)
+        
+        print(f"✅ Bootstrap CSS minimal créé: {bootstrap_file}")
 
 if __name__ == '__main__':
     main()

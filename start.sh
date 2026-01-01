@@ -31,11 +31,15 @@ echo "📦 Collecte des fichiers statiques..."
 python manage.py collectstatic --noinput --clear --verbosity=2 --settings=CabinetAvocat.settings_railway || echo "⚠️ Erreur lors de la collecte des fichiers statiques (ignorée)"
 
 # Corriger les fichiers statiques manquants
-echo "🔧 Correction des fichiers statiques manquants..."
+echo "🔧 Diagnostic et correction des fichiers statiques..."
 python fix_static_files.py || echo "⚠️ Erreur lors de la correction des fichiers statiques"
 
+# Créer les CSS manquants avec CDN comme fallback
+echo "🎨 Création des CSS manquants avec CDN..."
+python create_bootstrap_cdn.py || echo "⚠️ Erreur lors de la création des CSS CDN"
+
 # Debug des fichiers statiques
-echo "🔍 Debug des fichiers statiques..."
+echo "🔍 Debug final des fichiers statiques..."
 python debug_static.py || echo "⚠️ Erreur lors du debug des fichiers statiques"
 
 # Test de la configuration Django
