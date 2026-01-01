@@ -57,15 +57,51 @@ railway run python manage.py createsuperuser --settings=CabinetAvocat.settings_r
 ## 🔍 Vérification
 
 1. **Accéder à l'application** : `https://votre-app.railway.app`
-2. **Admin Django** : `https://votre-app.railway.app/admin`
-3. **Logs** : `railway logs`
+2. **Health check** : `https://votre-app.railway.app/health/`
+3. **Admin Django** : `https://votre-app.railway.app/admin`
+4. **Logs** : `railway logs`
+
+### Logs de démarrage attendus :
+```
+🚀 Démarrage de l'application Cabinet d'Avocats
+📦 Collecte des fichiers statiques...
+1822 static files copied to '/app/staticfiles', 2918 post-processed.
+🌐 Démarrage du serveur Gunicorn sur le port 8080...
+[INFO] Starting gunicorn 23.0.0
+[INFO] Listening at: http://0.0.0.0:8080 (1)  ← PORT CORRECT
+[INFO] Using worker: sync
+[INFO] Booting worker with pid: 35
+```
+
+**Important** : Le port doit être `8080` ou la valeur de `$PORT`, jamais `8000` !
 
 ## 🚨 Dépannage
+
+### Problème de port (CRITIQUE)
+Si vous voyez dans les logs :
+```
+Listening at: http://0.0.0.0:8000
+```
+❌ **C'est INCORRECT** - Railway ne peut pas accéder à l'app
+
+✅ **Doit être** :
+```
+Listening at: http://0.0.0.0:8080
+```
+ou la valeur de `$PORT`
+
+**Solution** : Vérifiez que le script `start.sh` utilise bien `$PORT`
 
 ### Test PyMySQL
 ```bash
 # Tester la configuration PyMySQL
 railway run python test_pymysql_railway.py
+```
+
+### Health Check
+```bash
+# Tester le health check
+curl https://votre-app.railway.app/health/
 ```
 
 ### Erreur de connexion MySQL

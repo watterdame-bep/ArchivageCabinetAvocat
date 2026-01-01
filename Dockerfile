@@ -22,8 +22,8 @@ RUN chmod +x start.sh
 # Créer le répertoire staticfiles
 RUN mkdir -p staticfiles
 
-# Exposer le port
-EXPOSE 8000
+# Exposer le port (Railway utilisera $PORT dynamiquement)
+EXPOSE $PORT
 
 # Utiliser le script de démarrage
 CMD ["./start.sh"]
