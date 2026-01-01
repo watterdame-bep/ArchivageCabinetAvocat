@@ -50,9 +50,17 @@ python debug_static.py || echo "⚠️ Erreur lors du debug des fichiers statiqu
 echo "🔤 Vérification des fonts et icônes..."
 python check_fonts.py || echo "⚠️ Erreur lors de la vérification des fonts"
 
+# Création des derniers assets manquants
+echo "🎨 Création des derniers assets manquants..."
+python create_final_missing_assets.py || echo "⚠️ Erreur lors de la création des derniers assets"
+
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
 python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️ Problème de configuration Django"
+
+# Vérification finale du déploiement
+echo "🎯 Vérification finale du déploiement..."
+python verify_deployment.py || echo "⚠️ Problèmes détectés lors de la vérification finale"
 
 # Démarrer Gunicorn sur le port Railway dynamique
 echo "🌐 Démarrage du serveur Gunicorn sur le port $PORT..."
