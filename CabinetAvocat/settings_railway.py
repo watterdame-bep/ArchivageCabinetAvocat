@@ -48,10 +48,10 @@ CSRF_TRUSTED_ORIGINS = [
 ]
 
 # Configuration des cookies pour Railway
-CSRF_COOKIE_SECURE = False  # Temporairement pour debug
+CSRF_COOKIE_SECURE = True
 CSRF_COOKIE_HTTPONLY = True
 CSRF_COOKIE_SAMESITE = 'Lax'
-SESSION_COOKIE_SECURE = False  # Temporairement pour debug
+SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 
@@ -66,7 +66,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': clean_env_var('MYSQLDATABASE', 'cabinetavocat'),
-        'USER': clean_env_var('MYSQLUSERNAME', 'root'),
+        'USER': clean_env_var('MYSQLUSER', 'root'),
         'PASSWORD': clean_env_var('MYSQLPASSWORD', ''),
         'HOST': clean_env_var('MYSQLHOST', 'localhost'),
         'PORT': clean_env_var('MYSQLPORT', '3306'),
@@ -130,8 +130,14 @@ LOGGING = {
 
 # Sécurité pour Railway (désactivée temporairement pour debug)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = False  # Temporairement désactivé
-    SESSION_COOKIE_SECURE = False
-    CSRF_COOKIE_SECURE = False
-    SECURE_BROWSER_XSS_FILTER = True
-    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+# Configuration HSTS pour la sécurité
+SECURE_HSTS_SECONDS = 31536000  # 1 an
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True

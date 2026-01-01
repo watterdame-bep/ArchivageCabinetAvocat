@@ -58,6 +58,22 @@ python check_fonts.py || echo "⚠️ Erreur lors de la vérification des fonts"
 echo "🎨 Création des derniers assets manquants..."
 python create_final_missing_assets.py || echo "⚠️ Erreur lors de la création des derniers assets"
 
+# Optimisations finales pour Railway
+echo "🎯 Optimisations finales pour Railway..."
+python optimize_final_deployment.py || echo "⚠️ Erreur lors des optimisations finales"
+
+# Amélioration de la sécurité
+echo "🔒 Amélioration de la sécurité..."
+python enhance_security_settings.py || echo "⚠️ Erreur lors de l'amélioration de la sécurité"
+
+# Correction finale de TOUS les fichiers statiques manquants
+echo "🔧 Correction finale de TOUS les fichiers statiques..."
+python fix_missing_static_final.py || echo "⚠️ Erreur lors de la correction finale"
+
+# Diagnostic avancé et création de tous les fallbacks
+echo "🔍 Diagnostic avancé des assets manquants..."
+python diagnose_missing_assets.py || echo "⚠️ Erreur lors du diagnostic avancé"
+
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
 python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️ Problème de configuration Django"
@@ -65,6 +81,14 @@ python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️
 # Vérification finale du déploiement
 echo "🎯 Vérification finale du déploiement..."
 python verify_deployment.py || echo "⚠️ Problèmes détectés lors de la vérification finale"
+
+# Validation finale complète
+echo "🎯 Validation finale complète..."
+python final_validation.py || echo "⚠️ Validation finale avec avertissements"
+
+# Résumé final du déploiement
+echo "📋 Résumé final du déploiement..."
+python deployment_summary.py || echo "⚠️ Erreur lors du résumé final"
 
 # Démarrer Gunicorn sur le port Railway dynamique
 echo "🌐 Démarrage du serveur Gunicorn sur le port $PORT..."
