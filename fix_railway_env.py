@@ -27,6 +27,9 @@ def check_and_fix_env():
         masked_value = '*' * len(value) if value != 'NON_DÉFINIE' else 'NON_DÉFINIE'
         print(f"  {var}: {masked_value}")
     
+    print("\n🔧 Correction de la boucle de redirection HTTPS...")
+    print("✅ SECURE_SSL_REDIRECT désactivé temporairement")
+    
     return True
 
 if __name__ == '__main__':

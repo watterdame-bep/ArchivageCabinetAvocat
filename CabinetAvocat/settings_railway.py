@@ -130,9 +130,9 @@ LOGGING = {
 
 # Sécurité pour Railway (désactivée temporairement pour debug)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = False  # Temporairement désactivé pour éviter les boucles
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
 
 # Configuration HSTS pour la sécurité
 SECURE_HSTS_SECONDS = 31536000  # 1 an

@@ -1,0 +1,72 @@
+[33m015474b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m Version2.1.1
+[33mabbec15[m Version2.1
+[33m350828d[m Version2.0.2
+[33mf1d7a70[m Version2.0.1
+[33m6d160ef[m Version2.0
+[33ma46e41a[m Version1.2.6
+[33mf2cb757[m Version1.2.5 ameliorer
+[33meaf54f9[m Version1.2.5
+[33m8fe7670[m Version1.2.4 ameliorer
+[33m124c1f5[m Version1.2.4
+[33mf0eab67[m Version1.2.3 ameliorer
+[33m5ed5044[m Version1.2.3
+[33m9bc384d[m Version1.2.2
+[33m4cc0165[m Version1.2.1
+[33m62999f8[m Version1.2.0
+[33m4458d94[m Version1.2
+[33m7700782[m version1.1
+[33mfe9b4ca[m Version1.0
+[33m63fa107[m modification
+[33m6a9d3d3[m Nouvelle version configuration 5
+[33m26618af[m Nouvelle version configuration 4
+[33mcbdaa68[m Nouvelle version nouvelle configuration 3
+[33m0f86b34[m Nouvelle version configuration 2
+[33m4e7d780[m Nouvelle version nouvelle configuration 1
+[33md5822b5[m Nouvelle version avec new method
+[33m339127b[m Fix vendors_css.css with absolute paths for Railway WhiteNoise with youtube analysis
+[33m9afc2e4[m DEBUG: Add Railway diagnostic endpoints to identify 404 root cause
+[33mb634ab3[m CRITICAL: Force settings_production.py usage on Railway runtime - Fix 404 static files
+[33m56b7f3a[m FINAL FIX: WhiteNoise StaticFilesStorage - Résolution définitive des erreurs sourcemap et 404 CSS
+[33m2dfd17d[m Fix vendors_css.css with absolute paths for Railway WhiteNoise again
+[33m568627e[m CRITICAL FIX: Railway utilise maintenant settings_production.py - Résolution définitive des 404 CSS
+[33m67447bf[m Fix: STATICFILES_DIRS pour Railway static files - Résolution définitive des 404 CSS
+[33m88375d6[m Fix vendors_css.css with absolute paths for Railway WhiteNoise
+[33m2cd5ac4[m Fix vendors_css.css with absolute paths for Railway WhiteNoise
+[33m0bd917c[m Fix WhiteNoise sourcemap issue - use CompressedStaticFilesStorage for Railway
+[33m2ed5404[m Final Railway configuration - fix healthcheck and static files serving
+[33maa959f9[m Fix WhiteNoise configuration - resolve static files 404 on Railway
+[33m1630f28[m Fix Railway static files with enhanced build configuration and test endpoint
+[33m758b123[m Correction du probleme du fichier statique
+[33m6cc9491[m Correction des probleme des fichiers statique et du csrf
+[33md35c02a[m Correction du probleme lost connection
+[33md13fc8b[m Correction du probleme de connexion à la base de données mysql
+[33md8de897[m Correction des errreur lie à whitenoise
+[33m88a8fb2[m Create missing weather-icons files and disable WhiteNoise strict mode
+[33me8be69b[m Create missing weather-icons files and disable WhiteNoise strict mode
+[33m147c824[m Fix Python indentation errors in settings_production.py
+[33m0147175[m Create all missing files for Railway collectstatic (fonts, sourcemaps, etc.)
+[33m3eaf3fb[m Fix collectstatic WhiteNoise sourcemap issues
+[33md816106[m Remove non-existent jsreport-python-client package
+[33m24b3e19[m Fix MySQL Railway deployment - remove mysqlclient, add nixpacks.toml
+[33md66356f[m Fix UTF-8 encoding issues for Railway deployment
+[33m62fdd52[m Ready for Railway deployment with MySQL + JSReport
+[33mcf39bc2[m Ready for Railway deployment with JSReport integration - Fixed report printing functionality
+[33mbd9aa11[m Fresh deployment setup - Clean configuration for Railway with collected static files
+[33m041db87[m Clean production configuration - Simplified settings for Railway deployment
+[33md256649[m Restore working static files configuration - Back to simple StaticFilesStorage with STATICFILES_DIRS
+[33m94db295[m Fix static files structure - Move files to Django app-based structure (Agent/static/Agent/)
+[33mca87f75[m Remove STATICFILES_DIRS from base settings.py to prevent inheritance issues
+[33mbbeb518[m Fix static files configuration - Override STATICFILES_DIRS inheritance and use CompressedManifestStaticFilesStorage
+[33mcd7c2c9[m Include staticfiles in repository and simplify Procfile approach for Railway static files
+[33m810bd79[m Add Procfile and .slugignore to fix static files deployment on Railway
+[33ma25adba[m Fix static files path using BASE_DIR / 'static' syntax as suggested by GPT
+[33md1ca696[m Fix static files collection: move collectstatic to start command and add debug logging
+[33m41756bb[m Update .gitignore to include static files
+[33m6f21c9d[m Fix static files: remove static/ from .gitignore and add all static files
+[33m579cbea[m Fix static files configuration for Railway deployment
+[33m2cb49fe[m Tous les fichiers de déploiement sont maintenant présents
+[33m947d525[m Fix MySQL dependencies for Railway deployment
+[33m2f9dc85[m Une simple correction et suppression des fichiers non necessaire
+[33m942653c[m Fix: Ajout des fichiers manquants pour le déploiement
+[33mf788a7e[m Add requirements.txt
+[33m79e08ee[m Initial commit - projet propre
