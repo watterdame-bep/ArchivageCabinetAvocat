@@ -7,6 +7,10 @@ echo "🚀 Démarrage de l'application Cabinet d'Avocats"
 echo "🧪 Test de connexion MySQL Railway..."
 python test_mysql_railway.py || echo "⚠️ Problème de connexion MySQL détecté"
 
+# Correction des variables d'environnement
+echo "🔧 Correction des variables d'environnement..."
+python fix_railway_env.py || echo "⚠️ Erreur lors de la correction des variables"
+
 echo "🔍 Variables d'environnement:"
 echo "PORT: $PORT"
 echo "DJANGO_SETTINGS_MODULE: $DJANGO_SETTINGS_MODULE"

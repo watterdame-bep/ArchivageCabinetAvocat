@@ -14,6 +14,140 @@ def create_remaining_css():
     else:
         staticfiles_path = Path('staticfiles')
     
+    # Créer les liens pour Bootstrap
+    bootstrap_source = staticfiles_path / 'assets/vendor_components/bootstrap/dist/css/bootstrap.css'
+    bootstrap_target = staticfiles_path / 'css/bootstrap.min.css'
+    
+    if bootstrap_source.exists() and not bootstrap_target.exists():
+        bootstrap_target.parent.mkdir(parents=True, exist_ok=True)
+        # Copier le contenu au lieu de créer un lien symbolique
+        import shutil
+        shutil.copy2(bootstrap_source, bootstrap_target)
+        print(f"✅ Copié Bootstrap: {bootstrap_target}")
+    
+    # Créer bootstrap.min.js
+    js_dir = staticfiles_path / 'js'
+    js_dir.mkdir(parents=True, exist_ok=True)
+    bootstrap_js = js_dir / 'bootstrap.min.js'
+    
+    if not bootstrap_js.exists():
+        bootstrap_js_content = '''
+/* Bootstrap JS via CDN pour Railway */
+(function() {
+    var script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';
+    script.integrity = 'sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz';
+    script.crossOrigin = 'anonymous';
+    document.head.appendChild(script);
+})();
+'''
+        with open(bootstrap_js, 'w', encoding='utf-8') as f:
+            f.write(bootstrap_js_content)
+        print(f"✅ Créé Bootstrap JS: {bootstrap_js}")
+    
+    # Créer railway-fixes.css
+    railway_fixes = staticfiles_path / 'css/railway-fixes.css'
+    if not railway_fixes.exists():
+        railway_fixes_content = '''
+/* CSS pour Railway - Corrections finales */
+@import url('./media-fallback.css');
+
+/* Corrections pour les composants manquants */
+.raty { position: relative; display: inline-block; }
+.raty img { cursor: pointer; float: left; margin-right: 2px; }
+.raty-cancel { position: absolute; left: -10px; }
+
+/* Bootstrap TouchSpin corrections */
+.bootstrap-touchspin .input-group-btn-vertical {
+    position: relative; white-space: nowrap; width: 1%;
+    vertical-align: middle; display: table-cell;
+}
+
+.bootstrap-touchspin .input-group-btn-vertical > .btn {
+    display: block; float: none; width: 100%; max-width: 100%;
+    padding: 8px 10px; margin-left: -1px; position: relative; border-radius: 0;
+}
+
+/* Preloader CSS */
+.preloader {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: #fff; z-index: 9999; display: flex;
+    justify-content: center; align-items: center;
+}
+
+.preloader::after {
+    content: ''; width: 40px; height: 40px;
+    border: 4px solid #f3f3f3; border-top: 4px solid #3498db;
+    border-radius: 50%; animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Avatars et images par défaut */
+.avatar-2, .avatar-3 {
+    width: 50px; height: 50px;
+    background: linear-gradient(45deg, #3498db, #2ecc71);
+    border-radius: 50%; display: inline-flex;
+    align-items: center; justify-content: center;
+    color: white; font-weight: bold; font-size: 18px;
+}
+
+.avatar-2::after { content: "U2"; }
+.avatar-3::after { content: "U3"; }
+
+/* Corrections pour les images manquantes */
+img[src*="/media/"] {
+    background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+    border: 2px dashed #dee2e6; display: inline-flex;
+    align-items: center; justify-content: center;
+    color: #6c757d; font-size: 12px; min-width: 50px; min-height: 50px;
+}
+
+img[src*="/media/"]:after { content: "Image"; }
+
+/* Logos */
+img[src*="/media/LogoCabinet/"] {
+    width: 100px; height: 60px;
+    background: linear-gradient(45deg, #007bff, #0056b3); color: white;
+}
+img[src*="/media/LogoCabinet/"]:after { content: "LOGO"; font-weight: bold; }
+
+/* Photos agents */
+img[src*="/media/PhotoAgent/"] {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(45deg, #28a745, #20c997); color: white;
+}
+img[src*="/media/PhotoAgent/"]:after { content: "👤"; font-size: 20px; }
+
+/* Photos clients */
+img[src*="/media/clients_photos/"] {
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(45deg, #17a2b8, #138496); color: white;
+}
+img[src*="/media/clients_photos/"]:after { content: "👥"; font-size: 20px; }
+
+/* Icônes */
+.fa:before, .fas:before, .far:before, .fal:before, .fab:before {
+    font-family: "Font Awesome 5 Free", "Font Awesome 5 Brands", "Font Awesome 5 Pro" !important;
+}
+
+.material-icons {
+    font-family: 'Material Icons' !important; font-weight: normal;
+    font-style: normal; font-size: 24px; line-height: 1;
+    letter-spacing: normal; text-transform: none; display: inline-block;
+    white-space: nowrap; word-wrap: normal; direction: ltr;
+    -webkit-font-feature-settings: 'liga'; -webkit-font-smoothing: antialiased;
+}
+
+.ion:before { font-family: "Ionicons" !important; }
+'''
+        with open(railway_fixes, 'w', encoding='utf-8') as f:
+            f.write(railway_fixes_content)
+        print(f"✅ Créé Railway fixes: {railway_fixes}")
+    
     # CSS manquants identifiés dans les logs
     missing_css = {
         'assets/vendor_components/raty-master/lib/jquery.raty.css': '''
