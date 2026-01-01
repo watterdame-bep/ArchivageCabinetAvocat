@@ -26,6 +26,8 @@ ALLOWED_HOSTS = [
     '.railway.app',
     'localhost',
     '127.0.0.1',
+    '0.0.0.0',
+    '*',  # Temporaire pour debug
 ]
 
 # Application definition
@@ -150,10 +152,10 @@ JSREPORT_USERNAME = config('JSREPORT_USERNAME', default='admin')
 JSREPORT_PASSWORD = config('JSREPORT_PASSWORD', default='admin123')
 JSREPORT_TIMEOUT = config('JSREPORT_TIMEOUT', default=60, cast=int)
 
-# Sécurité pour production
-SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
-SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=True, cast=bool)
-CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=True, cast=bool)
+# Sécurité pour production (temporairement désactivée pour debug)
+SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SESSION_COOKIE_SECURE = config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_SECURE = config('CSRF_COOKIE_SECURE', default=False, cast=bool)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 
@@ -164,6 +166,10 @@ LOGGING = {
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
             'style': '{',
         },
     },
@@ -181,6 +187,16 @@ LOGGING = {
         'django': {
             'handlers': ['console'],
             'level': 'INFO',
+            'propagate': False,
+        },
+        'django.db.backends': {
+            'handlers': ['console'],
+            'level': 'ERROR',  # Réduire le bruit des requêtes SQL
+            'propagate': False,
+        },
+        'CabinetAvocat': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': False,
         },
     },
