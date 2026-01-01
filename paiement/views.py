@@ -4,12 +4,15 @@ from django.utils import timezone
 from .models import Paiement
 from Dossier.models import dossier, TarifHoraire
 from Agent.models import agent
+import requests
 from django.urls import reverse
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
+from django.http import HttpResponse
 from django.db.models import Sum
 from parametre.models import taux
 from datetime import datetime
-from Structure.models import ServiceCabinet, Banque 
+import requests
+from Structure.models import ServiceCabinet,Banque 
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal
 from django.core.paginator import Paginator
@@ -50,9 +53,9 @@ def gestion_paiements(request, dossier_id):
 
         try:
             agent_logged = request.user.agent
-        except AttributeError:
-            # L'utilisateur n'a pas d'agent associé, utiliser None
-            agent_logged = None
+        except:
+            messages.error(request, "Erreur : Aucun agent associé à cet utilisateur.")
+            return redirect(request.path)
 
         # Calcul du montant en FC si paiement en USD
         if devise == "USD":
@@ -83,13 +86,6 @@ def gestion_paiements(request, dossier_id):
             taux=taux_fc,
             
         )
-        
-        # Log de l'activité
-        try:
-            from Agent.models_activity import ActivityLogManager
-            ActivityLogManager.log_payment_recorded(request.user, paiement, request)
-        except Exception as e:
-            print(f"Erreur lors du logging du paiement: {e}")
 
         # Si requête AJAX, renvoyer JSON avec URL de la facture
         if request.headers.get('x-requested-with') == 'XMLHttpRequest':
@@ -111,11 +107,11 @@ def gestion_paiements(request, dossier_id):
 def imprimer_facture_paiement(request, paiement_id):
     paiement = get_object_or_404(Paiement, id=paiement_id)
     doss = paiement.dossier
-    from utils.jsreport_service import jsreport_service
-    
     client = doss.client
     cabinet = request.user.cabinet
     today = datetime.now().strftime("%d/%m/%Y")  # Format français de la date
+
+    JSREPORT_URL = "http://localhost:5488/api/report"
 
     # Fonction pour convertir Decimal en float pour JSON
     def safe_float(value):
@@ -139,8 +135,9 @@ def imprimer_facture_paiement(request, paiement_id):
         reste_affiche = safe_float(paiement.montant_reste_fc)
         devise_affiche = "CDF"
 
-    # Données pour JSReport
-    data = {
+    payload = {
+    "template": {"name": "Facture_paiement_client"},
+    "data": {
         "paiement": {
             "today": today,
             "date": paiement.date_paiement.strftime("%d/%m/%Y %H:%M"),
@@ -155,6 +152,7 @@ def imprimer_facture_paiement(request, paiement_id):
             "numero_dossier": safe_str(doss.numero_reference_dossier),
             "num_facture":doss.reference,
         },
+
         "client": {
             "nom": safe_str(client.nom),
             "prenom": safe_str(client.prenom),
@@ -169,16 +167,18 @@ def imprimer_facture_paiement(request, paiement_id):
             "adresse": f"{cabinet.adresse.numero}, {cabinet.adresse.avenue}, {cabinet.adresse.quartier}, {cabinet.adresse.commune}, {cabinet.adresse.ville}",
             "logo": cabinet.logo.url if cabinet.logo else None,
         },
+       
     }
+}
 
-    # Génération du PDF via le service centralisé JSReport
-    filename = f"facture_paiement_{paiement.id}_{doss.numero_reference_dossier}.pdf"
-    return jsreport_service.generate_pdf_response(
-        template_name="Facture_paiement_client",
-        data=data,
-        filename=filename,
-        disposition="inline"
-    )
+    try:
+        response = requests.post(JSREPORT_URL, json=payload)
+        response.raise_for_status()
+    except requests.RequestException as e:
+        return HttpResponse(f"Erreur lors de la génération du PDF : {e}", status=500)
+
+    pdf = response.content
+    return HttpResponse(pdf, content_type="application/pdf")
 
 
 
@@ -302,10 +302,6 @@ def gerer_caisse(request):
      
     dossiers = dossier.objects.select_related("client").all()
 
-    # Facture à proposer après création de paiement
-    facture_paiement_id = request.session.pop('facture_paiement_id', None)
-    facture_paiement_url = request.session.pop('facture_paiement_url', None)
-
     # =======================
     # 📌 5. Contexte
     # =======================
@@ -324,8 +320,6 @@ def gerer_caisse(request):
         "is_paginated": page_obj.has_other_pages(),
         "page_obj": page_obj,
         "dossiers": dossiers,
-        "facture_paiement_id": facture_paiement_id,
-        "facture_paiement_url": facture_paiement_url,
     }
 
     return render(request, "admin_template/gere_caisse.html", context)
@@ -383,7 +377,7 @@ def ajouter_sortie(request):
             cabinet=cabinet,
             dossier=None,  # pas lié à un dossier client ici
             client=None,   # pas lié à un client
-            agent=request.user.agent if hasattr(request.user, 'agent') else None,
+            agent=request.user.agent if hasattr(request.user, 'agent') else '',
             montant_payer_dollars=montant_dollars,
             montant_payer_fc=montant_fc,
             devise=devise,
@@ -403,53 +397,15 @@ def ajouter_sortie(request):
         return redirect('Gerer_caisse')
 
     
-
-
-@login_required
-def caisse_detail_json(request, pk):
-    mvt = get_object_or_404(Paiement, pk=pk)
-
-    return JsonResponse({
-        "date": mvt.date_paiement.strftime("%d/%m/%Y"),
-        "type": mvt.type_operation,
-        "montant": f"{mvt.montant_payer_dollars}",
-        "motif": mvt.motif or "-",
-        "agent": mvt.agent.get_full_name() if mvt.agent else "-",
-        "piece": mvt.justificatif.url if mvt.justificatif else ""
-    })
-
+def caisse_detail(request, id):
+    mvt = Paiement.objects.get(id=id)
+    return render(request, "admin_template/caisse_detail.html", {"mvt": mvt})
 
 def caisse_edit(request, id):
     return HttpResponse("Édition à développer...")
 
-
-@login_required
 def caisse_delete(request, id):
-    mouvement = get_object_or_404(Paiement, pk=id)
-
-    if request.method == "POST":
-        # Log de l'activité avant suppression
-        try:
-            from Agent.models_activity import ActivityLog
-            ActivityLog.log_activity(
-                user=request.user,
-                action='delete',
-                entity_type='paiement',
-                title='Paiement supprimé',
-                description=f'{mouvement.montant_payer_dollars} USD - {mouvement.dossier.numero_reference_dossier if mouvement.dossier else "Caisse"}',
-                request=request,
-                dossier_id=mouvement.dossier.id if mouvement.dossier else None
-            )
-        except Exception as e:
-            print(f"Erreur lors du logging de la suppression de paiement: {e}")
-        
-        mouvement.delete()
-        messages.success(request, "Mouvement supprimé avec succès.")
-        return redirect('Gerer_caisse')
-
-    return render(request, 'caisse/confirm_delete.html', {
-        'mvt': mouvement
-    })
+    return HttpResponse("Suppression à développer...")
 
 
 
@@ -460,9 +416,11 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
     - Entrées pour le cabinet (dossier_id None ou via modal)
     """
 
-    # Si dossier_id fourni (URL), récupération initiale
+    # Si dossier_id fourni, récupération du dossier et client
     doss = get_object_or_404(dossier, id=dossier_id) if dossier_id else None
     cli = doss.client if doss else None
+
+    # Paiements liés au dossier ou vide si cabinet
     paiements = doss.paiements.all() if doss else Paiement.objects.none()
 
     # Taux courant du cabinet
@@ -472,6 +430,13 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
         return redirect('dossier_details', dossier_id=dossier_id) if dossier_id else redirect('dashboard')
 
     taux_fc = float(t.cout)
+
+    montant_enreg_dollars = float(doss.montant_dollars_enreg or 0) if doss else 0
+    montant_enreg_fc = float(doss.montant_fc_enreg or 0) if doss else 0
+
+    # Total déjà payé
+    total_deja_paye_dollars = float(paiements.aggregate(total=Sum("montant_payer_dollars"))["total"] or 0)
+    total_deja_paye_fc = float(paiements.aggregate(total=Sum("montant_payer_fc"))["total"] or 0)
 
     if request.method == "POST":
        
@@ -483,31 +448,6 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
             messages.error(request, "Le montant doit être un nombre valide.")
             return redirect(request.path)
         entry_type = request.POST.get("entry_type", "client")  # 'client' ou 'cabinet'
-
-        # --- Résolution du dossier pour les paiements client ---
-        if entry_type == "client":
-            post_dossier_id = request.POST.get("dossier_id") or dossier_id
-            numero_post = request.POST.get("numero_dossier")
-            if post_dossier_id:
-                doss = get_object_or_404(dossier, id=post_dossier_id)
-            elif numero_post:
-                doss = get_object_or_404(dossier, numero_reference_dossier=numero_post)
-            else:
-                messages.error(request, "Veuillez sélectionner un dossier client.")
-                return redirect(request.path)
-            cli = doss.client
-            paiements = doss.paiements.all()
-        else:
-            doss = None
-            cli = None
-            paiements = Paiement.objects.none()
-
-        # Données du dossier pour calculs
-        montant_enreg_dollars = float(doss.montant_dollars_enreg or 0) if doss else 0
-        montant_enreg_fc = float(doss.montant_fc_enreg or 0) if doss else 0
-        total_deja_paye_dollars = float(paiements.aggregate(total=Sum("montant_payer_dollars"))["total"] or 0)
-        total_deja_paye_fc = float(paiements.aggregate(total=Sum("montant_payer_fc"))["total"] or 0)
-
         devise = request.POST.get("devise_client") if entry_type=="client" else request.POST.get("devise")
         type_paiement = request.POST.get("type_paiement")
         notes = request.POST.get("notes")
@@ -519,16 +459,6 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
 
         # Personne qui paie, uniquement si client
         personne = request.POST.get("personne_paye") if entry_type == "client" else None
-
-        # Date de paiement (client ou cabinet)
-        date_str = request.POST.get("date_client") if entry_type == "client" else request.POST.get("date")
-        if date_str:
-            try:
-                date_paiement = datetime.strptime(date_str, "%Y-%m-%d")
-            except ValueError:
-                date_paiement = timezone.now()
-        else:
-            date_paiement = timezone.now()
 
 
         banque_id = request.POST.get("banque_hidden")
@@ -548,9 +478,9 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
         # ---------------- Vérification agent ----------------
         try:
             agent_logged = request.user.agent
-        except AttributeError:
-            # L'utilisateur n'a pas d'agent associé, utiliser None
-            agent_logged = None
+        except:
+            messages.error(request, "Erreur : Aucun agent associé à cet utilisateur.")
+            return redirect('dossier_details', dossier_id=dossier_id) if dossier_id else redirect('dashboard')
 
         # ---------------- Calcul montants ----------------
         if devise == "USD":
@@ -582,8 +512,7 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
             taux=taux_fc,
             motif=motif,
             type_operation="ENTREE",
-            banque=banque_instance,
-            date_paiement=date_paiement
+            banque=banque_instance
         )
 
        # ignorer si banque invalide
@@ -594,11 +523,6 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
             return JsonResponse({"success": True, "url_facture": url_facture})
 
         messages.success(request, "Paiement enregistré avec succès.")
-        # Préparer l'ouverture de la facture après redirection
-        if entry_type == "client":
-           request.session['facture_paiement_url'] = reverse('imprimer_facture_paiement', args=[paiement.id])
-
-
         # Redirection selon le type d'entrée
         if entry_type == "client" and dossier_id:
             return redirect('dossier_details', dossier_id=dossier_id)
@@ -608,13 +532,11 @@ def gestion_paiements_cabinet_client(request, dossier_id=None):
             return redirect('Gerer_caisse')  # pour entrée cabinet
 
     # ---------------- Render ----------------
-    facture_url = request.session.pop('facture_paiement_url', None)
     context = {
         "dossier": doss,
         "paiements": paiements,
         "client": cli,
         "taux_du_jour": taux_fc,
-        "banques": request.user.cabinet.Banque_cabinet.all(),
-        "facture_paiement_url": facture_url, # On le passe au contexte
+        "banques": request.user.cabinet.Banque_cabinet.all()
     }
     return render(request, "admin_template/dossier_details.html", context)

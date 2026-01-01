@@ -10,10 +10,10 @@
         <!-- HEADER -->
         <!-- HEADER -->
         <div class="content-header">
-            <h4 class="page-title">Gestion de la tr√(c)sorerie du cabinet</h4>
+            <h4 class="page-title">Gestion de la trésorerie du cabinet</h4>
             <p class="text-muted">
-                Pilotage des flux financiers, contr√¥le des encaissements et d√(c)caissements,
-                et suivi du solde de tr√(c)sorerie du cabinet d‚Äôavocats.
+                Pilotage des flux financiers, contrôle des encaissements et décaissements,
+                et suivi du solde de trésorerie du cabinet d’avocats.
             </p>
         </div>
 
@@ -23,7 +23,7 @@
             <div class="row mb-3">
                 <div class="col-12 d-flex justify-content-end gap-2">
                     <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addEntryModal">
-                        <i class="fa fa-plus-circle"></i> Enregistrer Entr√(c)e
+                        <i class="fa fa-plus-circle"></i> Enregistrer Entrée
                     </button>
                     <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addExitModal">
                         <i class="fa fa-minus-circle"></i> Enregistrer Sortie
@@ -48,7 +48,7 @@
 
                 <div class="col-lg-6 col-md-6">
                     <div class="box p-3 shadow-sm bg-white">
-                        <p class="text-muted mb-1">Total entr√(c)es (jour)</p>
+                        <p class="text-muted mb-1">Total entrées (jour)</p>
                         <h4 class="fw-bold text-success">{{ total_entrees_jour|floatformat:2 }} {{ devise }}</h4>
                         <h4 class="fw-bold text-success">{{ total_entrees_jour_fc|floatformat:2 }} FC</h4>
                         <div class="mt-2 progress" style="height: 4px;">
@@ -100,7 +100,7 @@
 
                                 <select id="filter_type" class="form-select filter-input">
                                     <option value="all">Tous types</option>
-                                    <option value="entree">Entr√(c)e</option>
+                                    <option value="entree">Entrée</option>
                                     <option value="sortie">Sortie</option>
                                 </select>
 
@@ -125,8 +125,8 @@
                                         <th>Type</th>
                                         <th>Montant</th>
                                         <th>Motif</th>
-                                        <th>Pi√(c)ce</th>
-                                        <th>Ajout√(c) par</th>
+                                        <th>Piéce</th>
+                                        <th>Ajouté par</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -137,7 +137,7 @@
 
                                         <td>
                                             {% if mvt.type_operation == 'ENTREE' %}
-                                            <span class="badge bg-success">Entr√(c)e</span>
+                                            <span class="badge bg-success">Entrée</span>
                                             {% else %}
                                             <span class="badge bg-danger">Sortie</span>
                                             {% endif %}
@@ -164,24 +164,27 @@
                                         </td>
 
                                         <td class="text-center">
-                                            <button class="btn btn-sm btn-info btn-view" data-id="{{ mvt.id }}">
+                                            <a href="{% url 'caisse_detail' mvt.id %}" class="btn btn-sm btn-info"
+                                                title="Voir">
                                                 <i class="fa fa-eye"></i>
-                                            </button>
-                                            <form action="{% url 'caisse_delete' mvt.id %}" method="post"
-                                                class="d-inline">
-                                                {% csrf_token %}
-                                                <button class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Confirmer la suppression ?')">
-                                                    <i class="fa fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            </a>
 
+                                            <a href="{% url 'caisse_edit' mvt.id %}" class="btn btn-sm btn-warning"
+                                                title="Modifier">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+
+                                            <a href="{% url 'caisse_delete' mvt.id %}" class="btn btn-sm btn-danger"
+                                                title="Supprimer"
+                                                onclick="return confirm('Confirmer la suppression ?');">
+                                                <i class="fa fa-trash"></i>
+                                            </a>
                                         </td>
 
                                     </tr>
                                     {% empty %}
                                     <tr>
-                                        <td colspan="8" class="text-center">Aucun mouvement enregistr√(c).</td>
+                                        <td colspan="8" class="text-center">Aucun mouvement enregistré.</td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -206,37 +209,37 @@
 
 <!-- ========================= MODALS ========================= -->
 
-<!-- Modal entr√(c)e -->
+<!-- Modal entrée -->
 <div class="modal fade" id="addEntryModal" tabindex="-1">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content modal-clean">
 
-            <form method="post" action="{% url 'gestion_paiements_cabinet' %}" enctype="multipart/form-data">
+            <form method="post"
+                action="{% if entry_type == 'client' %}{% url 'gestion_paiements_dossier' dossier.id %}{% else %}{% url 'gestion_paiements_cabinet' %}{% endif %}"
+                enctype="multipart/form-data">
                 {% csrf_token %}
 
                 <!-- Hidden pour transmettre montant et banque -->
                 <input type="hidden" name="montant_hidden" id="montantHidden" value="">
                 <input type="hidden" name="banque_hidden" id="banqueHidden" value="">
-                <input type="hidden" name="entry_type" id="entryTypeHidden" value="">
-                <input type="hidden" name="dossier_id" id="dossierIdHidden" value="">
+                <input type="hidden" name="entry_type" id="entryTypeHidden" value="cabinet">
 
 
 
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Nouvelle Entr√(c)e</h5>
+                    <h5 class="modal-title fw-bold">Nouvelle Entrée</h5>
                     <button class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
 
-                <div class="modal-body" style="max-height: 72vh; overflow-y: auto;">
+                <div class="modal-body">
 
-                    <!-- TYPE D‚ÄôENTR√âE -->
+                    <!-- TYPE D’ENTRÉE -->
                     <div class="mb-4">
-                        <label class="form-label fw-semibold mb-1">Type d‚Äôentr√(c)e</label>
+                        <label class="form-label fw-semibold">Type d’entrée</label>
                         <select id="entryType" class="form-select">
                             <option value="cabinet">Pour le cabinet</option>
                             <option value="client">Pour un client</option>
                         </select>
-                        <small class="text-muted">Choisissez la section concern√(c)e.</small>
                     </div>
                     <!-- === SECTION POUR LE CABINET === -->
                     <div id="sectionCabinet">
@@ -262,25 +265,25 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">Montant</label>
-                                <input type="number" step="0.01" name="montant_cabinet" class="form-control">
+                                <input type="number" step="0.01" name="montant" class="form-control" required>
                             </div>
 
 
                             <div class="col-md-6">
-                                <label>M√(c)thode de paiement </label>
+                                <label>Méthode de paiement </label>
                                 <select class="form-select" name="type_paiement" id="modePaiementCabinet" required>
                                     <option>Cash</option>
                                     <option>Virement Bancaire</option>
                                     <option>Mobile Money</option>
-                                    <option>Carte Cr√(c)dit/D√(c)bit</option>
-                                    <option>Ch√(R)que</option>
+                                    <option>Carte Crédit/Débit</option>
+                                    <option>Chèque</option>
                                     <option>Autre</option>
                                 </select>
 
                             </div>
 
                             <div class="col-md-6" id="banqueContainerCabinet" style="display: none;">
-                                <label class="form-label">S√(c)lectionner la banque</label>
+                                <label class="form-label">Sélectionner la banque</label>
                                 <select name="banque_cabinet" id="banqueSelectCabinet" class="form-select">
                                     <option value="">-- Choisir une banque --</option>
                                     {% for b in banques %}
@@ -296,7 +299,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Pi√(R)ce justificative</label>
+                                <label class="form-label">Pièce justificative</label>
                                 <input type="file" name="piece" class="form-control">
                             </div>
                         </div>
@@ -306,40 +309,29 @@
                     <!-- === SECTION POUR LE CLIENT === -->
                     <div id="sectionClient" style="display: none;">
 
-                        <div class="alert alert-info py-2 px-3 mb-3">
-                            Utilisez cette interface pour enregistrer un paiement li√(c) √† un dossier client.
-                        </div>
+                        <p class="text-muted">
+                            Utilisez cette interface pour enregistrer un paiement lié à un dossier client.
+                        </p>
 
                         <!-- Recherche dossier -->
+                        <!-- ... code au-dessus ... -->
                         <div class="row g-3 mb-3">
-                            <div class="col-md-3 col-lg-2">
-                                <label class="form-label">Date</label>
-                                <input type="date" name="date_client" class="form-control"
-                                    value="{{ now|date:'Y-m-d' }}">
+                            <div class="col-md-4">
+                                <label class="form-label">Numéro du dossier</label>
+                                <input type="text" name="numero_dossier" id="numeroDossier" class="form-control"
+                                    placeholder="Ex: 2024-001" data-bs-toggle="modal"
+                                    data-bs-target="#dossierSelectModal">
+                                <small class="text-muted">
+                                    Cliquez dans le champ pour afficher la liste des dossiers clients.
+                                </small>
                             </div>
 
-                            <div class="col-md-9 col-lg-10">
-                                <label class="form-label">Num√(c)ro du dossier</label>
-                                <div class="input-group">
-                                    <input type="text" name="numero_dossier" id="numeroDossier" class="form-control"
-                                        placeholder="Ex: 2024-001" autocomplete="off">
-                                    <button class="btn btn-outline-primary" type="button" id="openDossierModal"
-                                        data-bs-toggle="modal" data-bs-target="#dossierSelectModal">
-                                        <i class="fa fa-search"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Titre du dossier</label>
-                                <input type="text" id="titreDossier" class="form-control" disabled>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label">Nom du client</label>
+                            <div class="col-md-8">
+                                <label class="form-label">Nom du dossier</label>
                                 <input type="text" id="nomDossier" class="form-control" disabled>
                             </div>
                         </div>
+                        <!-- ... code en-dessous ... -->
 
                         <div class="row">
                             <div class="col-md-3 mb-3">
@@ -352,37 +344,31 @@
 
                             <div class="col-md-3 mb-3">
                                 <label>Taux du jour</label>
-                                <input class="form-control" type="text" name="taux_client"
-                                    value="{{dernier_taux.cout}} " disabled>
+                                <input class="form-control" type="text" name="taux_client" value="{{taux_du_jour}}">
                             </div>
 
-                            <div class="col-md-3 mb-3">
-                                <label>Montant pay√(c) *</label>
-                                <input type="number" step="0.01" class="form-control" name="montant_client">
-                            </div>
-
-                            <div class="col-md-3 mb-3">
-                                <label>Personne qui paye</label>
-                                <input type="text" class="form-control" name="personne_paye"
-                                    placeholder="Nom du payeur">
+                            <div class="col-md-6 mb-3">
+                                <label>Montant payé *</label>
+                                <input type="number" step="0.01" class="form-control" name="montant">
                             </div>
                         </div>
 
-                        <div class="row g-3 align-items-end">
-                            <div class="col-md-4">
-                                <label class="form-label">M√(c)thode de paiement</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label>Méthode de paiement </label>
                                 <select class="form-select" name="type_paiement" id="modePaiementClient" required>
                                     <option>Cash</option>
                                     <option>Virement Bancaire</option>
                                     <option>Mobile Money</option>
-                                    <option>Carte Cr√(c)dit/D√(c)bit</option>
-                                    <option>Ch√(R)que</option>
+                                    <option>Carte Crédit/Débit</option>
+                                    <option>Chèque</option>
                                     <option>Autre</option>
                                 </select>
+
                             </div>
 
-                            <div class="col-md-4" id="banqueContainerClient" style="display: none;">
-                                <label class="form-label">S√(c)lectionner la banque</label>
+                            <div class="col-md-6" id="banqueContainerClient" style="display: none;">
+                                <label class="form-label">Sélectionner la banque</label>
                                 <select name="banque_client" id="banqueSelectClient" class="form-select">
                                     <option value="">-- Choisir une banque --</option>
                                     {% for b in banques %}
@@ -391,10 +377,13 @@
                                 </select>
                             </div>
 
-                            <div class="col-md-4">
-                                <label class="form-label">Justificatif</label>
-                                <input type="file" class="form-control" name="justificatif">
-                            </div>
+
+
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Justificatif</label>
+                            <input type="file" class="form-control" name="justificatif">
                         </div>
 
                         <div class="mb-3">
@@ -416,85 +405,8 @@
         </div>
     </div>
 </div>
-<!-- Modal s√(c)lection dossier/client -->
-<div class="modal fade" id="dossierSelectModal" tabindex="-1">
-    <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
-            <div class="modal-header bg-light">
-                <div>
-                    <p class="text-muted mb-0 small">S√(c)lection et filtrage</p>
-                    <h5 class="modal-title fw-bold">S√(c)lectionner un dossier client</h5>
-                </div>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
 
-            <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
-                <div class="row g-3">
 
-                    <!-- Liste des clients -->
-                    <div class="col-md-4">
-                        <label class="form-label fw-semibold d-flex align-items-center gap-2">
-                            <i class="fa fa-users text-primary"></i> Clients du cabinet
-                        </label>
-                        <input type="text" id="searchClient" class="form-control mb-2"
-                            placeholder="Rechercher un client...">
-                        <div class="list-group border rounded" id="clientsList"
-                            style="max-height: 420px; overflow-y: auto;">
-                            <!-- Rempli en JS √† partir des dossiers -->
-                        </div>
-                    </div>
-
-                    <!-- Tableau des dossiers -->
-                    <div class="col-md-8">
-                        <div class="d-flex justify-content-between align-items-center mb-1">
-                            <label class="form-label fw-semibold mb-0 d-flex align-items-center gap-2">
-                                <i class="fa fa-folder-open text-primary"></i> Dossiers du client s√(c)lectionn√(c)
-                            </label>
-                            <small class="text-muted" id="clientSelectionInfo">Aucun client s√(c)lectionn√(c)</small>
-                        </div>
-                        <div class="input-group mb-2">
-                            <span class="input-group-text bg-light"><i class="fa fa-search"></i></span>
-                            <input type="text" id="searchDossier" class="form-control"
-                                placeholder="Rechercher par nom, postnom ou num√(c)ro de dossier...">
-                        </div>
-
-                        <div class="table-responsive border rounded" style="max-height: 60vh; overflow-y: auto;">
-                            <table class="table table-sm table-hover align-middle mb-0" id="dossiersTable">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>Num√(c)ro</th>
-                                        <th>Titre</th>
-                                        <th>Client</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for d in dossiers %}
-                                    <tr class="select-dossier-row" role="button" style="cursor: pointer;"
-                                        data-client-id="{{ d.client.id }}"
-                                        data-client-name="{{ d.client.nom }} {{ d.client.postnom }} {{ d.client.prenom }}"
-                                        data-dossier-id="{{ d.id }}" data-numero="{{ d.numero_reference_dossier }}"
-                                        data-nom="{{ d.client.nom }} {{ d.client.postnom }} {{ d.client.prenom }}"
-                                        data-titre="{{ d.titre|default:'Titre non renseign√(c)' }}">
-                                        <td class="fw-semibold">{{ d.numero_reference_dossier }}</td>
-                                        <td>{{ d.titre|default:"Titre non renseign√(c)" }}</td>
-                                        <td>{{ d.client.nom }} {{ d.client.postnom }} {{ d.client.prenom }}</td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="3" class="text-center text-muted py-3">Aucun dossier disponible.
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Modal sortie -->
 <div class="modal fade" id="addExitModal" tabindex="-1">
@@ -573,88 +485,79 @@
 </div>
 
 
-<!-- MODAL DETAILS MOUVEMENT -->
-<div class="modal fade" id="mouvementDetailModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
+<!-- Modal sélection dossier/client -->
+<div class="modal fade" id="dossierSelectModal" tabindex="-1">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
         <div class="modal-content">
-
             <div class="modal-header">
-                <h5 class="modal-title">D√(c)tails du mouvement</h5>
-                <button class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title">Sélectionner un dossier client</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
-                <table class="table table-bordered">
-                    <tr>
-                        <th>Date</th>
-                        <td id="mvtDate"></td>
-                    </tr>
-                    <tr>
-                        <th>Type</th>
-                        <td id="mvtType"></td>
-                    </tr>
-                    <tr>
-                        <th>Montant</th>
-                        <td id="mvtMontant"></td>
-                    </tr>
-                    <tr>
-                        <th>Motif</th>
-                        <td id="mvtMotif"></td>
-                    </tr>
-                    <tr>
-                        <th>Ajout√(c) par</th>
-                        <td id="mvtAgent"></td>
-                    </tr>
-                    <tr>
-                        <th>Pi√(R)ce</th>
-                        <td id="mvtPiece"></td>
-                    </tr>
-                </table>
-            </div>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <input
+                            type="text"
+                            id="searchDossier"
+                            class="form-control"
+                            placeholder="Rechercher par nom, postnom ou numéro de dossier..."
+                        >
+                    </div>
+                </div>
 
-            <div class="modal-footer">
-                <form id="deleteForm" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">
-                        <i class="fa fa-trash"></i> Supprimer
-                    </button>
-                </form>
-                <button class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-            </div>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover" id="dossiersTable">
+                        <thead>
+                            <tr>
+                                <th>Numéro dossier</th>
+                                <th>Nom</th>
+                                <th>Postnom</th>
+                                <th>Prénom</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for d in dossiers %}
+                            <tr>
+                                <td>{{ d.numero_dossier }}</td>
+                                <td>{{ d.client.nom }}</td>
+                                <td>{{ d.client.postnom }}</td>
+                                <td>{{ d.client.prenom }}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm btn-primary select-dossier"
+                                        data-numero="{{ d.numero_dossier }}"
+                                        data-nom="{{ d.client.nom }} {{ d.client.postnom }} {{ d.client.prenom }}"
+                                    >
+                                        Sélectionner
+                                    </button> 
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">
+                                    Aucun dossier disponible.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
 
+            </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="modalImpression" tabindex="-1" aria-labelledby="modalImpressionLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="modalImpressionLabel text-white"><i class="fa fa-check-circle"></i> Paiement enregistr√(c)</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-      <div class="modal-body text-center py-4">
-        <p class="fs-5">Le paiement a √(c)t√(c) enregistr√(c) avec succ√(R)s.</p>
-        <p class="text-muted">Voulez-vous imprimer la facture maintenant ?</p>
-      </div>
-      <div class="modal-footer justify-content-center">
-        <button type="button" class="btn btn-light border" data-bs-dismiss="modal">Plus tard</button>
-        <button type="button" class="btn btn-primary" id="btnImprimerUSD">
-            <i class="fa fa-print"></i> Imprimer en USD
-        </button>
-        <button type="button" class="btn btn-success" id="btnImprimerCDF">
-            <i class="fa fa-print"></i> Imprimer en CDF
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+
 
 <script>
     document.getElementById("entryType").addEventListener("change", function () {
 
         let type = this.value;
-        document.getElementById("entryTypeHidden").value = type; // üîπ √† ajouter
+        document.getElementById("entryTypeHidden").value = type; // 🔹 à ajouter
 
         if (type === "client") {
             document.getElementById("sectionClient").style.display = "block";
@@ -670,7 +573,7 @@
 
         let num = this.value;
 
-        if (num.length < 2) return; // √(c)viter appels excessifs
+        if (num.length < 2) return; // éviter appels excessifs
 
         fetch(`/recherche-dossier/${num}/`)
             .then(res => res.json())
@@ -678,7 +581,7 @@
                 if (data.success) {
                     document.getElementById("nomDossier").value = data.nom;
                 } else {
-                    document.getElementById("nomDossier").value = "Aucun dossier trouv√(c)";
+                    document.getElementById("nomDossier").value = "Aucun dossier trouvé";
                 }
             })
             .catch(() => {
@@ -686,32 +589,6 @@
             });
 
     });
-</script>
-
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    // Correction : Utilisez la variable pass√(c)e au CONTEXTE, pas √† la session directement
-    const factureUrl = "{{ facture_paiement_url|default:'' }}"; 
-    
-    if (factureUrl && factureUrl !== "") {
-        const modalElement = document.getElementById('modalImpression');
-        if (modalElement) {
-            const myModal = new bootstrap.Modal(modalElement);
-            myModal.show();
-
-            document.getElementById("btnImprimerUSD").onclick = function() {
-                window.open(`${factureUrl}?devise=USD`, "_blank");
-                myModal.hide();
-            };
-
-            document.getElementById("btnImprimerCDF").onclick = function() {
-                window.open(`${factureUrl}?devise=FC`, "_blank");
-                myModal.hide();
-            };
-        }
-    }
-});
 </script>
 
 
@@ -728,7 +605,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let currentPage = 1;
 
-        // R√(c)cup√(c)rer toutes les lignes au d√(c)part
+        // Récupérer toutes les lignes au départ
         const allRows = Array.from(tableBody.querySelectorAll("tr"));
 
         // Fonction pour normaliser texte (supprime accents)
@@ -743,15 +620,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
             return allRows.filter(row => {
 
-                // V√(c)rifier type
+                // Vérifier type
                 let typeText = normalizeText(row.querySelector("td:nth-child(2)").textContent);
                 if (type !== "all" && typeText.indexOf(type) === -1) return false;
 
-                // V√(c)rifier utilisateur
+                // Vérifier utilisateur
                 let userText = normalizeText(row.querySelector("td:nth-child(7)").textContent);
                 if (user && userText.indexOf(user) === -1) return false;
 
-                // V√(c)rifier p√(c)riode
+                // Vérifier période
                 const dateText = row.querySelector("td:nth-child(1)").textContent;
                 const [d, m, y] = dateText.split(" ")[0].split("/");
                 const rowDate = new Date(`${y}-${m}-${d}`);
@@ -789,14 +666,14 @@ document.addEventListener("DOMContentLoaded", function () {
             const totalPages = Math.ceil(totalRows / rowsPerPage);
             paginationContainer.innerHTML = "";
 
-            // Pr√(c)c√(c)dent
+            // Précédent
             const prev = document.createElement("li");
             prev.className = "page-item" + (currentPage === 1 ? " disabled" : "");
-            prev.innerHTML = `<a class="page-link" href="#">¬´</a>`;
+            prev.innerHTML = `<a class="page-link" href="#">«</a>`;
             prev.addEventListener("click", () => showPage(currentPage - 1));
             paginationContainer.appendChild(prev);
 
-            // Num√(c)ros de page
+            // Numéros de page
             for (let i = 1; i <= totalPages; i++) {
                 const li = document.createElement("li");
                 li.className = "page-item" + (i === currentPage ? " active" : "");
@@ -808,12 +685,12 @@ document.addEventListener("DOMContentLoaded", function () {
             // Suivant
             const next = document.createElement("li");
             next.className = "page-item" + (currentPage === totalPages ? " disabled" : "");
-            next.innerHTML = `<a class="page-link" href="#">¬ª</a>`;
+            next.innerHTML = `<a class="page-link" href="#">»</a>`;
             next.addEventListener("click", () => showPage(currentPage + 1));
             paginationContainer.appendChild(next);
         }
 
-        // √âv√(c)nements filtrage
+        // Événements filtrage
         [filterPeriod, filterType, filterUser].forEach(el => {
             el.addEventListener("change", () => showPage(1));
             if (el.tagName === "INPUT") {
@@ -835,18 +712,18 @@ document.addEventListener("DOMContentLoaded", function () {
 
             let selectMotif = $("#selectMotif");
 
-            // D√(c)truit l'ancienne instance si elle existe
+            // Détruit l'ancienne instance si elle existe
             selectMotif.chosen('destroy');
 
-            // R√(c)active Chosen dans le modal
+            // Réactive Chosen dans le modal
             selectMotif.chosen({
                 width: "100%",
-                no_results_text: "Aucun r√(c)sultat trouv√(c)",
+                no_results_text: "Aucun résultat trouvé",
                 allow_single_deselect: true,
                 search_contains: true
             });
 
-            // Activer scroll si plus de 10 √(c)l√(c)ments
+            // Activer scroll si plus de 10 éléments
             setTimeout(function () {
                 if (selectMotif.find("option").length > 5) {
                     $('.chosen-results').css({
@@ -861,95 +738,76 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 </script>
 
-<!--Script pour recuperer le montant , la banque et le type d'entr√(c)√(c)-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        const form = document.querySelector("#addEntryModal form");
-
+        // 🔹 Gestion du type d'entrée (Cabinet / Client)
         const entryTypeSelect = document.getElementById("entryType");
-        const entryTypeHidden = document.getElementById("entryTypeHidden");
-
         const sectionCabinet = document.getElementById("sectionCabinet");
         const sectionClient = document.getElementById("sectionClient");
+        const entryTypeHidden = document.getElementById("entryTypeHidden");
 
-        const montantHidden = document.getElementById("montantHidden");
-        const banqueHidden = document.getElementById("banqueHidden");
-
-        /* ==============================
-           SWITCH CABINET / CLIENT
-        ============================== */
-        function updateSection() {
+        function updateEntrySection() {
             const type = entryTypeSelect.value;
             entryTypeHidden.value = type;
-
             if (type === "client") {
                 sectionClient.style.display = "block";
                 sectionCabinet.style.display = "none";
             } else {
-                sectionCabinet.style.display = "block";
                 sectionClient.style.display = "none";
+                sectionCabinet.style.display = "block";
             }
         }
+        entryTypeSelect.addEventListener("change", updateEntrySection);
+        updateEntrySection(); // affichage initial
 
-        entryTypeSelect.addEventListener("change", updateSection);
-        updateSection();
-
-        /* ==============================
-           BANQUE VISIBILIT√â
-        ============================== */
-        function toggleBanque(selectId, containerId) {
+        // 🔹 Gestion affichage banque selon type de paiement
+        function toggleBanque(containerId, selectId) {
             const select = document.getElementById(selectId);
             const container = document.getElementById(containerId);
-
             function update() {
-                container.style.display =
-                    select.value === "Virement Bancaire" ? "block" : "none";
+                container.style.display = (select.value === "Virement Bancaire") ? "block" : "none";
             }
-
             select.addEventListener("change", update);
-            update();
+            update(); // état initial
         }
 
-        toggleBanque("modePaiementCabinet", "banqueContainerCabinet");
-        toggleBanque("modePaiementClient", "banqueContainerClient");
+        toggleBanque("banqueContainerCabinet", "modePaiementCabinet");
+        toggleBanque("banqueContainerClient", "modePaiementClient");
 
-        /* ==============================
-           SUBMIT FINAL
-        ============================== */
-        form.addEventListener("submit", function (event) {
+        // 🔹 Avant submit, remplir les hidden montant et banque
+        document.querySelectorAll("form").forEach(form => {
+            form.addEventListener("submit", function () {
 
-            const entryType = entryTypeSelect.value;
+                const entryType = entryTypeHidden.value;
 
-            let montantValue = "";
-            let banqueValue = "";
+                // Montant
+                let montantInput = (entryType === "cabinet") ?
+                    form.querySelector("#sectionCabinet input[name='montant']") :
+                    form.querySelector("#sectionClient input[name='montant']");
 
-            if (entryType === "cabinet") {
-                montantValue = form.querySelector("input[name='montant_cabinet']").value;
-                banqueValue = form.querySelector("select[name='banque_cabinet']")?.value || "";
-            } else {
-                montantValue = form.querySelector("input[name='montant_client']").value;
-                banqueValue = form.querySelector("select[name='banque_client']")?.value || "";
-            }
+                if (montantInput) {
+                    document.getElementById("montantHidden").value = montantInput.value;
+                }
 
-            if (!montantValue || parseFloat(montantValue) <= 0) {
-                alert("Veuillez saisir un montant valide.");
-                event.preventDefault();
-                return;
-            }
+                // Banque
+                let banqueSelect = (entryType === "cabinet") ?
+                    form.querySelector("#sectionCabinet select[name='banque_cabinet']") :
+                    form.querySelector("#sectionClient select[name='banque_client']");
 
-            montantHidden.value = montantValue;
-            banqueHidden.value = banqueValue;
+                if (banqueSelect && banqueSelect.value) {
+                    document.getElementById("banqueHidden").value = banqueSelect.value;
+                } else {
+                    document.getElementById("banqueHidden").value = "";
+                }
 
-            console.log("TYPE :", entryTypeHidden.value);
-            console.log("MONTANT :", montantHidden.value);
-            console.log("BANQUE :", banqueHidden.value);
+            });
         });
 
     });
+
 </script>
 
-<!--Script pour le modale de recherche du dossier  pour paiement client-->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Normalisation texte (pour ignore accents / majuscules)
@@ -958,79 +816,10 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         const searchInput = document.getElementById("searchDossier");
-        const searchClientInput = document.getElementById("searchClient");
         const table = document.getElementById("dossiersTable");
         const rows = table ? table.querySelectorAll("tbody tr") : [];
-        const numeroInput = document.getElementById("numeroDossier");
-        const nomInput = document.getElementById("nomDossier");
-        const titreInput = document.getElementById("titreDossier");
-        const modalEl = document.getElementById("dossierSelectModal");
-        const openBtn = document.getElementById("openDossierModal");
-        let dossierModal = modalEl ? (bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl)) : null;
-        const clientsList = document.getElementById("clientsList");
-        const clientInfo = document.getElementById("clientSelectionInfo");
 
-        // Ouvrir le modal via bouton ou focus sur le champ num√(c)ro
-        function showDossierModal() {
-            if (dossierModal) {
-                dossierModal.show();
-            }
-        }
-        if (openBtn) openBtn.addEventListener("click", showDossierModal);
-        if (numeroInput) numeroInput.addEventListener("focus", showDossierModal);
-
-        // Construire la liste des clients √† partir des lignes du tableau
-        const clientsMap = new Map(); // clientId -> {name, count}
-        rows.forEach(row => {
-            const clientId = row.getAttribute("data-client-id");
-            const clientName = row.getAttribute("data-client-name");
-            if (clientId && clientName) {
-                clientsMap.set(clientId, { name: clientName, count: (clientsMap.get(clientId)?.count || 0) + 1 });
-            }
-        });
-
-        if (clientsList) {
-            clientsList.innerHTML = "";
-            clientsMap.forEach((info, clientId) => {
-                const a = document.createElement("a");
-                a.href = "#";
-                a.className = "list-group-item list-group-item-action d-flex justify-content-between align-items-center";
-                a.setAttribute("data-client-id", clientId);
-                a.innerHTML = `<span>${info.name}</span><span class="badge bg-primary rounded-pill">${info.count}</span>`;
-                a.addEventListener("click", (e) => {
-                    e.preventDefault();
-                    filterByClient(clientId, info.name);
-                });
-                clientsList.appendChild(a);
-            });
-        }
-
-        // Filtrer par client
-        function filterByClient(clientId, clientName) {
-            const termClient = clientId ? clientId.toString() : "";
-            rows.forEach(row => {
-                const rowClient = row.getAttribute("data-client-id") || "";
-                row.style.display = (!termClient || rowClient === termClient) ? "" : "none";
-            });
-            if (clientInfo) {
-                clientInfo.textContent = clientName ? `Client s√(c)lectionn√(c) : ${clientName}` : "Aucun client s√(c)lectionn√(c)";
-            }
-            // R√(c)initialiser la recherche dossier
-            if (searchInput) searchInput.value = "";
-        }
-
-        // Recherche client (filtre la liste de gauche)
-        if (searchClientInput && clientsList) {
-            searchClientInput.addEventListener("keyup", function () {
-                const term = normalizeText(this.value.trim());
-                clientsList.querySelectorAll(".list-group-item").forEach(item => {
-                    const txt = normalizeText(item.textContent);
-                    item.style.display = txt.includes(term) ? "" : "none";
-                });
-            });
-        }
-
-        // Filtre sur nom, postnom, num√(c)ro dossier (tout le texte de la ligne)
+        // Filtre sur nom, postnom, numéro dossier (tout le texte de la ligne)
         if (searchInput && rows.length) {
             searchInput.addEventListener("keyup", function () {
                 const term = normalizeText(this.value.trim());
@@ -1042,75 +831,25 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         }
 
-        // S√(c)lection en cliquant sur la ligne du tableau
-        document.querySelectorAll(".select-dossier-row").forEach(row => {
-            row.addEventListener("click", function () {
+        // Quand on clique sur "Sélectionner"
+        document.querySelectorAll(".select-dossier").forEach(btn => {
+            btn.addEventListener("click", function () {
                 const numero = this.getAttribute("data-numero");
                 const nom = this.getAttribute("data-nom");
-                const titre = this.getAttribute("data-titre");
-                const dossierId = this.getAttribute("data-dossier-id");
+
+                const numeroInput = document.getElementById("numeroDossier");
+                const nomInput = document.getElementById("nomDossier");
 
                 if (numeroInput) numeroInput.value = numero;
                 if (nomInput) nomInput.value = nom;
-                if (titreInput) titreInput.value = titre;
-                const dossierIdInput = document.getElementById("dossierIdHidden");
-                if (dossierIdInput) dossierIdInput.value = dossierId;
 
-                if (dossierModal) {
-                    dossierModal.hide();
-                }
+                // Fermer le modal après sélection
+                const modalEl = document.getElementById("dossierSelectModal");
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                modal.hide();
             });
         });
     });
-</script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    const modalEl = document.getElementById("mouvementDetailModal");
-    const modal = new bootstrap.Modal(modalEl);
-
-    document.querySelectorAll(".btn-view").forEach(btn => {
-        btn.addEventListener("click", function () {
-
-            const mvtId = this.dataset.id;
-            console.log("CLICK MOUVEMENT ID :", mvtId);
-
-            fetch(`/caisse/${mvtId}/json/`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Erreur HTTP " + response.status);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log("DATA RE√áUE :", data);
-
-                    document.getElementById("mvtDate").textContent = data.date;
-                    document.getElementById("mvtType").textContent = data.type;
-                    document.getElementById("mvtMontant").textContent = data.montant;
-                    document.getElementById("mvtMotif").textContent = data.motif;
-                    document.getElementById("mvtAgent").textContent = data.agent;
-
-                    document.getElementById("mvtPiece").innerHTML =
-                        data.piece
-                            ? `<a href="${data.piece}" target="_blank">Voir</a>`
-                            : "-";
-
-                    document.getElementById("deleteForm").action =
-                        `/caisse/${mvtId}/delete/`;
-
-                    modal.show();
-                })
-                .catch(error => {
-                    console.error("ERREUR FETCH :", error);
-                    alert("Impossible de charger les d√(c)tails.");
-                });
-
-        });
-    });
-
-});
 </script>
 
 
