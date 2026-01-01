@@ -19,6 +19,7 @@ ALLOWED_HOSTS = [
     '.railway.app',
     'localhost',
     '127.0.0.1',
+    '*',  # Temporaire pour debug
 ]
 
 # Configuration de la base de données MySQL Railway
@@ -43,15 +44,11 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Ajouter WhiteNoise pour servir les fichiers statiques
-MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
+if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
+    MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise - Utiliser notre stockage personnalisé
-STATICFILES_STORAGE = 'storage.RailwayStaticFilesStorage'
-
-# Configuration WhiteNoise pour ignorer les fichiers manquants
-WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'map']
-WHITENOISE_USE_FINDERS = True
-WHITENOISE_AUTOREFRESH = True
+# Configuration WhiteNoise - Simple et robuste
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Configuration des logs pour Railway
 LOGGING = {
@@ -75,10 +72,10 @@ LOGGING = {
     },
 }
 
-# Sécurité pour Railway (HTTPS)
+# Sécurité pour Railway (désactivée temporairement pour debug)
 if not DEBUG:
-    SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+    SECURE_SSL_REDIRECT = False  # Temporairement désactivé
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
