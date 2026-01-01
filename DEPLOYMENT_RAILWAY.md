@@ -172,7 +172,13 @@ Railway Dashboard → Metrics :
 
 ### Erreurs communes
 
-**1. Erreur 500 - Internal Server Error**
+**1. Erreur mysqlclient build failed**
+```
+Exception: Can not find valid pkg-config name.
+```
+**Solution :** Le projet utilise maintenant PyMySQL au lieu de mysqlclient pour éviter les problèmes de compilation sur Railway.
+
+**2. Erreur 500 - Internal Server Error**
 ```bash
 # Vérifier les logs
 railway logs

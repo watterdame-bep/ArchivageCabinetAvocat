@@ -7,6 +7,10 @@ Configuration optimisée pour le déploiement sur Railway
 from pathlib import Path
 import os
 from decouple import config
+import pymysql
+
+# Configuration PyMySQL pour remplacer mysqlclient
+pymysql.install_as_MySQLdb()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
