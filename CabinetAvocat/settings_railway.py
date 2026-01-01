@@ -45,8 +45,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 # Ajouter WhiteNoise pour servir les fichiers statiques
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# Configuration WhiteNoise - Utiliser notre stockage personnalisé
+STATICFILES_STORAGE = 'storage.RailwayStaticFilesStorage'
+
+# Configuration WhiteNoise pour ignorer les fichiers manquants
+WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'map']
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
 # Configuration des logs pour Railway
 LOGGING = {

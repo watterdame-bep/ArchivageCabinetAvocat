@@ -16,11 +16,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copier le code de l'application
 COPY . .
 
-# Collecter les fichiers statiques
-RUN python manage.py collectstatic --noinput --settings=CabinetAvocat.settings_railway
+# Rendre le script de démarrage exécutable
+RUN chmod +x start.sh
+
+# Créer le répertoire staticfiles
+RUN mkdir -p staticfiles
 
 # Exposer le port
 EXPOSE 8000
 
-# Commande de démarrage
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--env", "DJANGO_SETTINGS_MODULE=CabinetAvocat.settings_railway", "CabinetAvocat.wsgi:application"]
+# Utiliser le script de démarrage
+CMD ["./start.sh"]
