@@ -26,9 +26,13 @@ fi
 echo "🗄️ Application des migrations..."
 python manage.py migrate --settings=CabinetAvocat.settings_railway || echo "⚠️ Erreur lors des migrations (ignorée)"
 
-# Collecter les fichiers statiques (ignorer les erreurs)
+# Collecter les fichiers statiques avec plus de verbosité
 echo "📦 Collecte des fichiers statiques..."
-python manage.py collectstatic --noinput --settings=CabinetAvocat.settings_railway --clear || echo "⚠️ Erreur lors de la collecte des fichiers statiques (ignorée)"
+python manage.py collectstatic --noinput --clear --verbosity=2 --settings=CabinetAvocat.settings_railway || echo "⚠️ Erreur lors de la collecte des fichiers statiques (ignorée)"
+
+# Debug des fichiers statiques
+echo "🔍 Debug des fichiers statiques..."
+python debug_static.py || echo "⚠️ Erreur lors du debug des fichiers statiques"
 
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
