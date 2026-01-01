@@ -86,13 +86,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if 'whitenoise.middleware.WhiteNoiseMiddleware' not in MIDDLEWARE:
     MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
-# Configuration WhiteNoise - Plus robuste
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+# Configuration WhiteNoise - Désactiver la compression pour debug
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
 # Configuration WhiteNoise pour éviter les erreurs
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = True
 WHITENOISE_SKIP_COMPRESS_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'zip', 'gz', 'tgz', 'bz2', 'tbz', 'xz', 'br', 'map']
+WHITENOISE_MAX_AGE = 31536000  # 1 an
 
 # Répertoires de fichiers statiques
 STATICFILES_DIRS = [

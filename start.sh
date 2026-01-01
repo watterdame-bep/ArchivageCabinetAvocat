@@ -30,6 +30,10 @@ python manage.py migrate --settings=CabinetAvocat.settings_railway || echo "⚠�
 echo "📦 Collecte des fichiers statiques..."
 python manage.py collectstatic --noinput --clear --verbosity=2 --settings=CabinetAvocat.settings_railway || echo "⚠️ Erreur lors de la collecte des fichiers statiques (ignorée)"
 
+# Corriger les fichiers statiques manquants
+echo "🔧 Correction des fichiers statiques manquants..."
+python fix_static_files.py || echo "⚠️ Erreur lors de la correction des fichiers statiques"
+
 # Debug des fichiers statiques
 echo "🔍 Debug des fichiers statiques..."
 python debug_static.py || echo "⚠️ Erreur lors du debug des fichiers statiques"
