@@ -3,15 +3,13 @@ set -e  # Arrêter en cas d'erreur
 
 echo "🚀 Démarrage de l'application Cabinet d'Avocats"
 
-# Test rapide de la configuration
-echo "🧪 Test de configuration..."
-python test_config.py || echo "⚠️ Problème de configuration détecté"
+# Test spécifique MySQL Railway
+echo "🧪 Test de connexion MySQL Railway..."
+python test_mysql_railway.py || echo "⚠️ Problème de connexion MySQL détecté"
 
 echo "🔍 Variables d'environnement:"
 echo "PORT: $PORT"
 echo "DJANGO_SETTINGS_MODULE: $DJANGO_SETTINGS_MODULE"
-echo "MYSQLHOST: $MYSQLHOST"
-echo "MYSQLDATABASE: $MYSQLDATABASE"
 
 # Vérifier que les variables critiques sont définies
 if [ -z "$PORT" ]; then

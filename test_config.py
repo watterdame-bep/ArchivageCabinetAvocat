@@ -26,6 +26,16 @@ def test_environment():
             if value != 'NON DÉFINIE':
                 value = '*' * 10
         print(f"  {var}: {value}")
+    
+    # Vérifier les doublons dans les variables
+    mysqlhost = os.environ.get('MYSQLHOST', '')
+    mysqldatabase = os.environ.get('MYSQLDATABASE', '')
+    
+    if mysqlhost.count('mysql.railway.internal') > 1:
+        print(f"⚠️ MYSQLHOST dupliqué détecté: {mysqlhost}")
+    
+    if 'railway' in mysqldatabase and mysqldatabase.count('railway') > 1:
+        print(f"⚠️ MYSQLDATABASE dupliqué détecté: {mysqldatabase}")
 
 def test_django():
     """Tester Django"""
