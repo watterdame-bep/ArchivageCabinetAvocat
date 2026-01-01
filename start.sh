@@ -38,9 +38,17 @@ python fix_static_files.py || echo "⚠️ Erreur lors de la correction des fich
 echo "🎨 Création des CSS manquants avec CDN..."
 python create_bootstrap_cdn.py || echo "⚠️ Erreur lors de la création des CSS CDN"
 
+# Créer les assets manquants (fonts, icônes)
+echo "🎨 Création des assets manquants (fonts, icônes)..."
+python create_missing_assets.py || echo "⚠️ Erreur lors de la création des assets manquants"
+
 # Debug des fichiers statiques
 echo "🔍 Debug final des fichiers statiques..."
 python debug_static.py || echo "⚠️ Erreur lors du debug des fichiers statiques"
+
+# Vérification des fonts et icônes
+echo "🔤 Vérification des fonts et icônes..."
+python check_fonts.py || echo "⚠️ Erreur lors de la vérification des fonts"
 
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
