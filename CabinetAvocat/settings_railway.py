@@ -35,10 +35,31 @@ SECRET_KEY = os.environ.get('SECRET_KEY', SECRET_KEY)
 # Hosts autorisés pour Railway
 ALLOWED_HOSTS = [
     '.railway.app',
+    'archivagecabinetavocat-production.up.railway.app',  # Votre domaine spécifique
     'localhost',
     '127.0.0.1',
     '*',  # Temporaire pour debug
 ]
+
+# Configuration CSRF pour Railway
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://archivagecabinetavocat-production.up.railway.app',
+]
+
+# Configuration des cookies pour Railway
+CSRF_COOKIE_SECURE = False  # Temporairement pour debug
+CSRF_COOKIE_HTTPONLY = True
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False  # Temporairement pour debug
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Configuration des sessions pour Railway
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 86400  # 24 heures
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 # Configuration de la base de données MySQL Railway avec nettoyage
 DATABASES = {

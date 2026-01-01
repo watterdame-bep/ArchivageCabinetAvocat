@@ -22,6 +22,10 @@ if [ -z "$SECRET_KEY" ]; then
     exit 1
 fi
 
+# Exécuter les migrations
+echo "🗄️ Application des migrations..."
+python manage.py migrate --settings=CabinetAvocat.settings_railway || echo "⚠️ Erreur lors des migrations (ignorée)"
+
 # Collecter les fichiers statiques (ignorer les erreurs)
 echo "📦 Collecte des fichiers statiques..."
 python manage.py collectstatic --noinput --settings=CabinetAvocat.settings_railway --clear || echo "⚠️ Erreur lors de la collecte des fichiers statiques (ignorée)"
