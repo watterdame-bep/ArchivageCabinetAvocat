@@ -1,0 +1,196 @@
+
+/* Correction spécifique pour les icônes - Cabinet d'Avocats */
+
+/* Force le chargement des fonts d'icônes avec priorité */
+@font-face {
+    font-family: 'FontAwesome';
+    src: url('/static/assets/icons/font-awesome/fonts/fontawesome-webfont3e6e.woff2') format('woff2'),
+         url('/static/assets/icons/font-awesome/fonts/fontawesome-webfont3e6e.woff') format('woff'),
+         url('/static/assets/icons/font-awesome/fonts/fontawesome-webfont3e6e.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Material Design Icons';
+    src: url('/static/assets/icons/material-design-iconic-font/fonts/materialdesignicons-webfontdf71.woff2') format('woff2'),
+         url('/static/assets/icons/material-design-iconic-font/fonts/materialdesignicons-webfontdf71.woff') format('woff'),
+         url('/static/assets/icons/material-design-iconic-font/fonts/materialdesignicons-webfontdf71.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'Ionicons';
+    src: url('/static/assets/icons/Ionicons/fonts/ionicons28b5.woff2') format('woff2'),
+         url('/static/assets/icons/Ionicons/fonts/ionicons28b5.woff') format('woff'),
+         url('/static/assets/icons/Ionicons/fonts/ionicons28b5.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'themify';
+    src: url('/static/assets/icons/themify-icons/fonts/themify.woff') format('woff'),
+         url('/static/assets/icons/themify-icons/fonts/themify.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Correction pour FontAwesome */
+.fa, .fas, .far, .fal, .fab {
+    font-family: 'FontAwesome' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Correction pour Material Design Icons */
+.mdi, .material-icons {
+    font-family: 'Material Design Icons' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Correction pour Ionicons */
+.ion, .ionicons {
+    font-family: 'Ionicons' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Correction pour Themify Icons */
+.ti {
+    font-family: 'themify' !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    text-decoration: inherit !important;
+    text-rendering: auto !important;
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+}
+
+/* Correction spécifique pour les icônes de la sidebar */
+.sidebar-menu .fa, .sidebar-menu .ion, .sidebar-menu .mdi, .sidebar-menu .ti {
+    display: inline-block !important;
+    width: 1.28571429em !important;
+    text-align: center !important;
+    margin-right: 10px !important;
+}
+
+/* Correction pour les icônes dans les boutons */
+.btn .fa, .btn .ion, .btn .mdi, .btn .ti {
+    margin-right: 5px !important;
+}
+
+/* Correction pour les icônes dans la navbar */
+.navbar .fa, .navbar .ion, .navbar .mdi, .navbar .ti {
+    font-size: 16px !important;
+}
+
+/* Correction pour les icônes dans les dropdowns */
+.dropdown-menu .fa, .dropdown-menu .ion, .dropdown-menu .mdi, .dropdown-menu .ti {
+    margin-right: 8px !important;
+    width: 16px !important;
+    text-align: center !important;
+}
+
+/* Correction pour les icônes dans les cartes */
+.card .fa, .card .ion, .card .mdi, .card .ti {
+    margin-right: 5px !important;
+}
+
+/* Correction pour les icônes dans les alertes */
+.alert .fa, .alert .ion, .alert .mdi, .alert .ti {
+    margin-right: 8px !important;
+}
+
+/* Correction pour les icônes dans les badges */
+.badge .fa, .badge .ion, .badge .mdi, .badge .ti {
+    font-size: 0.8em !important;
+}
+
+/* Correction pour les icônes dans les breadcrumbs */
+.breadcrumb .fa, .breadcrumb .ion, .breadcrumb .mdi, .breadcrumb .ti {
+    margin-right: 5px !important;
+}
+
+/* Correction pour les icônes dans les tabs */
+.nav-tabs .fa, .nav-tabs .ion, .nav-tabs .mdi, .nav-tabs .ti,
+.nav-pills .fa, .nav-pills .ion, .nav-pills .mdi, .nav-pills .ti {
+    margin-right: 5px !important;
+}
+
+/* Correction pour les icônes dans les listes */
+.list-group-item .fa, .list-group-item .ion, .list-group-item .mdi, .list-group-item .ti {
+    margin-right: 8px !important;
+    width: 16px !important;
+    text-align: center !important;
+}
+
+/* Correction pour les icônes dans les modales */
+.modal-header .fa, .modal-header .ion, .modal-header .mdi, .modal-header .ti {
+    margin-right: 8px !important;
+}
+
+/* Correction pour les icônes dans les tooltips */
+.tooltip .fa, .tooltip .ion, .tooltip .mdi, .tooltip .ti {
+    font-size: 12px !important;
+}
+
+/* Correction pour les icônes dans les popovers */
+.popover .fa, .popover .ion, .popover .mdi, .popover .ti {
+    margin-right: 5px !important;
+}
+
+/* Correction pour les icônes spécifiques du template */
+.icon-Layout-4-blocks:before { content: "\f009"; }
+.icon-Hummer:before { content: "\f0e3"; }
+.icon-User:before { content: "\f007"; }
+.icon-Commit:before { content: "\f126"; }
+.icon-Position:before { content: "\f065"; }
+.icon-Notification:before { content: "\f0f3"; }
+.icon-Settings1:before { content: "\f013"; }
+.icon-Menu:before { content: "\f0c9"; }
+.icon-Search:before { content: "\f002"; }
+.icon-Key:before { content: "\f084"; }
+.icon-Lock-overturning:before { content: "\f023"; }
+.icon-Group-chat:before { content: "\f086"; }
+.icon-Incoming-mail:before { content: "\f0e0"; }
+.icon-Add-user:before { content: "\f234"; }
+.icon-Clipboard:before { content: "\f0ea"; }
+.icon-Group:before { content: "\f0c0"; }
+.icon-Active-call:before { content: "\f095"; }
+.icon-Question-circle:before { content: "\f059"; }
+.icon-Notifications:before { content: "\f0f3"; }
+.icon-Color:before { content: "\f1fc"; }
+
+/* Force l'affichage des icônes même si les fonts ne se chargent pas */
+.fa:before, .fas:before, .far:before, .fal:before, .fab:before,
+.mdi:before, .ion:before, .ti:before {
+    font-family: 'FontAwesome', 'Material Design Icons', 'Ionicons', 'themify', sans-serif !important;
+}
+
+/* Fallback pour les icônes qui ne se chargent pas */
+.fa:not([class*="fa-"]):before,
+.mdi:not([class*="mdi-"]):before,
+.ion:not([class*="ion-"]):before,
+.ti:not([class*="ti-"]):before {
+    content: "●" !important;
+    color: #666 !important;
+}

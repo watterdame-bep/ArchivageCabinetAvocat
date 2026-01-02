@@ -70,6 +70,10 @@ python fix_encoding_issues.py || echo "⚠️ Erreur lors de la correction d'enc
 echo "🔧 Correction finale des fichiers manquants..."
 python fix_final_missing_files.py || echo "⚠️ Erreur lors de la correction finale"
 
+# Correction des icônes et charts
+echo "🎨 Correction des icônes et charts..."
+python fix_icons_and_charts.py || echo "⚠️ Erreur lors de la correction des icônes et charts"
+
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
 python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️ Problème de configuration Django"
