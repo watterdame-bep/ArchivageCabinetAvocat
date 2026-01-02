@@ -66,6 +66,10 @@ python analyze_css_issues.py || echo "⚠️ Erreur lors de l'analyse CSS"
 echo "🔤 Correction des problèmes d'encodage..."
 python fix_encoding_issues.py || echo "⚠️ Erreur lors de la correction d'encodage"
 
+# Correction finale des fichiers manquants
+echo "🔧 Correction finale des fichiers manquants..."
+python fix_final_missing_files.py || echo "⚠️ Erreur lors de la correction finale"
+
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
 python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️ Problème de configuration Django"
