@@ -4,7 +4,7 @@
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-<!-- CSS personnalis√(c) pour le select des clients -->
+<!-- CSS personnalisé pour le select des clients -->
 <style>
   /* Style pour le select des clients avec recherche */
   .client-select-with-search .select2-container .select2-selection--single {
@@ -24,7 +24,7 @@
     border-radius: 4px;
   }
 
-  /* Am√(c)lioration de la barre de recherche */
+  /* Amélioration de la barre de recherche */
   .select2-search--dropdown .select2-search__field {
     border: 1px solid #007bff;
     border-radius: 4px;
@@ -37,7 +37,7 @@
     outline: none;
   }
 
-  /* Style pour les r√(c)sultats de recherche */
+  /* Style pour les résultats de recherche */
   .select2-results__option--highlighted {
     background-color: #007bff !important;
     color: white !important;
@@ -108,7 +108,7 @@
         <div class="col-md-6">
           <div class="d-flex gap-2">
             <button class="btn btn-outline-info" data-bs-toggle="collapse" data-bs-target="#filtresAvances" aria-expanded="false">
-              <i class="fa fa-filter"></i> Filtres avanc√(c)s
+              <i class="fa fa-filter"></i> Filtres avancés
             </button>
             <form method="get" action="" class="d-flex flex-grow-1">
               <input type="text" name="q" class="form-control me-2" placeholder="Recherche rapide...">
@@ -120,7 +120,7 @@
         </div>
       </div>
 
-      <!-- Filtres avanc√(c)s (collapsible) -->
+      <!-- Filtres avancés (collapsible) -->
       <div class="collapse mb-3" id="filtresAvances">
         <div class="card card-body bg-light">
           <div class="row g-3">
@@ -129,7 +129,7 @@
               <input type="text" class="form-control form-control-sm" id="filtreId" placeholder="Ex: 123">
             </div>
             <div class="col-md-2">
-              <label class="form-label small">Date d√(c)but</label>
+              <label class="form-label small">Date début</label>
               <input type="date" class="form-control form-control-sm" id="filtreDateDebut">
             </div>
             <div class="col-md-2">
@@ -141,8 +141,8 @@
               <input type="text" class="form-control form-control-sm" id="filtreClient" placeholder="Nom du client">
             </div>
             <div class="col-md-2">
-              <label class="form-label small">R√(c)f√(c)rence</label>
-              <input type="text" class="form-control form-control-sm" id="filtreReference" placeholder="R√(c)f√(c)rence">
+              <label class="form-label small">Référence</label>
+              <input type="text" class="form-control form-control-sm" id="filtreReference" placeholder="Référence">
             </div>
             <div class="col-md-2">
               <label class="form-label small">Statut</label>
@@ -150,7 +150,7 @@
                 <option value="">Tous les statuts</option>
                 <option value="Ouvert">Ouvert</option>
                 <option value="En cours">En cours</option>
-                <option value="Cl√¥tur√(c)">Cl√¥tur√(c)</option>
+                <option value="Clôturé">Clôturé</option>
               </select>
             </div>
           </div>
@@ -192,8 +192,8 @@
                       <th>ID</th>
                       <th>Date Ouverture</th>
                       <th>Client</th>
-                      <th>R√(c)f√(c)rence</th>
-                      <th>Type d‚Äôaffaire</th>
+                      <th>Référence</th>
+                      <th>Type d'affaire</th>
                       <th>Secteur Foncier</th>
                       <th>Statut</th>
 
@@ -210,7 +210,7 @@
                       <td>{{ d.type_affaire.nom_type }}</td>
                       <td>{{ d.secteur_foncier.nom }}</td>
                       <td>
-                        {% if d.statut_dossier == 'Cl√¥tur√(c)' %}
+                        {% if d.statut_dossier == 'Clôturé' %}
                         <span class="badge bg-primary">{{ d.statut_dossier }}</span>
                         {% else %}
                         <span class="badge bg-success">{{ d.statut_dossier }}</span>
@@ -231,14 +231,14 @@
                     </tr>
                     {% empty %}
                     <tr>
-                      <td colspan="8" class="text-center text-muted">Aucun dossier trouv√(c).</td>
+                      <td colspan="8" class="text-center text-muted">Aucun dossier trouvé.</td>
                     </tr>
                     {% endfor %}
                   </tbody>
                 </table>
               </div>
               
-              <!-- Contr√¥les de pagination -->
+              <!-- Contrôles de pagination -->
               <div class="d-flex justify-content-between align-items-center mt-3 px-3"></div>
                 <div class="d-flex align-items-center">
                   <label class="form-label me-2 mb-0">Afficher:</label>
@@ -248,11 +248,11 @@
                     <option value="50">50</option>
                     <option value="100">100</option>
                   </select>
-                  <span class="ms-2 text-muted small">√(c)l√(c)ments par page</span>
+                  <span class="ms-2 text-muted small">éléments par page</span>
                 </div>
                 
                 <div class="d-flex align-items-center">
-                  <span class="me-3 text-muted small" id="paginationInfo">Affichage de 1 √† 10 sur 100 entr√(c)es</span>
+                  <span class="me-3 text-muted small" id="paginationInfo">Affichage de 1 à 10 sur 100 entrées</span>
                   
                   <nav aria-label="Pagination des dossiers">
                     <ul class="pagination pagination-sm mb-0" id="paginationControls">
@@ -261,7 +261,7 @@
                           <i class="fa fa-chevron-left"></i>
                         </a>
                       </li>
-                      <!-- Les num√(c)ros de page seront g√(c)n√(c)r√(c)s dynamiquement -->
+                      <!-- Les numéros de page seront générés dynamiquement -->
                       <li class="page-item disabled" id="nextPage">
                         <a class="page-link" href="#">
                           <i class="fa fa-chevron-right"></i>
@@ -309,19 +309,19 @@
               <div class="row">
                 <div class="col-md-6 mb-3">
                   <label class="form-label">Client <span class="text-danger">*</span></label>
-                  <!-- Zone cliquable pour s√(c)lectionner un client -->
+                  <!-- Zone cliquable pour sélectionner un client -->
                   <div class="client-selector-zone" data-bs-toggle="modal" data-bs-target="#modalSelectionClient">
                     <div class="form-control d-flex justify-content-between align-items-center" style="cursor: pointer;">
                       <span id="selectedClientText" class="text-muted">Cliquer pour choisir un client...</span>
                       <i class="fa fa-chevron-down"></i>
                     </div>
                   </div>
-                  <!-- Input cach√(c) pour stocker l'ID du client s√(c)lectionn√(c) -->
+                  <!-- Input caché pour stocker l'ID du client sélectionné -->
                   <input type="hidden" name="client" id="selectedClientId" required>
                 </div>
 
                 <div class="col-md-6 mb-3">
-                  <label class="form-label">Intitul√(c) du dossier <span class="text-danger">*</span></label>
+                  <label class="form-label">Intitulé du dossier <span class="text-danger">*</span></label>
                   <input type="text" name="titre" class="form-control" placeholder="Nom du dossier" required>
                 </div>
               </div>
@@ -363,7 +363,7 @@
                   <label class="form-label">Juridiction <span class="text-danger">*</span></label>
                   <div class="input-group">
                     <select name="juridiction" id="juridictionSelect" class="form-select select2" required>
-                      <option value="">S√(c)lectionnez une juridiction...</option>
+                      <option value="">Sélectionnez une juridiction...</option>
                       {% for j in juridictions %}
                       <option value="{{ j.id }}">{{ j.nom }} {% if j.lieu %}- {{ j.lieu.nom }}{% endif %}</option>
                       {% endfor %}
@@ -404,13 +404,13 @@
   </div>
 </div>
 
-<!-- Modal de s√(c)lection de client -->
+<!-- Modal de sélection de client -->
 <div class="modal fade" id="modalSelectionClient" tabindex="-1" aria-labelledby="modalSelectionClientLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <div class="modal-header bg-primary text-white">
         <h5 class="modal-title" id="modalSelectionClientLabel">
-          <i class="fa fa-users me-2"></i>S√(c)lectionner un Client
+          <i class="fa fa-users me-2"></i>Sélectionner un Client
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
@@ -422,7 +422,7 @@
             <div class="input-group">
               <span class="input-group-text"><i class="fa fa-search"></i></span>
               <input type="text" class="form-control" id="searchClientModal"
-                placeholder="Rechercher par nom, pr√(c)nom, email...">
+                placeholder="Rechercher par nom, prénom, email...">
             </div>
           </div>
           <div class="col-md-6">
@@ -439,9 +439,9 @@
               <tr>
                 <th>Photo</th>
                 <th>Nom</th>
-                <th>Pr√(c)nom</th>
+                <th>Prénom</th>
                 <th>Email</th>
-                <th>T√(c)l√(c)phone</th>
+                <th>Téléphone</th>
                 <th>Date Naissance</th>
                 <th>Action</th>
               </tr>
@@ -464,17 +464,17 @@
                 <td class="fw-bold">{{ client.nom }}</td>
                 <td>{{ client.prenom }}</td>
                 <td>
-                  <small class="text-muted">{{ client.email|default:"Non renseign√(c)" }}</small>
+                  <small class="text-muted">{{ client.email|default:"Non renseigné" }}</small>
                 </td>
                 <td>
-                  <small class="text-muted">{{ client.telephone|default:"Non renseign√(c)" }}</small>
+                  <small class="text-muted">{{ client.telephone|default:"Non renseigné" }}</small>
                 </td>
                 <td>
                   <small class="text-muted">
                     {% if client.date_naissance %}
                     {{ client.date_naissance|date:"d/m/Y" }}
                     {% else %}
-                    Non renseign√(c)
+                    Non renseigné
                     {% endif %}
                   </small>
                 </td>
@@ -511,9 +511,9 @@
 <!-- Configuration Select2 pour le modal -->
 <script>
   $(document).ready(function () {
-    // Configuration Select2 √† l'ouverture du modal
+    // Configuration Select2 à l'ouverture du modal
     $('#ajoutDossierModal').on('shown.bs.modal', function () {
-      // D√(c)truire les instances existantes et reconfigurer
+      // Détruire les instances existantes et reconfigurer
       $(this).find('.select2').select2('destroy').select2({
         dropdownParent: $('#ajoutDossierModal'),
         width: '100%',
@@ -521,7 +521,7 @@
         allowClear: true,
         language: {
           noResults: function () {
-            return "Aucun r√(c)sultat trouv√(c)";
+            return "Aucun résultat trouvé";
           }
         }
       });
@@ -556,13 +556,13 @@
       $('.client-row').show();
     });
 
-    // S√(c)lectionner un client
+    // Sélectionner un client
     $(document).on('click', '.select-client-btn', function () {
       const clientId = $(this).data('client-id');
       const clientNom = $(this).data('client-nom');
       const clientPrenom = $(this).data('client-prenom');
       
-      // Mettre √† jour la zone de s√(c)lection
+      // Mettre à jour la zone de sélection
       $('#selectedClientText').text(clientNom + ' ' + clientPrenom)
         .removeClass('text-muted')
         .addClass('text-dark fw-bold');
@@ -573,18 +573,18 @@
       
       // Notification (si toastr est disponible)
       if (typeof toastr !== 'undefined') {
-        toastr.success(`Client s√(c)lectionn√(c): ${clientNom} ${clientPrenom}`, 'Succ√(R)s');
+        toastr.success(`Client sélectionné: ${clientNom} ${clientPrenom}`, 'Succès');
       }
     });
 
-    // R√(c)initialiser la recherche √† l'ouverture du modal
+    // Réinitialiser la recherche à l'ouverture du modal
     $('#modalSelectionClient').on('shown.bs.modal', function () {
       $('#searchClientModal').val('');
       $('.client-row').show();
       $('#searchClientModal').focus();
     });
 
-    // Clic sur une ligne pour s√(c)lectionner (optionnel)
+    // Clic sur une ligne pour sélectionner (optionnel)
     $(document).on('click', '.client-row', function () {
       $(this).find('.select-client-btn').click();
     });
@@ -605,7 +605,7 @@
       $('#example1 tbody tr').each(function() {
         const ligne = $(this);
         
-        // Ignorer la ligne "Aucun dossier trouv√(c)"
+        // Ignorer la ligne "Aucun dossier trouvé"
         if (ligne.find('td').length === 1 && ligne.find('td').attr('colspan')) {
           return;
         }
@@ -628,7 +628,7 @@
           afficher = false;
         }
         
-        // Filtre par r√(c)f√(c)rence
+        // Filtre par référence
         if (filtreReference && !reference.includes(filtreReference)) {
           afficher = false;
         }
@@ -663,20 +663,20 @@
         }
       });
       
-      // Mettre √† jour le compteur
-      $('#compteurResultats').text(`${lignesVisibles} dossier(s) trouv√(c)(s)`);
+      // Mettre à jour le compteur
+      $('#compteurResultats').text(`${lignesVisibles} dossier(s) trouvé(s)`);
       
-      // Mettre √† jour la pagination avec les r√(c)sultats filtr√(c)s
+      // Mettre à jour la pagination avec les résultats filtrés
       updateFilteredItems();
       
-      // Afficher/masquer le message "Aucun dossier trouv√(c)"
+      // Afficher/masquer le message "Aucun dossier trouvé"
       if (lignesVisibles === 0) {
         if ($('#example1 tbody .no-results').length === 0) {
           $('#example1 tbody').append(`
             <tr class="no-results">
               <td colspan="8" class="text-center text-muted py-4">
                 <i class="fa fa-search fa-2x mb-2 d-block"></i>
-                Aucun dossier ne correspond aux crit√(R)res de recherche
+                Aucun dossier ne correspond aux critères de recherche
               </td>
             </tr>
           `);
@@ -691,12 +691,12 @@
       filtrerTableau();
     });
     
-    // Filtrage en temps r√(c)el sur les champs texte
+    // Filtrage en temps réel sur les champs texte
     $('#filtreId, #filtreClient, #filtreReference').on('keyup', function() {
       filtrerTableau();
     });
     
-    // Filtrage en temps r√(c)el sur les champs date et select
+    // Filtrage en temps réel sur les champs date et select
     $('#filtreDateDebut, #filtreDateFin, #filtreStatut').on('change', function() {
       filtrerTableau();
     });
@@ -709,7 +709,7 @@
       $('#example1 tbody .no-results').remove();
       $('#compteurResultats').text('');
       
-      // R√(c)initialiser la pagination
+      // Réinitialiser la pagination
       initPagination();
     });
     
@@ -722,12 +722,12 @@
     
     // Initialiser la pagination
     function initPagination() {
-      // R√(c)cup√(c)rer toutes les lignes du tableau (sauf les messages)
+      // Récupérer toutes les lignes du tableau (sauf les messages)
       const allRows = $('#example1 tbody tr').not('.no-results');
       totalItems = allRows.length;
       filteredItems = allRows.toArray();
       
-      // Mettre √† jour l'affichage
+      // Mettre à jour l'affichage
       updatePagination();
       showPage(1);
       
@@ -737,40 +737,40 @@
       }
     }
     
-    // Mettre √† jour la pagination
+    // Mettre à jour la pagination
     function updatePagination() {
       const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
       
-      // Mettre √† jour les informations de pagination
+      // Mettre à jour les informations de pagination
       const startItem = filteredItems.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
       const endItem = Math.min(currentPage * itemsPerPage, filteredItems.length);
       
-      $('#paginationInfo').text(`Affichage de ${startItem} √† ${endItem} sur ${filteredItems.length} entr√(c)es`);
+      $('#paginationInfo').text(`Affichage de ${startItem} à ${endItem} sur ${filteredItems.length} entrées`);
       
-      // G√(c)n√(c)rer les contr√¥les de pagination
+      // Générer les contrôles de pagination
       generatePaginationControls(totalPages);
       
-      // Activer/d√(c)sactiver les boutons pr√(c)c√(c)dent/suivant
+      // Activer/désactiver les boutons précédent/suivant
       $('#prevPage').toggleClass('disabled', currentPage === 1);
       $('#nextPage').toggleClass('disabled', currentPage === totalPages || totalPages === 0);
     }
     
-    // G√(c)n√(c)rer les contr√¥les de pagination
+    // Générer les contrôles de pagination
     function generatePaginationControls(totalPages) {
       const paginationControls = $('#paginationControls');
       
-      // Supprimer les anciens num√(c)ros de page
+      // Supprimer les anciens numéros de page
       paginationControls.find('.page-number').remove();
       
       if (totalPages <= 1) {
         return;
       }
       
-      // Calculer les pages √† afficher
+      // Calculer les pages à afficher
       let startPage = Math.max(1, currentPage - 2);
       let endPage = Math.min(totalPages, currentPage + 2);
       
-      // Ajuster si on est pr√(R)s du d√(c)but ou de la fin
+      // Ajuster si on est près du début ou de la fin
       if (endPage - startPage < 4) {
         if (startPage === 1) {
           endPage = Math.min(totalPages, startPage + 4);
@@ -779,7 +779,7 @@
         }
       }
       
-      // Ajouter la premi√(R)re page si n√(c)cessaire
+      // Ajouter la première page si nécessaire
       if (startPage > 1) {
         const firstPageItem = $(`
           <li class="page-item page-number">
@@ -809,7 +809,7 @@
         $('#nextPage').before(pageItem);
       }
       
-      // Ajouter la derni√(R)re page si n√(c)cessaire
+      // Ajouter la dernière page si nécessaire
       if (endPage < totalPages) {
         if (endPage < totalPages - 1) {
           const ellipsisItem = $(`
@@ -829,14 +829,14 @@
       }
     }
     
-    // Afficher une page sp√(c)cifique
+    // Afficher une page spécifique
     function showPage(page) {
       currentPage = page;
       
       // Masquer toutes les lignes
       $('#example1 tbody tr').hide();
       
-      // Calculer les indices de d√(c)but et fin
+      // Calculer les indices de début et fin
       const startIndex = (currentPage - 1) * itemsPerPage;
       const endIndex = startIndex + itemsPerPage;
       
@@ -845,18 +845,18 @@
         $(filteredItems[i]).show();
       }
       
-      // Mettre √† jour la pagination
+      // Mettre à jour la pagination
       updatePagination();
     }
     
-    // Mettre √† jour les √(c)l√(c)ments filtr√(c)s
+    // Mettre à jour les éléments filtrés
     function updateFilteredItems() {
       filteredItems = $('#example1 tbody tr').not('.no-results').filter(':visible').toArray();
       currentPage = 1;
       showPage(1);
     }
     
-    // Gestionnaires d'√(c)v√(c)nements pour la pagination
+    // Gestionnaires d'événements pour la pagination
     $(document).on('click', '#prevPage:not(.disabled) a', function(e) {
       e.preventDefault();
       if (currentPage > 1) {
@@ -878,7 +878,7 @@
       showPage(page);
     });
     
-    // Changer le nombre d'√(c)l√(c)ments par page
+    // Changer le nombre d'éléments par page
     $('#itemsPerPage').on('change', function() {
       itemsPerPage = parseInt($(this).val());
       currentPage = 1;
@@ -922,17 +922,17 @@
         }
       });
       
-      // Mettre √† jour la pagination avec les r√(c)sultats de recherche
+      // Mettre à jour la pagination avec les résultats de recherche
       updateFilteredItems();
       
-      // G√(c)rer le message "aucun r√(c)sultat"
+      // Gérer le message "aucun résultat"
       if (lignesVisibles === 0) {
         if ($('#example1 tbody .no-results').length === 0) {
           $('#example1 tbody').append(`
             <tr class="no-results">
               <td colspan="8" class="text-center text-muted py-4">
                 <i class="fa fa-search fa-2x mb-2 d-block"></i>
-                Aucun dossier ne correspond √† "${searchTerm}"
+                Aucun dossier ne correspond à "${searchTerm}"
               </td>
             </tr>
           `);
@@ -945,9 +945,9 @@
 </script>
 
 
-<!-- Styles pour le modal de s√(c)lection client -->
+<!-- Styles pour le modal de sélection client -->
 <style>
-  /* Zone cliquable pour s√(c)lectionner un client */
+  /* Zone cliquable pour sélectionner un client */
   .client-selector-zone:hover {
     background-color: #f8f9fa;
   }
@@ -989,7 +989,7 @@
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
   }
 
-  /* Styles pour les filtres avanc√(c)s */
+  /* Styles pour les filtres avancés */
   #filtresAvances .card-body {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 1px solid #dee2e6;
@@ -1025,20 +1025,20 @@
     }
   }
 
-  /* Style pour le compteur de r√(c)sultats */
+  /* Style pour le compteur de résultats */
   #compteurResultats {
     font-weight: 500;
     color: #007bff;
   }
 
-  /* Am√(c)lioration du bouton filtres */
+  /* Amélioration du bouton filtres */
   .btn-outline-info:hover {
     background-color: #17a2b8;
     border-color: #17a2b8;
     color: white;
   }
 
-  /* Style pour les lignes filtr√(c)es */
+  /* Style pour les lignes filtrées */
   #example1 tbody tr {
     transition: opacity 0.2s ease;
   }
@@ -1080,7 +1080,7 @@
     cursor: not-allowed;
   }
 
-  /* Style pour les contr√¥les de pagination */
+  /* Style pour les contrôles de pagination */
   #itemsPerPage {
     min-width: 80px;
   }
@@ -1110,18 +1110,18 @@
   /* Select2 custom styles for scrollable dropdown */
   .select2-container--default .select2-results>.select2-results__options {
     max-height: 200px;
-    /* Hauteur pour environ 5-6 √(c)l√(c)ments */
+    /* Hauteur pour environ 5-6 éléments */
     overflow-y: auto;
   }
 
-  /* Optionnel : Si vous voulez aussi styliser la barre de d√(c)filement (scrollbar) */
+  /* Optionnel : Si vous voulez aussi styliser la barre de défilement (scrollbar) */
   .select2-results__options::-webkit-scrollbar {
     width: 6px;
   }
 
   .select2-results__options::-webkit-scrollbar-thumb {
     background-color: #71b6f9;
-    /* Couleur de votre th√(R)me */
+    /* Couleur de votre thème */
     border-radius: 10px;
   }
 </style>

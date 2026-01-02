@@ -63,7 +63,7 @@
 										{{ dossier.client.nom }} {{ dossier.client.prenom }}
 									</a>
 									{% else %}
-									<span>Client non associ√(c)</span>
+									<span>Client non associé</span>
 									{% endif %}
 								</h4>
 
@@ -71,7 +71,7 @@
 								<h5 class="d-flex align-items-center mb-2">
 									<span class="me-2">Dossier: {{ dossier.titre }}</span>
 
-									{% if dossier.statut_dossier == 'Cl√¥tur√(c)' %}
+									{% if dossier.statut_dossier == 'Clôturé' %}
 									<span class="badge bg-primary text-white rounded-pill px-2 py-1">
 										{{ dossier.statut_dossier }}
 									</span>
@@ -94,9 +94,9 @@
 									{% endif %}
 								</h5>
 
-								<!-- R√(c)f√(c)rence et date -->
+								<!-- Référence et date -->
 								<h5 class="fw-500 mb-2">#ref: {{ dossier.numero_reference_dossier }}</h5>
-								<p><i class="fa fa-clock-o me-1"></i> {{ dossier.date_ouverture|date:"d F Y √† H:i" }}
+								<p><i class="fa fa-clock-o me-1"></i> {{ dossier.date_ouverture|date:"d F Y à H:i" }}
 								</p>
 							</div>
 
@@ -105,7 +105,7 @@
 					<div class="py-2 px-3" style="background:white; border-bottom:1px solid #dee2e6;">
 						<div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
 
-							<!-- üîπ Boutons √† gauche -->
+							<!-- üîπ Boutons à gauche -->
 							<div class="d-flex gap-2 flex-wrap">
 
 								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
@@ -119,7 +119,7 @@
 								</button>
 
 								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
-									data-bs-target="#sectionPieces" title="Pi√(R)ces jointes">
+									data-bs-target="#sectionPieces" title="Pièces jointes">
 									<i class="fa fa-file-text text-warning fa-2x"></i>
 								</button>
 
@@ -129,17 +129,17 @@
 								</button>
 
 								<button class="btn btn-light btn-sm border" data-bs-toggle="collapse"
-									data-bs-target="#sectionDeclaration" title="D√(c)claration">
+									data-bs-target="#sectionDeclaration" title="Déclaration">
 									<i class="fa fa-clipboard text-secondary fa-2x"></i>
 								</button>
 							</div>
 
-							<!-- üî¥ Bouton cl√¥turer √† droite -->
-							{% if dossier.statut_dossier != 'Cl√¥tur√(c)' %}
+							<!-- üî¥ Bouton clôturer à droite -->
+							{% if dossier.statut_dossier != 'Clôturé' %}
 							<button class="btn btn-danger btn-sm d-flex align-items-center gap-2 px-3"
 								data-bs-toggle="modal" data-bs-target="#modalClotureDossier">
 								<i class="fa fa-lock"></i>
-								<strong>Cl√¥turer le dossier</strong>
+								<strong>Clôturer le dossier</strong>
 							</button>
 							{%endif%}
 
@@ -154,7 +154,7 @@
 					</style>
 
 					<!-- ==== FIN BOUTONS ==== -->
-					<!-- ==================== SECTION MODE D‚ÄôHONORAIRE (COLLAPSIBLE) ==================== -->
+					<!-- ==================== SECTION MODE D'HONORAIRE (COLLAPSIBLE) ==================== -->
 					<div class="collapse mt-3" id="sectionHonoraire">
 						<div class="box">
 
@@ -189,7 +189,7 @@
 								</p>
 
 								<!-- MONTANT A PAYER -->
-								<p class="mb-2"><strong>Montant √† payer :</strong></p>
+								<p class="mb-2"><strong>Montant à payer :</strong></p>
 
 								<div class="d-flex gap-2 flex-wrap mb-4">
 
@@ -225,7 +225,7 @@
 
 
 								<!-- MONTANT D√âJ√Ä PAY√â -->
-								<p class="mb-2"><strong>Montant d√(c)j√† pay√(c) :</strong></p>
+								<p class="mb-2"><strong>Montant déjà payé :</strong></p>
 
 								<div class="d-flex gap-2 flex-wrap mb-4">
 									<span
@@ -249,7 +249,7 @@
 								</div>
 
 								<!-- RESTE √Ä PAYER -->
-								<p class="mb-2 mt-3"><strong>Reste √† payer :</strong></p>
+								<p class="mb-2 mt-3"><strong>Reste à payer :</strong></p>
 
 								<div class="d-flex flex-wrap gap-3 mb-4">
 
@@ -260,7 +260,7 @@
 										USD restant : ${{ reste_a_payer|floatformat:2|intcomma }}
 									</span>
 
-									<!-- RESTE FC (si tu veux, tu peux d√(c)commenter)-->
+									<!-- RESTE FC (si tu veux, tu peux décommenter)-->
 									<span
 										class="badge bg-danger text-white px-4 py-3 fs-6 fw-bold shadow-sm rounded-pill">
 										<i class="fa fa-exclamation-circle me-1"></i>
@@ -269,19 +269,19 @@
 								</div>
 
 								{% else %}
-								<p class="text-muted">Aucun mode d‚Äôhonoraire n‚Äôa encore √(c)t√(c) d√(c)fini pour ce dossier.</p>
+								<p class="text-muted">Aucun mode d'honoraire n'a encore été défini pour ce dossier.</p>
 								{% endif %}
 							</div>
 
 							<!-- DETAILS ACTIVIT√âS -->
 							<button type="button" class="btn btn-info btn-sm mb-3" data-bs-toggle="modal"
 								data-bs-target="#modalActivites{{ dossier.id }}">
-								<i class="fa fa-eye"></i> Voir d√(c)tails activit√(c)s
+								<i class="fa fa-eye"></i> Voir détails activités
 							</button>
 
 						</div>
 					</div>
-					<!-- ==================== FIN SECTION MODE D‚ÄôHONORAIRE ==================== -->
+					<!-- ==================== FIN SECTION MODE D'HONORAIRE ==================== -->
 
 
 					<!-- ==================== DEBUT SECTION GESTION PAIEMENT ==================== -->
@@ -289,7 +289,7 @@
 						<div class="col-12">
 							<div class="box-header d-flex justify-content-between align-items-center">
 								<h4 class="box-title">üí∏ Gestion des Paiements</h4>
-								<!-- Bouton Imprimer plac√(c) √† droite -->
+								<!-- Bouton Imprimer placé à droite -->
 								<button class="btn btn-primary"
 									onclick="window.open('{% url 'extrait_compte_date_form' dossier.id %}');">
 									<i class="fa fa-print me-1"></i> Imprimer extrait de compte client
@@ -308,7 +308,7 @@
 											</a>
 										</li>
 
-										{% if dossier.statut_dossier != 'Cl√¥tur√(c)' %}
+										{% if dossier.statut_dossier != 'Clôturé' %}
 										<li class="nav-item">
 											<a class="nav-link" data-bs-toggle="tab" href="#tab_enregistrer_paiement"
 												role="tab">
@@ -342,7 +342,7 @@
 													data-reference="{{ p.reference_transaction|default:'-' }}"
 													data-status="{{ p.statut }}">
 
-													<!-- Ic√¥ne selon le mode de paiement -->
+													<!-- Icône selon le mode de paiement -->
 													{% if p.type_paiement == "Cash" %}
 													<div
 														class="icon bg-warning-light text-warning fa fa-money-bill-wave">
@@ -352,7 +352,7 @@
 													{% elif p.type_paiement == "Virement Bancaire" %}
 													<div class="icon bg-primary-light text-primary fa fa-university">
 													</div>
-													{% elif p.type_paiement == "Ch√(R)que" %}
+													{% elif p.type_paiement == "Chèque" %}
 													<div
 														class="icon bg-secondary-light text-secondary fa fa-file-invoice-dollar">
 													</div>
@@ -395,7 +395,7 @@
 												</li>
 
 												{% empty %}
-												<p class="text-muted">Aucun paiement enregistr√(c) pour ce dossier.</p>
+												<p class="text-muted">Aucun paiement enregistré pour ce dossier.</p>
 												{% endfor %}
 
 											</ul>
@@ -434,7 +434,7 @@
 													</div>
 
 													<div class="col-md-6 mb-3">
-														<label for="montant">Montant Pay√(c) <span
+														<label for="montant">Montant Payé <span
 																class="text-danger">*</span></label>
 														<input type="number" step="0.01" class="form-control"
 															id="montant" name="montant" required>
@@ -444,22 +444,22 @@
 
 												<div class="row">
 													<div class="col-md-6 mb-3">
-														<label for="type_paiement">M√(c)thode de Paiement <span
+														<label for="type_paiement">Méthode de Paiement <span
 																class="text-danger">*</span></label>
 														<select class="form-select" id="type_paiement"
 															name="type_paiement" required>
 															<option value="Virement Bancaire">Virement Bancaire</option>
 															<option value="Cash">Cash</option>
 															<option value="Mobile Money">Mobile Money</option>
-															<option value="Carte Cr√(c)dit/D√(c)bit">Carte Cr√(c)dit/D√(c)bit
+															<option value="Carte Crédit/Débit">Carte Crédit/Débit
 															</option>
-															<option value="Ch√(R)que">Ch√(R)que</option>
+															<option value="Chèque">Chèque</option>
 															<option value="Autre">Autre</option>
 														</select>
 													</div>
 
 													<div class="col-md-6 mb-3">
-														<label for="personne_paye">Personne qui paye (si diff√(c)rent du
+														<label for="personne_paye">Personne qui paye (si différent du
 															client)</label>
 														<input type="text" class="form-control" id="personne_paye"
 															name="personne_paye" placeholder="Nom de la personne">
@@ -467,7 +467,7 @@
 												</div>
 
 												<div class="mb-3">
-													<label for="justificatif">Pi√(R)ce justificative (Optionnel)</label>
+													<label for="justificatif">Pièce justificative (Optionnel)</label>
 													<input type="file" class="form-control" id="justificatif"
 														name="justificatif" accept=".pdf,.jpg,.png">
 												</div>
@@ -494,12 +494,12 @@
 										<div class="modal-content">
 											<div class="modal-header bg-primary text-white">
 												<h5 class="modal-title" id="modalImpressionLabel text-white"><i
-														class="fa fa-check-circle"></i> Paiement enregistr√(c)</h5>
+														class="fa fa-check-circle"></i> Paiement enregistré</h5>
 												<button type="button" class="btn-close" data-bs-dismiss="modal"
 													aria-label="Fermer"></button>
 											</div>
 											<div class="modal-body text-center py-4">
-												<p class="fs-5">Le paiement a √(c)t√(c) enregistr√(c) avec succ√(R)s.</p>
+												<p class="fs-5">Le paiement a été enregistré avec succès.</p>
 												<p class="text-muted">Voulez-vous imprimer la facture maintenant ?</p>
 											</div>
 											<div class="modal-footer justify-content-center">
@@ -521,15 +521,15 @@
 					</div>
 
 
-					<!-- DEBUT Section Pi√(R)ces et Documents du Dossier -->
+					<!-- DEBUT Section Pièces et Documents du Dossier -->
 					{% if user.is_authenticated and not user.agent.poste == 'Secretaire'%}
 					<div class="collapse mt-3" id="sectionPieces">
 						<div class="box">
 
 							<div class="box-header d-flex justify-content-between align-items-center">
-								<h4 class="box-title">Preuve et pi√(R)ces jointes</h4>
+								<h4 class="box-title">Preuve et pièces jointes</h4>
 								<!-- Bouton pour ouvrir le modal d'ajout -->
-								<!-- Boutons pour ajouter diff√(c)rents types de pi√(R)ces -->
+								<!-- Boutons pour ajouter différents types de pièces -->
 								<div class="d-flex gap-3 mb-3">
 
 									<!-- Document -->
@@ -549,11 +549,11 @@
 										<i class="fa fa-image fa-lg"></i>
 									</button>
 
-									<!-- Vid√(c)o -->
+									<!-- Vidéo -->
 									<button type="button"
 										class="btn btn-danger btn-sm rounded-circle shadow-sm d-flex align-items-center justify-content-center"
 										data-bs-toggle="modal" data-bs-target="#modalAjouterPieces" data-format="video"
-										title="Ajouter une vid√(c)o" style="width:40px; height:40px;">
+										title="Ajouter une vidéo" style="width:40px; height:40px;">
 										<i class="fa fa-film fa-lg"></i>
 									</button>
 
@@ -591,7 +591,7 @@
 											<option value="">Tous les types</option>
 											<option value="document">Document</option>
 											<option value="image">Image</option>
-											<option value="video">Vid√(c)o</option>
+											<option value="video">Vidéo</option>
 											<option value="whatsapp">Message WhatsApp</option>
 											<option value="sms">SMS</option>
 										</select>
@@ -602,21 +602,21 @@
 
 										max-height: 400px;
 										overflow-y: auto;
-										/* Active le d√(c)filement vertical */
+										/* Active le défilement vertical */
 										overflow-x: hidden;
-										/* Cache le d√(c)filement horizontal */
+										/* Cache le défilement horizontal */
 										padding-right: 0px;
-										/* Ajoute un peu d'espace si la barre de d√(c)filement appara√Æt */
+										/* Ajoute un peu d'espace si la barre de défilement apparaît */
 									}
 
-									/* Pour s'assurer que l'ic√¥ne et le texte sont toujours bien centr√(c)s m√™me si l'√(c)l√(c)ment change de taille */
+									/* Pour s'assurer que l'icône et le texte sont toujours bien centrés mùme si l'élément change de taille */
 									.card-body-custom {
 										display: flex;
 										flex-direction: column;
 										justify-content: center;
 										align-items: center;
 										padding: 10px;
-										/* R√(c)duit un peu le padding interne de la carte */
+										/* Réduit un peu le padding interne de la carte */
 									}
 								</style>
 
@@ -663,7 +663,7 @@
 														<a href="{{ piece.fichier.url }}" target="_blank"
 															class="btn btn-sm btn-outline-primary"
 															style="font-size: 0.7em; padding: 3px 5px;">
-															Ouvrir / T√(c)l√(c)charger
+															Ouvrir / Télécharger
 														</a>
 
 														<form method="POST"
@@ -698,7 +698,7 @@
 
 							<div class="box-header d-flex justify-content-between align-items-center mb-3">
 								<h4 class="box-title mb-0 text-dark fw-semibold">
-									<i class="fa fa-gavel text-primary me-2"></i> Avocats assign√(c)s √† l'affaire
+									<i class="fa fa-gavel text-primary me-2"></i> Avocats assignés à l'affaire
 								</h4>
 								{% if user.is_authenticated and not user.agent.poste == 'Avocat'%}
 								<button type="button" class="btn btn-lawfirm" data-bs-toggle="modal"
@@ -723,7 +723,7 @@
 										<p class="text-muted mb-1 small">{{ avocat_dossier.avocat.specialite }}</p>
 										<small
 											class="text-primary d-block mb-1">{{avocat_dossier.get_role_display}}</small>
-										<small class="text-muted d-block">Assign√(c) le
+										<small class="text-muted d-block">Assigné le
 											{{avocat_dossier.date_assignation|date:"d/m/Y" }}</small>
 
 										<div class="d-flex text-warning small mt-1">
@@ -749,7 +749,7 @@
 									</div>
 								</div>
 								{% empty %}
-								<p class="text-muted">Aucun avocat assign√(c) √† ce dossier.</p>
+								<p class="text-muted">Aucun avocat assigné à ce dossier.</p>
 								{% endfor %}
 							</div>
 						</div>
@@ -780,13 +780,13 @@
 										{% for decl in dossier.declarations.all %}
 										<li class="list-group-item list-group-item-action declaration-item"
 											data-contenu="{{ decl.contenu|escapejs }}"
-											data-date="{{ decl.date_ajout|date:'d/m/Y √† H:i' }}"
+											data-date="{{ decl.date_ajout|date:'d/m/Y à H:i' }}"
 											data-auteur="{{ decl.auteur }}" data-id="{{ decl.id }}"
 											style="cursor:pointer;">
 
 											<div class="d-flex justify-content-between">
 												<div style="max-width: 80%;">
-													<strong>{{ decl.date_ajout|date:'d/m/Y √† H:i' }}</strong>
+													<strong>{{ decl.date_ajout|date:'d/m/Y à H:i' }}</strong>
 													<br>
 													<small
 														class="text-muted d-block">{{decl.contenu|truncatewords:7}}</small>
@@ -835,13 +835,13 @@
 							</div>
 
 							<!-- ================================ -->
-							<!-- COLONNE DROITE : Affichage d√(c)tail -->
+							<!-- COLONNE DROITE : Affichage détail -->
 							<!-- ================================ -->
 							<div class="col-xl-8">
 								<div class="box p-4 shadow-sm">
 
-									<h4 class="mb-3"><i class="fa fa-comment-dots text-dark me-2"></i> D√(c)claration
-										s√(c)lectionn√(c)e</h4>
+									<h4 class="mb-3"><i class="fa fa-comment-dots text-dark me-2"></i> Déclaration
+										sélectionnée</h4>
 
 									<p class="text-muted">
 										<strong>Date :</strong> <span id="detailDate"></span> <br>
@@ -850,7 +850,7 @@
 
 									<div id="zoneDeclarationContenu" class="client-declaration p-4 rounded shadow-sm"
 										style="background:#f8f9fa;border-left:4px solid #343a40;max-height:350px;overflow:auto;">
-										<em class="text-muted">S√(c)lectionnez une d√(c)claration √† gauche.</em>
+										<em class="text-muted">Sélectionnez une déclaration à gauche.</em>
 									</div>
 
 								</div>
@@ -868,13 +868,13 @@
 								{% csrf_token %}
 
 								<div class="modal-header bg-dark text-white">
-									<h5 class="modal-title">Nouvelle D√(c)claration</h5>
+									<h5 class="modal-title">Nouvelle Déclaration</h5>
 									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 								</div>
 
 								<div class="modal-body">
 									<textarea name="contenu" class="form-control" rows="6"
-										placeholder="Saisissez la nouvelle d√(c)claration..." required></textarea>
+										placeholder="Saisissez la nouvelle déclaration..." required></textarea>
 								</div>
 								<div class="modal-body">
 									<input name="auteur" class="form-control" rows="6"
@@ -899,7 +899,7 @@
 							<form method="POST" id="formModifierDeclaration">
 								{% csrf_token %}
 								<div class="modal-header bg-primary text-white">
-									<h5 class="modal-title">Modifier la d√(c)claration</h5>
+									<h5 class="modal-title">Modifier la déclaration</h5>
 									<button class="btn-close" data-bs-dismiss="modal"></button>
 								</div>
 
@@ -931,7 +931,7 @@
 
 								<div class="modal-body text-center">
 									<i class="fa fa-exclamation-triangle text-danger fs-1"></i>
-									<p class="mt-2">Voulez-vous vraiment supprimer cette d√(c)claration ?</p>
+									<p class="mt-2">Voulez-vous vraiment supprimer cette déclaration ?</p>
 								</div>
 
 								<div class="modal-footer">
@@ -952,7 +952,7 @@
 							<div class="modal-content">
 
 								<div class="modal-header">
-									<h5 class="modal-title">D√(c)tails du Paiement</h5>
+									<h5 class="modal-title">Détails du Paiement</h5>
 									<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
 								</div>
 
@@ -963,7 +963,7 @@
 											<td id="detail-montant"></td>
 										</tr>
 										<tr>
-											<th>M√(c)thode</th>
+											<th>Méthode</th>
 											<td id="detail-method"></td>
 										</tr>
 										<tr>
@@ -1032,7 +1032,7 @@
 
 				<div class="modal-header bg-primary text-white">
 					<h5 class="modal-title">
-						<i class="fa fa-money-bill-wave"></i> D√(c)finir le mode d'honoraire
+						<i class="fa fa-money-bill-wave"></i> Définir le mode d'honoraire
 					</h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 				</div>
@@ -1051,7 +1051,7 @@
 					<div class="alert alert-info">
 						<p class="mb-0">
 							<i class="fa fa-info-circle"></i>
-							Apres avoir choisis le mode honoraire, cette op√(c)ration est irreverssible
+							Apres avoir choisis le mode honoraire, cette opération est irreverssible
 						</p>
 					</div>
 
@@ -1091,7 +1091,7 @@
 								{% for agent in agents %}
 								<a href="javascript:void(0);" class="list-group-item list-group-item-action avocat-item"
 									data-id="{{ agent.id }}" data-nom="{{ agent.nom }}" data-prenom="{{ agent.prenom }}"
-									data-specialite="{{ agent.specialite|default:'Non sp√(c)cifi√(c)e' }}"
+									data-specialite="{{ agent.specialite|default:'Non spécifiée' }}"
 									data-photo="{{ agent.photo.url|default:'/static/images/avatar/avatar-10.png' }}">
 									<div class="d-flex align-items-center">
 										<img src="{{ agent.photo.url|default:'/static/images/avatar/avatar-10.png' }}"
@@ -1115,11 +1115,11 @@
 								<img id="photoAvocat" src="{% static 'images/avatar/avatar-10.png' %}"
 									class="rounded-circle border mb-3"
 									style="width:120px; height:120px; object-fit:cover;" alt="Photo Avocat">
-								<h4 id="nomComplet" class="mb-0">S√(c)lectionnez un avocat</h4>
-								<p id="specialite" class="text-muted mb-3">Sp√(c)cialit√(c)</p>
+								<h4 id="nomComplet" class="mb-0">Sélectionnez un avocat</h4>
+								<p id="specialite" class="text-muted mb-3">Spécialité</p>
 
 								<div class="form-group mb-3">
-									<label class="form-label fw-bold">R√¥le √† assigner</label>
+									<label class="form-label fw-bold">Rôle à assigner</label>
 									<select id="roleAvocat" class="form-select">
 										<option value="Principal">Avocat Principal</option>
 										<option value="Support" selected>Avocat de Support</option>
@@ -1128,14 +1128,14 @@
 								</div>
 
 								<button type="button" id="btnAjouterAvocat" class="btn btn-success" disabled>
-									<i class="fa fa-plus-circle"></i> Ajouter √† la liste
+									<i class="fa fa-plus-circle"></i> Ajouter à la liste
 								</button>
 							</div>
 						</div>
 					</div>
 
 					<hr class="my-4">
-					<h5 class="text-secondary"><i class="fa fa-list"></i> Avocats s√(c)lectionn√(c)s</h5>
+					<h5 class="text-secondary"><i class="fa fa-list"></i> Avocats sélectionnés</h5>
 					<div id="avocatsSelectionnes" class="list-group border shadow-sm"
 						style="max-height:150px; overflow-y:auto;"></div>
 				</div>
@@ -1151,7 +1151,7 @@
 	</div>
 </div>
 
-<!-- Modal Ajouter Pi√(R)ces -->
+<!-- Modal Ajouter Pièces -->
 <div class="modal fade" id="modalAjouterPieces" tabindex="-1">
 	<div class="modal-dialog modal-xl modal-dialog-centered">
 		<div class="modal-content border-0 shadow-lg">
@@ -1159,7 +1159,7 @@
 				enctype="multipart/form-data">
 				{% csrf_token %}
 				<div class="modal-header bg-primary text-white">
-					<h5 class="modal-title"><i class="mdi mdi-file-plus-outline"></i> Ajouter des pi√(R)ces</h5>
+					<h5 class="modal-title"><i class="mdi mdi-file-plus-outline"></i> Ajouter des pièces</h5>
 					<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 				</div>
 				<div class="modal-body">
@@ -1167,7 +1167,7 @@
 					<!-- Conteneur des lignes -->
 					<div id="piecesContainer" class="d-flex flex-column gap-2"></div>
 
-					<!-- Boutons internes en bas √† gauche -->
+					<!-- Boutons internes en bas à gauche -->
 					<div class="d-flex gap-2 mt-3 justify-content-start">
 						<button type="button" class="btn btn-primary btn-sm rounded-circle add-line-btn"
 							data-format="document" title="Ajouter un document" style="width:35px;height:35px;">
@@ -1178,7 +1178,7 @@
 							<i class="fa fa-image fa-sm"></i>
 						</button>
 						<button type="button" class="btn btn-danger btn-sm rounded-circle add-line-btn"
-							data-format="video" title="Ajouter une vid√(c)o" style="width:35px;height:35px;">
+							data-format="video" title="Ajouter une vidéo" style="width:35px;height:35px;">
 							<i class="fa fa-film fa-sm"></i>
 						</button>
 						<button type="button" class="btn btn-success btn-sm rounded-circle add-line-btn"
@@ -1276,7 +1276,7 @@
 
 				const file = this.files[0];
 				if (file.size > MAX_SIZE_BYTES) {
-					alert("Le fichier d√(c)passe la limite de 200 Mo.");
+					alert("Le fichier dépasse la limite de 200 Mo.");
 					this.value = "";
 					return;
 				}
@@ -1312,7 +1312,7 @@
 			btn.addEventListener('click', () => createPieceRow(btn.dataset.format));
 		});
 
-		// Ligne initiale quand modal s'ouvre depuis ic√¥ne externe
+		// Ligne initiale quand modal s'ouvre depuis icône externe
 		const modalPieces = document.getElementById('modalAjouterPieces');
 		modalPieces.addEventListener('show.bs.modal', function (event) {
 			piecesContainer.innerHTML = "";
@@ -1327,17 +1327,17 @@
 <!-- Bouton pour ouvrir le modal -->
 <button type="button" class="btn btn-info btn-sm mb-3" data-bs-toggle="modal"
 	data-bs-target="#modalActivites{{ dossier.id }}">
-	<i class="fa fa-eye"></i> Voir d√(c)tails activit√(c)s
+	<i class="fa fa-eye"></i> Voir détails activités
 </button>
 
-<!-- Modal D√(c)tails Activit√(c)s -->
+<!-- Modal Détails Activités -->
 <div class="modal fade" id="modalActivites{{ dossier.id }}" tabindex="-1"
 	aria-labelledby="modalActivitesLabel{{ dossier.id }}" aria-hidden="true">
 	<div class="modal-dialog modal-xl modal-dialog-centered">
 		<div class="modal-content">
 			<div class="modal-header bg-primary text-white">
 				<h5 class="modal-title" id="modalActivitesLabel{{ dossier.id }}">
-					<i class="fa fa-list"></i> D√(c)tails des activit√(c)s - {{ dossier.numero_reference_dossier }}
+					<i class="fa fa-list"></i> Détails des activités - {{ dossier.numero_reference_dossier }}
 				</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
 			</div>
@@ -1349,7 +1349,7 @@
 							({{dossier.numero_reference_dossier }})</p>
 						<p class="mb-1"><strong>Client :</strong> {{ dossier.client.nom }} {{ dossier.client.prenom }}
 						</p>
-						<p class="mb-1"><strong>Type d‚Äôaffaire :</strong> {{ dossier.type_affaire.nom_type }}</p>
+						<p class="mb-1"><strong>Type d'affaire :</strong> {{ dossier.type_affaire.nom_type }}</p>
 						<p class="mb-1"><strong>Secteur :</strong> {{ dossier.secteur_foncier.nom }}</p>
 					</div>
 					<div class="text-end">
@@ -1368,7 +1368,7 @@
 							<thead class="table-primary text-center">
 								<tr>
 									<th>#</th>
-									<th>Activit√(c)</th>
+									<th>Activité</th>
 									<th>Prix ($)</th>
 									<th>Prix (Fc)</th>
 								</tr>
@@ -1453,10 +1453,10 @@
 	<div class="modal-dialog modal-lg modal-dialog-centered">
 		<div class="modal-content">
 
-			<!-- En-t√™te -->
+			<!-- En-tùte -->
 			<div class="modal-header bg-danger text-white">
 				<h5 class="modal-title">
-					<i class="fa fa-gavel me-2"></i> Cl√¥ture d√(c)finitive du dossier
+					<i class="fa fa-gavel me-2"></i> Clôture définitive du dossier
 				</h5>
 				<button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
 			</div>
@@ -1470,33 +1470,33 @@
 					<div class="alert alert-danger d-flex align-items-center">
 						<i class="fa fa-exclamation-triangle me-2"></i>
 						<div>
-							Cette action est <strong>irr√(c)versible</strong>.
-							Une fois le dossier cl√¥tur√(c), il ne pourra plus √™tre modifi√(c).
+							Cette action est <strong>irréversible</strong>.
+							Une fois le dossier clôturé, il ne pourra plus ùtre modifié.
 						</div>
 					</div>
 
 					<!-- Observation obligatoire -->
 					<div class="mb-3">
-						<label class="form-label fw-bold">Observation / Dernier mot de l‚Äôavocat</label>
+						<label class="form-label fw-bold">Observation / Dernier mot de l'avocat</label>
 						<textarea name="observation_cloture" rows="5" class="form-control"
-							placeholder="Ex : Dossier cl√¥tur√(c) apr√(R)s ex√(c)cution compl√(R)te des obligations l√(c)gales..."
+							placeholder="Ex : Dossier clôturé après exécution complète des obligations légales..."
 							required></textarea>
 					</div>
 
-					<!-- R√(c)sultat du dossier (optionnel) -->
+					<!-- Résultat du dossier (optionnel) -->
 					<div class="mb-3">
-						<label class="form-label fw-bold">R√(c)sultat du dossier (optionnel)</label>
+						<label class="form-label fw-bold">Résultat du dossier (optionnel)</label>
 						<select name="resultat_dossier" class="form-select">
-							<option value="" selected>-- S√(c)lectionner --</option>
-							<option value="gagne">Gagn√(c)</option>
+							<option value="" selected>-- Sélectionner --</option>
+							<option value="gagne">Gagné</option>
 							<option value="perdu">Perdu</option>
-							<option value="n/a">Non d√(c)fini / N/A</option>
+							<option value="n/a">Non défini / N/A</option>
 						</select>
 					</div>
 
 					<!-- Date et avocat (optionnel pour info) -->
 					<div class="mb-2 text-muted">
-						<small>Cette cl√¥ture sera enregistr√(c)e avec votre nom et la date actuelle.</small>
+						<small>Cette clôture sera enregistrée avec votre nom et la date actuelle.</small>
 					</div>
 
 				</div>
@@ -1508,7 +1508,7 @@
 					</button>
 					<button type="submit" class="btn btn-danger d-flex align-items-center gap-2">
 						<i class="fa fa-check-circle"></i>
-						Confirmer la cl√¥ture
+						Confirmer la clôture
 					</button>
 				</div>
 
@@ -1520,7 +1520,7 @@
 
 
 
-<!--Le script pour imprimer la liste des activit√(c)s-->
+<!--Le script pour imprimer la liste des activités-->
 <script>
 	function printModalActivites(dossierId, devise) {
 		const url = `/dossiers/${dossierId}/print/?devise=${devise}`;
@@ -1541,7 +1541,7 @@
 	const taux_fc = {{ taux_fc| safe }};
 
 	modalElement.addEventListener('shown.bs.modal', function () {
-		// S√(c)lectionner les inputs ici, apr√(R)s que la modale est compl√(R)tement affich√(c)e
+		// Sélectionner les inputs ici, après que la modale est complètement affichée
 		const inputs = modalElement.querySelectorAll('.prix-dollar');
 
 		function updateFC() {
@@ -1570,12 +1570,12 @@
 			}
 		}
 
-		// Attacher l'√(c)v√(c)nement input pour chaque input
+		// Attacher l'événement input pour chaque input
 		inputs.forEach(input => {
 			input.addEventListener('input', updateFC);
 		});
 
-		// Calcul initial pour que les totaux soient corrects d√(R)s l'ouverture
+		// Calcul initial pour que les totaux soient corrects dès l'ouverture
 		updateFC();
 	});
 	{% endif %}
@@ -1585,7 +1585,7 @@
 
 
 <style>
-	/* Bouton styl√(c) fa√ßon LawFirm Admin */
+	/* Bouton stylé fa√ßon LawFirm Admin */
 	.btn-lawfirm {
 		background: linear-gradient(135deg, #0b5ed7, #003366);
 		/* bleu profond au bleu royal */
@@ -1599,7 +1599,7 @@
 		transition: all 0.3s ease;
 	}
 
-	/* Effet hover (brillance subtile + ombre renforc√(c)e) */
+	/* Effet hover (brillance subtile + ombre renforcée) */
 	.btn-lawfirm:hover {
 		background: linear-gradient(135deg, #004099, #0b5ed7);
 		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
@@ -1613,7 +1613,7 @@
 		box-shadow: 0 0 0 3px rgba(11, 94, 215, 0.25);
 	}
 
-	/* Ic√¥ne √† gauche du texte */
+	/* Icône à gauche du texte */
 	.btn-lawfirm i {
 		font-size: 0.95rem;
 	}
@@ -1667,7 +1667,7 @@
 		transform: translateX(2px);
 	}
 
-	/* --- Carte info avocat s√(c)lectionn√(c) --- */
+	/* --- Carte info avocat sélectionné --- */
 	#modalAssignerAvocats .card {
 		border-radius: 12px;
 		border: 1px solid #dee2e6;
@@ -1688,7 +1688,7 @@
 		box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 	}
 
-	/* --- Liste des avocats s√(c)lectionn√(c)s --- */
+	/* --- Liste des avocats sélectionnés --- */
 	#modalAssignerAvocats #avocatsSelectionnes .list-group-item {
 		border-radius: 8px;
 		margin-bottom: 0.5rem;
@@ -1699,7 +1699,7 @@
 		background-color: #f0f8ff;
 	}
 
-	/* --- Box g√(c)n√(c)ral --- */
+	/* --- Box général --- */
 	.box {
 		background-color: #fff;
 		border-radius: 12px;
@@ -1769,10 +1769,10 @@
 		border-color: #0b5ed7;
 	}
 
-	/* --- Modal plus compacte et styl√(c)e --- */
+	/* --- Modal plus compacte et stylée --- */
 	#modalAjouterPieces .modal-dialog {
 		max-width: 800px;
-		/* r√(c)duit la largeur du modal XL par d√(c)faut */
+		/* réduit la largeur du modal XL par défaut */
 	}
 
 	#modalAjouterPieces .modal-content {
@@ -1839,7 +1839,7 @@
 		gap: 0.5rem;
 	}
 
-	/* --- Box g√(c)n√(c)rale --- */
+	/* --- Box générale --- */
 	.box {
 		border-radius: 12px;
 		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -1871,7 +1871,7 @@
 		color: #343a40;
 	}
 
-	/* --- Bouton modifier description sur la m√™me ligne --- */
+	/* --- Bouton modifier description sur la mùme ligne --- */
 	.box-body.pt-0 .btn-primary {
 		font-size: 0.85rem;
 		padding: 5px 12px;
@@ -1948,7 +1948,7 @@
 	/* R√àGLES CSS POUR L'IMPRESSION (Media Query) */
 	@media print {
 
-		/* Masquer tous les √(c)l√(c)ments non essentiels pour un document propre */
+		/* Masquer tous les éléments non essentiels pour un document propre */
 		.nav-tabs,
 		.box-header,
 		.print-hide,
@@ -1960,7 +1960,7 @@
 			display: none !important;
 		}
 
-		/* Assurez-vous que l'historique est affich√(c) et occupe toute la largeur */
+		/* Assurez-vous que l'historique est affiché et occupe toute la largeur */
 		#tab_historique_paiements {
 			display: block !important;
 			width: 100%;
@@ -1972,11 +1972,11 @@
 			border: 1px solid #eee;
 			padding: 10px;
 			margin-bottom: 15px;
-			/* Force le contenu √† l'int√(c)rieur de la timeline √† s'afficher si les √(c)l√(c)ments sont flottants */
+			/* Force le contenu à l'intérieur de la timeline à s'afficher si les éléments sont flottants */
 			overflow: visible;
 		}
 
-		/* Supprimer les fonds de couleur des ic√¥nes pour √(c)conomiser de l'encre */
+		/* Supprimer les fonds de couleur des icônes pour économiser de l'encre */
 		.icon {
 			background: transparent !important;
 			color: #333 !important;
@@ -2013,7 +2013,7 @@
 		const searchInput = document.getElementById('searchPieces');
 		const filterSelect = document.getElementById('filterType');
 
-		// MODIFICATION ICI : S√(c)lecteur g√(c)n√(c)rique pour capturer toutes les pi√(R)ces
+		// MODIFICATION ICI : Sélecteur générique pour capturer toutes les pièces
 		const pieces = document.querySelectorAll('#listePieces > div');
 
 		function filterPieces() {
@@ -2023,16 +2023,16 @@
 			pieces.forEach(piece => {
 				const titleElement = piece.querySelector('.card-title');
 
-				// Si l'√(c)l√(c)ment est masqu√(c) par le filtre pr√(c)c√(c)dent ou est introuvable, passez.
+				// Si l'élément est masqué par le filtre précédent ou est introuvable, passez.
 				if (!titleElement) return;
 
 				const title = titleElement.textContent.toLowerCase();
 				const typeIcon = piece.querySelector('.card-body i');
 				let type = '';
 
-				// La logique de d√(c)tection du type est correcte, bas√(c)e sur les ic√¥nes
+				// La logique de détection du type est correcte, basée sur les icônes
 				if (typeIcon.classList.contains('fa-image')) type = 'image';
-				else if (typeIcon.classList.contains('fa-film')) type = 'video'; // Correction de 'fa-video' √† 'fa-film' si c'est ce que vous utilisez pour la vid√(c)o
+				else if (typeIcon.classList.contains('fa-film')) type = 'video'; // Correction de 'fa-video' à 'fa-film' si c'est ce que vous utilisez pour la vidéo
 				else if (typeIcon.classList.contains('fa-whatsapp')) type = 'whatsapp';
 				else if (typeIcon.classList.contains('fa-comment')) type = 'sms';
 				else if (typeIcon.classList.contains('fa-file')) type = 'document';
@@ -2074,7 +2074,7 @@
 
 		let avocatSelectionne = null;
 
-		// ‚úÖ S√(c)lection d'un avocat dans la liste
+		// ‚úÖ Sélection d'un avocat dans la liste
 		listeAvocats.forEach(item => {
 			item.addEventListener('click', () => {
 				listeAvocats.forEach(a => a.classList.remove('active'));
@@ -2095,15 +2095,15 @@
 			});
 		});
 
-		// ‚úÖ Ajout d'un avocat √† la liste
+		// ‚úÖ Ajout d'un avocat à la liste
 		btnAjouter.addEventListener('click', () => {
 			if (!avocatSelectionne) return;
 			const role = roleSelect.value;
 			const avocatId = avocatSelectionne.id;
 
-			// Emp√™cher les doublons
+			// Empùcher les doublons
 			if (document.getElementById('avocat_' + avocatId)) {
-				alert("‚ö†Ô∏è Cet avocat est d√(c)j√† s√(c)lectionn√(c).");
+				alert("‚ö†Ô∏è Cet avocat est déjà sélectionné.");
 				return;
 			}
 
@@ -2131,7 +2131,7 @@
 			btnAjouter.disabled = true;
 		});
 
-		// ‚úÖ Recherche par nom, pr√(c)nom ou sp√(c)cialit√(c)
+		// ‚úÖ Recherche par nom, prénom ou spécialité
 		searchInput.addEventListener('keyup', function () {
 			const value = this.value.toLowerCase().trim();
 
@@ -2140,7 +2140,7 @@
 				const prenom = av.dataset.prenom.toLowerCase();
 				const specialite = (av.dataset.specialite || '').toLowerCase();
 
-				// Correspondance sur nom, pr√(c)nom OU sp√(c)cialit√(c)
+				// Correspondance sur nom, prénom OU spécialité
 				if (nom.includes(value) || prenom.includes(value) || specialite.includes(value)) {
 					av.style.display = 'block';
 				} else {
@@ -2160,7 +2160,7 @@
 			button.addEventListener('click', function () {
 				const avocatId = this.dataset.id;
 				const box = document.getElementById('avocatBox' + avocatId);
-				const url = this.dataset.url; // on r√(c)cup√(R)re la vraie URL Django
+				const url = this.dataset.url; // on récupère la vraie URL Django
 
 				console.log("Suppression de l'avocat ID =", avocatId, "URL:", url);
 
@@ -2174,19 +2174,19 @@
 					})
 						.then(response => response.json())
 						.then(data => {
-							console.log("R√(c)ponse serveur:", data);
+							console.log("Réponse serveur:", data);
 							if (data.success) {
 								box.style.transition = 'opacity 0.4s ease';
 								box.style.opacity = '0';
 								setTimeout(() => box.remove(), 400);
-								toastr.success("Avocat supprim√(c) avec succ√(R)s !");
+								toastr.success("Avocat supprimé avec succès !");
 							} else {
-								toastr.error("Erreur: " + (data.error || "suppression √(c)chou√(c)e"));
+								toastr.error("Erreur: " + (data.error || "suppression échouée"));
 							}
 						})
 						.catch(error => {
-							console.error("Erreur r√(c)seau:", error);
-							toastr.error("Erreur r√(c)seau.");
+							console.error("Erreur réseau:", error);
+							toastr.error("Erreur réseau.");
 						});
 				}
 			});
@@ -2206,7 +2206,7 @@
 			const modal = new bootstrap.Modal(document.querySelector(modalId));
 			modal.show();
 
-			// Supprime le param√(R)tre GET pour √(c)viter la r√(c)ouverture au refresh
+			// Supprime le paramètre GET pour éviter la réouverture au refresh
 			urlParams.delete('open_modal');
 			const newUrl = window.location.pathname + '?' + urlParams.toString();
 			window.history.replaceState({}, '', newUrl);
@@ -2248,7 +2248,7 @@
 	showPage(currentPage);
 
 	// ===========================
-	// Affichage d√(c)tail au clic
+	// Affichage détail au clic
 	// ===========================
 	document.querySelectorAll('.declaration-item').forEach(item => {
 		item.onclick = function () {
@@ -2294,7 +2294,7 @@
 		const formPaiement = document.querySelector('#tab_enregistrer_paiement form');
 
 		formPaiement.addEventListener('submit', function (e) {
-			e.preventDefault(); // Emp√™che le submit classique
+			e.preventDefault(); // Empùche le submit classique
 
 			const formData = new FormData(formPaiement);
 
@@ -2333,7 +2333,7 @@
 							imprimerFacture('CDF');
 						});
 
-						// R√(c)initialiser le formulaire apr√(R)s succ√(R)s
+						// Réinitialiser le formulaire après succès
 						formPaiement.reset();
 					} else {
 						alert('Erreur lors de l\'enregistrement du paiement.');
@@ -2341,7 +2341,7 @@
 				})
 				.catch(error => {
 					console.error('Erreur:', error);
-					alert('Une erreur est survenue. Veuillez r√(c)essayer.');
+					alert('Une erreur est survenue. Veuillez réessayer.');
 				});
 		});
 	});

@@ -1,7 +1,7 @@
 {% extends 'admin_template/base.html' %}
 {% load static %}
 
-{% block title %}Statistiques Activit√(c)s Dossiers{% endblock %}
+{% block title %}Statistiques Activités Dossiers{% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
@@ -10,7 +10,7 @@
         <div class="content-header">
             <div class="d-flex align-items-center">
                 <div class="me-auto">
-                    <h3 class="page-title">üìä Statistiques Activit√(c)s Dossiers</h3>
+                    <h3 class="page-title">üìä Statistiques Activités Dossiers</h3>
                     <div class="d-inline-block align-items-center">
                         <nav>
                             <ol class="breadcrumb">
@@ -32,13 +32,13 @@
 
         <!-- Main content -->
         <section class="content">
-            <!-- Statistiques g√(c)n√(c)rales -->
+            <!-- Statistiques générales -->
             <div class="row">
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ statistiques.total_activites }}</h3>
-                            <p>Total Activit√(c)s</p>
+                            <p>Total Activités</p>
                         </div>
                         <div class="icon">
                             <i class="mdi mdi-history"></i>
@@ -60,7 +60,7 @@
                     <div class="small-box bg-warning">
                         <div class="inner">
                             <h3>{{ statistiques.activites_facturees }}</h3>
-                            <p>Activit√(c)s Factur√(c)es</p>
+                            <p>Activités Facturées</p>
                         </div>
                         <div class="icon">
                             <i class="mdi mdi-check-circle"></i>
@@ -71,7 +71,7 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ statistiques.activites_non_facturees }}</h3>
-                            <p>Non Factur√(c)es</p>
+                            <p>Non Facturées</p>
                         </div>
                         <div class="icon">
                             <i class="mdi mdi-clock"></i>
@@ -82,13 +82,13 @@
 
             <!-- Graphiques et analyses -->
             <div class="row">
-                <!-- R√(c)partition par type d'activit√(c) -->
+                <!-- Répartition par type d'activité -->
                 <div class="col-md-6">
                     <div class="box">
                         <div class="box-header with-border">
                             <h4 class="box-title">
                                 <i class="mdi mdi-chart-pie text-primary"></i> 
-                                R√(c)partition Facturation
+                                Répartition Facturation
                             </h4>
                         </div>
                         <div class="box-body">
@@ -105,7 +105,7 @@
                                     <tbody>
                                         <tr>
                                             <td>
-                                                <span class="badge badge-success">Factur√(c)es</span>
+                                                <span class="badge badge-success">Facturées</span>
                                             </td>
                                             <td class="text-center">
                                                 <strong>{{ statistiques.activites_facturees }}</strong>
@@ -127,7 +127,7 @@
                                         </tr>
                                         <tr>
                                             <td>
-                                                <span class="badge badge-warning">Non factur√(c)es</span>
+                                                <span class="badge badge-warning">Non facturées</span>
                                             </td>
                                             <td class="text-center">
                                                 <strong>{{ statistiques.activites_non_facturees }}</strong>
@@ -154,7 +154,7 @@
                     </div>
                 </div>
 
-                <!-- Activit√(c)s par avocat -->
+                <!-- Activités par avocat -->
                 <div class="col-md-6">
                     <div class="box">
                         <div class="box-header with-border">
@@ -170,7 +170,7 @@
                                         <thead>
                                             <tr>
                                                 <th>Avocat</th>
-                                                <th class="text-center">Activit√(c)s</th>
+                                                <th class="text-center">Activités</th>
                                                 <th class="text-center">Heures</th>
                                                 <th class="text-center">%</th>
                                             </tr>
@@ -209,7 +209,7 @@
                             {% else %}
                                 <div class="text-center text-muted py-4">
                                     <i class="mdi mdi-information mdi-48px"></i>
-                                    <br>Aucune donn√(c)e disponible
+                                    <br>Aucune donnée disponible
                                 </div>
                             {% endif %}
                         </div>
@@ -234,10 +234,10 @@
                                         <thead>
                                             <tr>
                                                 <th>Rang</th>
-                                                <th>Num√(c)ro R√(c)f√(c)rence</th>
+                                                <th>Numéro Référence</th>
                                                 <th>Titre</th>
                                                 <th>Client</th>
-                                                <th class="text-center">Activit√(c)s</th>
+                                                <th class="text-center">Activités</th>
                                                 <th class="text-center">Heures</th>
                                             </tr>
                                         </thead>
@@ -275,7 +275,7 @@
                                                 <td class="text-center">
                                                     <div class="btn-group">
                                                         <a href="{% url 'rapport_activites_dossier' item.dossier.id %}" 
-                                                           class="btn btn-sm btn-info" title="Voir activit√(c)s">
+                                                           class="btn btn-sm btn-info" title="Voir activités">
                                                             <i class="mdi mdi-eye"></i>
                                                         </a>
                                                         <a href="{% url 'rapport_activites_dossier' item.dossier.id %}?format=pdf" 
@@ -292,7 +292,7 @@
                             {% else %}
                                 <div class="text-center text-muted py-4">
                                     <i class="mdi mdi-information mdi-48px"></i>
-                                    <br>Aucun dossier avec activit√(c)s trouv√(c)
+                                    <br>Aucun dossier avec activités trouvé
                                 </div>
                             {% endif %}
                         </div>
@@ -300,7 +300,7 @@
                 </div>
             </div>
 
-            <!-- √âvolution des activit√(c)s -->
+            <!-- √âvolution des activités -->
             {% if statistiques.activites_recentes %}
             <div class="row">
                 <div class="col-12">
@@ -308,7 +308,7 @@
                         <div class="box-header with-border">
                             <h4 class="box-title">
                                 <i class="mdi mdi-chart-line text-info"></i> 
-                                √âvolution des Activit√(c)s (30 derniers jours)
+                                √âvolution des Activités (30 derniers jours)
                             </h4>
                         </div>
                         <div class="box-body">
@@ -317,7 +317,7 @@
                                     <thead>
                                         <tr>
                                             <th>Date</th>
-                                            <th class="text-center">Nombre d'Activit√(c)s</th>
+                                            <th class="text-center">Nombre d'Activités</th>
                                             <th>Tendance</th>
                                         </tr>
                                     </thead>
@@ -346,7 +346,7 @@
             </div>
             {% endif %}
 
-            <!-- R√(c)sum√(c) et insights -->
+            <!-- Résumé et insights -->
             <div class="row">
                 <div class="col-12">
                     <div class="box">
@@ -362,12 +362,12 @@
                                     <div class="card border-info">
                                         <div class="card-body text-center">
                                             <i class="mdi mdi-trending-up mdi-48px text-info"></i>
-                                            <h5 class="card-title mt-2">Productivit√(c)</h5>
+                                            <h5 class="card-title mt-2">Productivité</h5>
                                             <p class="card-text">
                                                 {% if statistiques.total_activites > 0 %}
-                                                    Moyenne de {{ statistiques.activites_cette_semaine|floatformat:1 }} activit√(c)s par jour cette semaine.
+                                                    Moyenne de {{ statistiques.activites_cette_semaine|floatformat:1 }} activités par jour cette semaine.
                                                 {% else %}
-                                                    Aucune activit√(c) enregistr√(c)e r√(c)cemment.
+                                                    Aucune activité enregistrée récemment.
                                                 {% endif %}
                                             </p>
                                         </div>
@@ -386,10 +386,10 @@
                                                         {% else %}
                                                             {{ top_user.user__username }}
                                                         {% endif %}
-                                                        <br><small>({{ top_user.count }} activit√(c)s)</small>
+                                                        <br><small>({{ top_user.count }} activités)</small>
                                                     {% endwith %}
                                                 {% else %}
-                                                    Aucune donn√(c)e disponible
+                                                    Aucune donnée disponible
                                                 {% endif %}
                                             </p>
                                         </div>
@@ -403,11 +403,11 @@
                                             <p class="card-text">
                                                 {% if statistiques.dossiers_actifs %}
                                                     {% with top_dossier=statistiques.dossiers_actifs.0 %}
-                                                        {{ top_dossier.numero_reference|default:"Dossier sans r√(c)f√(c)rence" }}
-                                                        <br><small>({{ top_dossier.count }} activit√(c)s)</small>
+                                                        {{ top_dossier.numero_reference|default:"Dossier sans référence" }}
+                                                        <br><small>({{ top_dossier.count }} activités)</small>
                                                     {% endwith %}
                                                 {% else %}
-                                                    Aucune donn√(c)e disponible
+                                                    Aucune donnée disponible
                                                 {% endif %}
                                             </p>
                                         </div>

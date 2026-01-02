@@ -46,3 +46,10 @@
 @import url(/static/assets/vendor_components/fullcalendar/fullcalendar.min.css) print;
 @import url(/static/assets/vendor_components/weather-icons/weather-icons.css);
 
+
+
+/* Corrections ajoutées automatiquement */
+@import url(/static/css/font-size-fix.css);
+@import url(/static/css/template-font-fix.css);
+@import url(/static/css/missing-assets-fallback.css);
+@import url(/static/css/comprehensive-fix.css);

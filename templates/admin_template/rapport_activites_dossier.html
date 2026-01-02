@@ -1,7 +1,7 @@
 {% extends 'admin_template/base.html' %}
 {% load static %}
 
-{% block title %}Rapport Activit√(c)s - Dossier {{ dossier.numero_reference_dossier }}{% endblock %}
+{% block title %}Rapport Activités - Dossier {{ dossier.numero_reference_dossier }}{% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
@@ -10,14 +10,14 @@
         <div class="content-header">
             <div class="d-flex align-items-center">
                 <div class="me-auto">
-                    <h3 class="page-title">üìã Rapport d'Activit√(c)s - Dossier {{ dossier.numero_reference_dossier }}</h3>
+                    <h3 class="page-title">üìã Rapport d'Activités - Dossier {{ dossier.numero_reference_dossier }}</h3>
                     <div class="d-inline-block align-items-center">
                         <nav>
                             <ol class="breadcrumb">
                                 <li class="breadcrumb-item"><a href="{% url 'Dashboard_Cabinet_Administrateur' %}"><i class="mdi mdi-home-outline"></i></a></li>
                                 <li class="breadcrumb-item"><a href="{% url 'rapport_dashboard' %}">Rapport</a></li>
                                 <li class="breadcrumb-item"><a href="{% url 'rapport_dossier' %}">Dossiers</a></li>
-                                <li class="breadcrumb-item active" aria-current="page">Activit√(c)s</li>
+                                <li class="breadcrumb-item active" aria-current="page">Activités</li>
                             </ol>
                         </nav>
                     </div>
@@ -51,7 +51,7 @@
                                 <div class="col-md-6">
                                     <table class="table table-borderless">
                                         <tr>
-                                            <td><strong>Num√(c)ro de r√(c)f√(c)rence:</strong></td>
+                                            <td><strong>Numéro de référence:</strong></td>
                                             <td>{{ dossier.numero_reference_dossier|default:"-" }}</td>
                                         </tr>
                                         <tr>
@@ -64,7 +64,7 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Type d'affaire:</strong></td>
-                                            <td>{{ dossier.type_affaire.nom_type|default:"Non d√(c)fini" }}</td>
+                                            <td>{{ dossier.type_affaire.nom_type|default:"Non défini" }}</td>
                                         </tr>
                                     </table>
                                 </div>
@@ -75,7 +75,7 @@
                                             <td>
                                                 {% if dossier.statut_dossier == 'Ouvert' %}
                                                     <span class="badge badge-success">{{ dossier.statut_dossier }}</span>
-                                                {% elif dossier.statut_dossier == 'Cl√¥tur√(c)' %}
+                                                {% elif dossier.statut_dossier == 'Clôturé' %}
                                                     <span class="badge badge-secondary">{{ dossier.statut_dossier }}</span>
                                                 {% else %}
                                                     <span class="badge badge-warning">{{ dossier.statut_dossier }}</span>
@@ -88,10 +88,10 @@
                                         </tr>
                                         <tr>
                                             <td><strong>Juridiction:</strong></td>
-                                            <td>{{ dossier.juridiction.nom|default:"Non d√(c)finie" }}</td>
+                                            <td>{{ dossier.juridiction.nom|default:"Non définie" }}</td>
                                         </tr>
                                         <tr>
-                                            <td><strong>Rapport g√(c)n√(c)r√(c) le:</strong></td>
+                                            <td><strong>Rapport généré le:</strong></td>
                                             <td>{{ rapport_data.rapport.date_generation }}</td>
                                         </tr>
                                     </table>
@@ -102,13 +102,13 @@
                 </div>
             </div>
 
-            <!-- Statistiques des activit√(c)s -->
+            <!-- Statistiques des activités -->
             <div class="row">
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ rapport_data.statistiques.total_activites }}</h3>
-                            <p>Total Activit√(c)s</p>
+                            <p>Total Activités</p>
                         </div>
                         <div class="icon">
                             <i class="mdi mdi-history"></i>
@@ -130,7 +130,7 @@
                     <div class="small-box bg-warning">
                         <div class="inner">
                             <h3>{{ rapport_data.statistiques.activites_facturees }}</h3>
-                            <p>Activit√(c)s Factur√(c)es</p>
+                            <p>Activités Facturées</p>
                         </div>
                         <div class="icon">
                             <i class="mdi mdi-check-circle"></i>
@@ -141,7 +141,7 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ rapport_data.statistiques.activites_non_facturees }}</h3>
-                            <p>Non Factur√(c)es</p>
+                            <p>Non Facturées</p>
                         </div>
                         <div class="icon">
                             <i class="mdi mdi-clock"></i>
@@ -163,12 +163,12 @@
                             <form method="GET" class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>P√(c)riode:</label>
+                                        <label>Période:</label>
                                         <select name="periode" class="form-control" onchange="this.form.submit()">
                                             <option value="7" {% if periode == '7' %}selected{% endif %}>7 derniers jours</option>
                                             <option value="30" {% if periode == '30' %}selected{% endif %}>30 derniers jours</option>
                                             <option value="90" {% if periode == '90' %}selected{% endif %}>3 derniers mois</option>
-                                            <option value="all" {% if periode == 'all' %}selected{% endif %}>Toutes les activit√(c)s</option>
+                                            <option value="all" {% if periode == 'all' %}selected{% endif %}>Toutes les activités</option>
                                         </select>
                                     </div>
                                 </div>
@@ -190,8 +190,8 @@
                                         <label>Statut facturation:</label>
                                         <select name="facturee" class="form-control" onchange="this.form.submit()">
                                             <option value="all" {% if facturee_filter == 'all' %}selected{% endif %}>Toutes</option>
-                                            <option value="true" {% if facturee_filter == 'true' %}selected{% endif %}>Factur√(c)es</option>
-                                            <option value="false" {% if facturee_filter == 'false' %}selected{% endif %}>Non factur√(c)es</option>
+                                            <option value="true" {% if facturee_filter == 'true' %}selected{% endif %}>Facturées</option>
+                                            <option value="false" {% if facturee_filter == 'false' %}selected{% endif %}>Non facturées</option>
                                         </select>
                                     </div>
                                 </div>
@@ -223,14 +223,14 @@
                 </div>
             </div>
 
-            <!-- Liste des activit√(c)s -->
+            <!-- Liste des activités -->
             <div class="row">
                 <div class="col-12">
                     <div class="box">
                         <div class="box-header with-border">
                             <h4 class="box-title">
                                 <i class="mdi mdi-timeline"></i> 
-                                Historique des Activit√(c)s ({{ rapport_data.statistiques.periode_affichee }})
+                                Historique des Activités ({{ rapport_data.statistiques.periode_affichee }})
                             </h4>
                         </div>
                         <div class="box-body">
@@ -248,7 +248,7 @@
                                                 <div class="card">
                                                     <div class="card-body">
                                                         <div class="d-flex justify-content-between align-items-start mb-2">
-                                                            <h6 class="card-title mb-0">Activit√(c) du {{ activite.date_activite|date:"d/m/Y" }}</h6>
+                                                            <h6 class="card-title mb-0">Activité du {{ activite.date_activite|date:"d/m/Y" }}</h6>
                                                             <small class="text-muted">{{ activite.date_activite|date:"d/m/Y" }}</small>
                                                         </div>
                                                         <p class="card-text text-muted mb-2">{{ activite.description }}</p>
@@ -256,7 +256,7 @@
                                                             <div>
                                                                 <span class="badge badge-info">{{ activite.duree_heures }}h</span>
                                                                 <span class="badge badge-{{ activite.color }}">
-                                                                    {% if activite.facturee %}Factur√(c)e{% else %}Non factur√(c)e{% endif %}
+                                                                    {% if activite.facturee %}Facturée{% else %}Non facturée{% endif %}
                                                                 </span>
                                                             </div>
                                                             <small class="text-muted">
@@ -273,10 +273,10 @@
                             {% else %}
                                 <div class="text-center text-muted py-5">
                                     <i class="mdi mdi-information mdi-48px"></i>
-                                    <h5 class="mt-3">Aucune activit√(c) trouv√(c)e</h5>
-                                    <p>Aucune activit√(c) ne correspond aux crit√(R)res s√(c)lectionn√(c)s pour ce dossier.</p>
+                                    <h5 class="mt-3">Aucune activité trouvée</h5>
+                                    <p>Aucune activité ne correspond aux critères sélectionnés pour ce dossier.</p>
                                     <a href="?" class="btn btn-primary">
-                                        <i class="mdi mdi-refresh"></i> Voir toutes les activit√(c)s
+                                        <i class="mdi mdi-refresh"></i> Voir toutes les activités
                                     </a>
                                 </div>
                             {% endif %}
@@ -285,14 +285,14 @@
                 </div>
             </div>
 
-            <!-- Statistiques d√(c)taill√(c)es -->
+            <!-- Statistiques détaillées -->
             {% if rapport_data.statistiques.activites_par_avocat %}
             <div class="row">
                 <div class="col-md-6">
                     <div class="box">
                         <div class="box-header with-border">
                             <h4 class="box-title">
-                                <i class="mdi mdi-account-group"></i> Activit√(c)s par Avocat
+                                <i class="mdi mdi-account-group"></i> Activités par Avocat
                             </h4>
                         </div>
                         <div class="box-body">
@@ -301,7 +301,7 @@
                                     <thead>
                                         <tr>
                                             <th>Avocat</th>
-                                            <th class="text-center">Activit√(c)s</th>
+                                            <th class="text-center">Activités</th>
                                             <th class="text-center">Heures</th>
                                             <th class="text-center">%</th>
                                         </tr>
@@ -328,7 +328,7 @@
                     <div class="box">
                         <div class="box-header with-border">
                             <h4 class="box-title">
-                                <i class="mdi mdi-calendar"></i> Activit√(c)s par Jour
+                                <i class="mdi mdi-calendar"></i> Activités par Jour
                             </h4>
                         </div>
                         <div class="box-body">
@@ -337,7 +337,7 @@
                                     <thead>
                                         <tr>
                                             <th>Date</th>
-                                            <th class="text-center">Activit√(c)s</th>
+                                            <th class="text-center">Activités</th>
                                             <th class="text-center">Heures</th>
                                         </tr>
                                     </thead>

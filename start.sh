@@ -58,6 +58,14 @@ python check_fonts.py || echo "⚠️ Erreur lors de la vérification des fonts"
 echo "🎨 Création des derniers assets manquants..."
 python create_final_missing_assets.py || echo "⚠️ Erreur lors de la création des derniers assets"
 
+# Analyse et correction complète des problèmes CSS
+echo "🔍 Analyse et correction des problèmes CSS..."
+python analyze_css_issues.py || echo "⚠️ Erreur lors de l'analyse CSS"
+
+# Correction des problèmes d'encodage
+echo "🔤 Correction des problèmes d'encodage..."
+python fix_encoding_issues.py || echo "⚠️ Erreur lors de la correction d'encodage"
+
 # Test de la configuration Django
 echo "🧪 Test de la configuration Django..."
 python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️ Problème de configuration Django"
@@ -65,6 +73,10 @@ python manage.py check --settings=CabinetAvocat.settings_railway || echo "⚠️
 # Vérification finale du déploiement
 echo "🎯 Vérification finale du déploiement..."
 python verify_deployment.py || echo "⚠️ Problèmes détectés lors de la vérification finale"
+
+# Validation finale complète
+echo "🎯 Validation finale complète..."
+python validate_final_deployment.py || echo "⚠️ Avertissements lors de la validation finale"
 
 # Démarrer Gunicorn sur le port Railway dynamique
 echo "🌐 Démarrage du serveur Gunicorn sur le port $PORT..."
